@@ -33,7 +33,7 @@ class TARGETError(Exception):
         Exception.__init__(self)
 
 
-class Backup:
+class Vitalus:
     """
     Class for backups
     """
@@ -50,7 +50,7 @@ class Backup:
             os.makedirs(self.backup_log_dir)
         self.pidfilename = os.path.join(self.backup_log_dir, 'backup.pid')
 
-        self.logger = logging.getLogger('backup')
+        self.logger = logging.getLogger('Vitalus')
         hdlr = logging.FileHandler(os.path.join(self.backup_log_dir, 'backup.log'))
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         hdlr.setFormatter(formatter)
