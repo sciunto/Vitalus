@@ -71,6 +71,7 @@ class Vitalus:
         """
         Set the last backup (labeled name) time 
         """
+        self.logger.debug('Set lastbackup time')
         self._timebase[name] = datetime.datetime.now() 
 
     def _check_need_backup(self, name, period):
@@ -80,7 +81,7 @@ class Vitalus:
         name (backup label)
         period (seconds)
         """
-        self.logger.debug('Check time between backups')
+        self.logger.debug('Check time between backups for ' + str(name))
         try:
             last = self._timebase[name]
         except KeyError:
@@ -91,13 +92,13 @@ class Vitalus:
        
         #Calculate the difference
         diff = datetime.datetime.now() - last
-        self.logger.debug('diff=' + str(diff.seconds))
-        self.logger.debug('period=' + str(period))
+        self.logger.debug('diff=' + str(diff.seconds) + ' seconds')
+        self.logger.debug('period=' + str(period) + 'seconds')
         if diff.seconds > period:
             self.logger.debug(str(name) + ' need backup')
             return True
         else:
-            self.logger.debug(str(name) + ' do not need backup')
+            self.logger.debug(str(name) + ' does not need backup')
             return False
 
     def _signal_handler(self, signal, frame):
@@ -128,6 +129,7 @@ class Vitalus:
 
     def _release_pidfile(self):
         """ Release the pidfile """
+        self.logger.debug('Removing this PID file')
         os.remove(self.pidfilename)
 
     def _set_process_high(self):
@@ -141,6 +143,7 @@ class Vitalus:
     def _set_process_low_priority(self):
         """ Change nice/ionice"""
         #ionice
+        self.logger.debug('Set low priority')
         p = psutil.Process(os.getpid())
         p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
         #nice
@@ -278,6 +281,9 @@ class Vitalus:
             #MrProper
             self._delete_old_files(incrementdir, days=duration)
 
+        #Job done, update the time
+        self._set_lastbackup_time(name)
+
     def add_job(self, name, source, destination, period=24, incremental=False, duration=50, exclude=None):
         """ Add a new job 
         name: backup label
@@ -301,7 +307,6 @@ class Vitalus:
             if self._check_need_backup(job['name'], job['period']): 
                 print(job['name'])
                 self._do_backup(job['name'], job['source'], job['destination'], job['incremental'], job['duration'], job['exclude'])
-                self._set_lastbackup_time(job['name'])
         self._release_pidfile()
         self.logger.info('The script exited gracefully')
 
