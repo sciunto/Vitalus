@@ -16,6 +16,7 @@
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
 import psutil, os, sys
+import subprocess
 import shutil
 import datetime
 import logging
@@ -260,19 +261,28 @@ class Vitalus:
 
         # backup-dir: keep increments
         if incremental:
-            command += ' --backup --backup-dir="%s" "%s" "%s"' % (increment, source, backup)
+            command += ' --backup --backup-dir=%s %s %s' % (increment, source, backup)
         else:
-            command += ' "%s" "%s"' % (source, backup)
+            command += ' %s %s' % (source, backup)
         if exclude:
             #TODO check how it is formatted
             command += ' --exclude=' + exclude
-        #Log output
-        command += '>> ' + thread_log
 
         if self.terminate: return
         self.logger.debug('rsync command: %s' % command)
-       # TODO : subprocess
-        os.system(command)
+
+        #Run the command
+        #FIXME : write command in a splitted version
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+        #Write outputs
+        loghandler = open(thread_log, 'a')
+        loghandler.write(stdout.decode())
+        if stderr != b'':
+            loghandler.write('Errors:')
+            loghandler.write(stderr.decode())
+            
 
         if incremental:
             #compress & delete the dir
@@ -312,10 +322,10 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Backup()
+    b = Vitalus()
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.01, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
-    b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', incremental=True)
+    b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', period=0, incremental=True)
 
     b.run()
