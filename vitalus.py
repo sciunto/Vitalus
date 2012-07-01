@@ -93,7 +93,7 @@ class Vitalus:
         #Calculate the difference
         diff = datetime.datetime.now() - last
         self.logger.debug('diff=' + str(diff.seconds) + ' seconds')
-        self.logger.debug('period=' + str(period) + 'seconds')
+        self.logger.debug('period=' + str(period) + ' seconds')
         if diff.seconds > period:
             self.logger.debug(str(name) + ' need backup')
             return True
@@ -134,6 +134,7 @@ class Vitalus:
 
     def _set_process_high(self):
         """ Change nice/ionice"""
+        self.logger.debug('Set high priority')
         #ionice
         p = psutil.Process(os.getpid())
         p.set_ionice(psutil.IOPRIO_CLASS_NONE, value=0)
@@ -142,8 +143,8 @@ class Vitalus:
 
     def _set_process_low_priority(self):
         """ Change nice/ionice"""
-        #ionice
         self.logger.debug('Set low priority')
+        #ionice
         p = psutil.Process(os.getpid())
         p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
         #nice
@@ -162,9 +163,9 @@ class Vitalus:
         for filepath in enumerate(filenames):
             #keep a sufficient number of archives
             if (nb_archives - filepath[0]) <= keep:
-                self.logger.debug('nb archives %s, keep %s, number %s' % (nb_archives, keep, filepath[0]))
+                self.logger.debug('nb archives %s, keep %s, archive %s' % (nb_archives, keep, filepath[0]))
                 return
-            #Are-they too old?
+            #Are they too old?
             file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
             if datetime.datetime.now() - file_date - datetime.timedelta(days=days) < datetime.timedelta():
                 self.logger.info('remove %s' % filepath[1])
@@ -180,19 +181,19 @@ class Vitalus:
 
     def _compress(self, path):
         """ Compress the directory """
+        self.logger.debug('Zip the directory: ' + str(path))
         head, tail = os.path.split(path)
         archive = str(path) + '.bz2'
         tar = tarfile.open(archive, "w:bz2")
         tar.add(path, arcname=tail)
         tar.close()
 
-
-
-
     def _check_target(self, target):
         """ Check the target"""
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
-        #ssh
+            #ssh
+            self.logger.debug('the target looks like SSH')
+            #TODO check connection
             return 'SSH'
         else:
             if not os.path.exists(target):
@@ -300,7 +301,6 @@ class Vitalus:
 
     def run(self):
         """ Run all jobs """
-        #TODO : vider la liste au fur et a mesure
         self.logger.info('The script starts...')
         self._create_pidfile()
         for job in self.jobs:
@@ -311,7 +311,7 @@ class Vitalus:
         self.logger.info('The script exited gracefully')
 
 if __name__ == '__main__':
-
+    #An example...
     b = Backup()
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.01, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
