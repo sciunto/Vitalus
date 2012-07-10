@@ -92,10 +92,13 @@ class Vitalus:
             return True
        
         #Calculate the difference
+        self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
+        self.logger.debug('last=' + str(last) + ' seconds')
         diff = datetime.datetime.now() - last
-        self.logger.debug('diff=' + str(diff.seconds) + ' seconds')
+        difftime = diff.seconds + diff.days * 3600*24
+        self.logger.debug('diff=' + str(difftime) + ' seconds')
         self.logger.debug('period=' + str(period) + ' seconds')
-        if diff.seconds > period:
+        if difftime > period:
             self.logger.debug(str(name) + ' need backup')
             return True
         else:
@@ -306,6 +309,8 @@ class Vitalus:
         exclude: Exclude a subpath #TODO
         """
         period_in_seconds = period*3600
+        self.logger.debug('add job+ ' + 'name'+str(name))#+ 'source'+source+ 'destination'+destination+\
+            #'period'+period_in_seconds+ 'incremental'+incremental+ 'duration'+duration+ 'exclude'+exclude)
         self.jobs.append({'name':name, 'source':source, 'destination':destination,\
             'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'exclude':exclude})
 
@@ -323,7 +328,7 @@ class Vitalus:
 if __name__ == '__main__':
     #An example...
     b = Vitalus()
-    b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.01, incremental=True)
+    b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
     b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', period=0, incremental=True)
