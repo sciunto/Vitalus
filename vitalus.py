@@ -107,7 +107,7 @@ class Vitalus:
 
     def _signal_handler(self, signal, frame):
         self.logger.warn('Signal received %s' % signal)
-        self._set_process_high()
+        self._set_process_high_priority()
         self.terminate = True
 
     def _create_pidfile(self):
@@ -136,7 +136,7 @@ class Vitalus:
         self.logger.debug('Removing this PID file')
         os.remove(self.pidfilename)
 
-    def _set_process_high(self):
+    def _set_process_high_priority(self):
         """ Change nice/ionice"""
         self.logger.debug('Set high priority')
         #ionice
@@ -211,9 +211,11 @@ class Vitalus:
         """ Backup fonction
         make rsync command and run it
         """
+
+        #If a signal is received, stop the process
         if self.terminate: return
+
         self.logger.info('backup %s' % name)
-        thread_log = os.path.join(self.backup_log_dir, name + '.log')
 
         #Check if the source exists
         try:
@@ -227,6 +229,8 @@ class Vitalus:
         except TARGETError:
             return
 
+        #This file is a log dedicated to the current backup
+        thread_log = os.path.join(self.backup_log_dir, name + '.log')
         with open(thread_log, 'a') as f:
             f.write('\n\n' + '='*20 + str(self.now) + '='*20 + '\n\n')
             f.close()
@@ -271,31 +275,36 @@ class Vitalus:
             #TODO check how it is formatted
             command += ' --exclude=' + exclude
 
+        #If a signal is received, stop the process
         if self.terminate: return
-        self.logger.debug('rsync command: %s' % command)
 
         #Run the command
+        self.logger.debug('rsync command: %s' % command)
         #FIXME : write command in a splitted version
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
-        #Write outputs
+        #Dump outputs in log files
         loghandler = open(thread_log, 'a')
         loghandler.write(stdout.decode())
         if stderr != b'':
             loghandler.write('Errors:')
             loghandler.write(stderr.decode())
-            
+        loghandler.close() 
 
         if incremental:
-            #compress & delete the dir
-            self._compress(increment)
+            #compress if not empty
+            if os.listdir(path) != []:
+                self._compress(increment)
+            else:
+                self.logger.info('Empty increment')
+            #delete the dir (we keep only non-empty tarballs
             shutil.rmtree(increment)
 
-            #MrProper
+            #MrProper: remove old tarballs
             self._delete_old_files(incrementdir, days=duration)
 
-        #Job done, update the time
+        #Job done, update the time in the database
         self._set_lastbackup_time(name)
 
     def add_job(self, name, source, destination, period=24, incremental=False, duration=50, exclude=None):
@@ -308,8 +317,8 @@ class Vitalus:
         duration: How long we keep diffs (days)
         exclude: Exclude a subpath #TODO
         """
-        period_in_seconds = period*3600
-        self.logger.debug('add job+ ' + 'name'+str(name))#+ 'source'+source+ 'destination'+destination+\
+        period_in_seconds = period * 3600
+        self.logger.debug('add job+ ' + 'name' + str(name))#+ 'source'+source+ 'destination'+destination+\
             #'period'+period_in_seconds+ 'incremental'+incremental+ 'duration'+duration+ 'exclude'+exclude)
         self.jobs.append({'name':name, 'source':source, 'destination':destination,\
             'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'exclude':exclude})
