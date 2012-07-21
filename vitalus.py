@@ -294,7 +294,7 @@ class Vitalus:
 
         if incremental:
             #compress if not empty
-            if os.listdir(path) != []:
+            if os.listdir(increment) != []:
                 self._compress(increment)
             else:
                 self.logger.info('Empty increment')
