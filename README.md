@@ -29,5 +29,14 @@ Wrapper for rsync
 * Old increments deleted (keeping a minimal amount of increments)
 * Rotated logs (general + one per task)
 
+# Requierements
+* python 3
+* python-psutil
+* rsync
+* distutils (install)
+
+# How to install?
+python setup.py install --root='/tmp'
+
 # How to setup?
 See example.py
