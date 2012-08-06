@@ -11,5 +11,5 @@ setup(
     author_email = info.EMAIL,
     description  = info.SHORT_DESCRIPTION,
     packages = ['Vitalus'],
-    scripts     = ['vitalus.py'],
+    scripts     = [],
 )
