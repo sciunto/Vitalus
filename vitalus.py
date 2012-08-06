@@ -19,7 +19,7 @@ import psutil, os, sys
 import subprocess
 import shutil
 import datetime
-import logging
+import logging, logging.handlers
 import tarfile
 import re
 import signal
@@ -38,12 +38,16 @@ class Vitalus:
     """
     Class for backups
     """
-    def __init__(self):
+    def __init__(self, min_disk_space=1):
+        """
+        min_disk_space: minimal disk space (destination) [Go]
+        """
         #Variables
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
         self.jobs = []
         self.terminate = False
+        self.min_disk_space = min_disk_space * 10**9
 
         #Logging
         self.backup_log_dir = os.path.expanduser('~/.backup/')
@@ -52,10 +56,19 @@ class Vitalus:
         self.pidfilename = os.path.join(self.backup_log_dir, 'backup.pid')
 
         self.logger = logging.getLogger('Vitalus')
-        hdlr = logging.FileHandler(os.path.join(self.backup_log_dir, 'backup.log'))
+        LOG_PATH = os.path.join(self.backup_log_dir, 'backup.log')
+        #hdlr = logging.FileHandler(os.path.join(self.backup_log_dir, 'backup.log'))
+
+        # Add the log message handler to the logger
+        log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        hdlr.setFormatter(formatter)
-        self.logger.addHandler(hdlr)
+        log_rotator.setFormatter(formatter)
+        self.logger.addHandler(log_rotator)
+        
+        # Roll over on application start
+        #FIXME : rollover only when needed!
+        #self.logger.handlers[0].doRollover()
+
         self.logger.setLevel(logging.INFO)
 
         #Priority 
@@ -207,7 +220,7 @@ class Vitalus:
             else:
                 return 'DIR'
 
-    def _do_backup(self, name, source, destination, incremental=False, duration=50, exclude=None):
+    def _do_backup(self, name, source, destination, incremental=False, duration=50, filter=None):
         """ Backup fonction
         make rsync command and run it
         """
@@ -229,11 +242,27 @@ class Vitalus:
         except TARGETError:
             return
 
+        #TODO: run the command though ssh...
+        if dest_type != 'SSH':
+            if psutil.disk_usage(destination)[2] < self.min_disk_space:
+                self.logger.critical('Low disk space: ' + str(destination))
+                return
+
+
         #This file is a log dedicated to the current backup
         thread_log = os.path.join(self.backup_log_dir, name + '.log')
         with open(thread_log, 'a') as f:
             f.write('\n\n' + '='*20 + str(self.now) + '='*20 + '\n\n')
             f.close()
+
+        #TENTATIVE Via logger + rotate
+        job_log = os.path.join(self.backup_log_dir, name + '.test.log')
+        job_logger = logging.getLogger(name)
+        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
+        job_logger.addHandler(log_rotator)
+        job_logger.setLevel(logging.INFO)
+        job_logger.info('='*20 + str(self.now) + '='*20)
+
 
         #define dirs
         if incremental:
@@ -244,7 +273,7 @@ class Vitalus:
         backup = os.path.join(destination, str(name), 'BAK')
         self.logger.debug('source path: %s' % source)
         self.logger.debug('backup path: %s' % backup)
-        self.logger.debug('exclude path: %s' % exclude)
+        self.logger.debug('filter path: %s' % filter)
 
         #Create dirs
         try:
@@ -255,41 +284,56 @@ class Vitalus:
             #they could already exist
             pass
 
-        command = '/usr/bin/rsync'
+        command = list()
+        command.append('/usr/bin/rsync')
         # a: archive (recursivity, preserve rights and times...)
         # v: verbose
         # h: human readable
         # stat: file rate stats
-        # delete-excluded: if a file is deleted in source, delete it in backup
-        command += ' -avh --stats --delete-excluded '
+        # delete-filterd: if a file is deleted in source, delete it in backup
+        #command += ' -avh --stats --delete-excluded'
+        command.append('-avh') 
+        command.append('--stats')
+        command.append('--delete-excluded')
         # z: compress if transfert thought a network
         if (source_type or dest_type) == 'SSH':
-            command += ' -z '
+            command.append('-z')
 
         # backup-dir: keep increments
         if incremental:
-            command += ' --backup --backup-dir=%s %s %s' % (increment, source, backup)
+            command.append('--backup')
+            command.append('--backup-dir=' + increment)
+            command.append(source)
+            command.append(backup)
         else:
-            command += ' %s %s' % (source, backup)
-        if exclude:
-            #TODO check how it is formatted
-            command += ' --exclude=' + exclude
+            command.append(source)
+            command.append(backup)
+        if filter:
+            #TODO 
+            # rsync -av a b --filter='- *.txt' --filter='- *dir'
+            #command.append(' --filter=' + filter)
+            pass
 
         #If a signal is received, stop the process
         if self.terminate: return
 
         #Run the command
         self.logger.debug('rsync command: %s' % command)
-        #FIXME : write command in a splitted version
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
         #Dump outputs in log files
+        #TODO TENTATIVE ICI AUSSI...
         loghandler = open(thread_log, 'a')
-        loghandler.write(stdout.decode())
+        #loghandler.write(stdout.decode())
+        log = stdout.decode()
+        loghandler.write(log)
+        job_logger.info(log)
+
         if stderr != b'':
             loghandler.write('Errors:')
             loghandler.write(stderr.decode())
+            #TODO TENTENTIVE a faire
         loghandler.close() 
 
         if incremental:
@@ -307,7 +351,7 @@ class Vitalus:
         #Job done, update the time in the database
         self._set_lastbackup_time(name)
 
-    def add_job(self, name, source, destination, period=24, incremental=False, duration=50, exclude=None):
+    def add_job(self, name, source, destination, period=24, incremental=False, duration=50, filter=None):
         """ Add a new job 
         name: backup label
         source: backup from...
@@ -315,13 +359,13 @@ class Vitalus:
         period: min time (hours) between backups
         incremental: Create diffs
         duration: How long we keep diffs (days)
-        exclude: Exclude a subpath #TODO
+        filter: filter, must be a tuple
         """
         period_in_seconds = period * 3600
         self.logger.debug('add job+ ' + 'name' + str(name))#+ 'source'+source+ 'destination'+destination+\
-            #'period'+period_in_seconds+ 'incremental'+incremental+ 'duration'+duration+ 'exclude'+exclude)
+            #'period'+period_in_seconds+ 'incremental'+incremental+ 'duration'+duration+ 'filter'+filter)
         self.jobs.append({'name':name, 'source':source, 'destination':destination,\
-            'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'exclude':exclude})
+            'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'filter':filter})
 
     def run(self):
         """ Run all jobs """
@@ -330,7 +374,7 @@ class Vitalus:
         for job in self.jobs:
             if self._check_need_backup(job['name'], job['period']): 
                 print(job['name'])
-                self._do_backup(job['name'], job['source'], job['destination'], job['incremental'], job['duration'], job['exclude'])
+                self._do_backup(job['name'], job['source'], job['destination'], job['incremental'], job['duration'], job['filter'])
         self._release_pidfile()
         self.logger.info('The script exited gracefully')
 
