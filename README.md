@@ -18,3 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Description
 Wrapper for rsync
+
+
+# Functionalities
+* Manage different tasks
+* rsync from or to local disks
+* rsync from or to SSH
+* Check disk space (local disks)
+* Possibility to keep zipped increments
+* Old increments deleted (keeping a minimal amount of increments)
+* Rotated logs (general + one per task)
+
+# How to setup?
+See example.py
