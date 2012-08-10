@@ -7,7 +7,7 @@ setup(
     name         = 'Vitalus',
     version      = info.VERSION,
     url          = info.URL,
-    author       = "François Boulogne",
+    author       = "Francois Boulogne",
     author_email = info.EMAIL,
     description  = info.SHORT_DESCRIPTION,
     packages = ['Vitalus'],
