@@ -36,7 +36,11 @@ Wrapper for rsync
 * distutils (install)
 
 # How to install?
+Archlinux: https://aur.archlinux.org/packages.php?ID=61901
+
+Otherwise:
 python setup.py install --root='/tmp'
+You can adapt the root directory.
 
 # How to setup?
 See example.py
