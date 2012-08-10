@@ -29,7 +29,7 @@ Wrapper for rsync
 * Old increments deleted (keeping a minimal amount of increments)
 * Rotated logs (general + one per task)
 
-# Requierements
+# Requirements
 * python 3
 * python-psutil
 * rsync
