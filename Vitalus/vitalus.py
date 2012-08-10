@@ -167,7 +167,6 @@ class Vitalus:
         #nice
         p.nice = 15
 
-
     def _delete_old_files(self, path, days=10, keep=10):
         """ Delete files older than #days
         but keep at least #keep files
@@ -250,13 +249,13 @@ class Vitalus:
 
 
         #This file is a log dedicated to the current backup
-        thread_log = os.path.join(self.backup_log_dir, name + '.log')
-        with open(thread_log, 'a') as f:
-            f.write('\n\n' + '='*20 + str(self.now) + '='*20 + '\n\n')
-            f.close()
+        #thread_log = os.path.join(self.backup_log_dir, name + '.log')
+        #with open(thread_log, 'a') as f:
+        #    f.write('\n\n' + '='*20 + str(self.now) + '='*20 + '\n\n')
+        #    f.close()
 
         #TENTATIVE Via logger + rotate
-        job_log = os.path.join(self.backup_log_dir, name + '.test.log')
+        job_log = os.path.join(self.backup_log_dir, name + '.log')
         job_logger = logging.getLogger(name)
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
         job_logger.addHandler(log_rotator)
@@ -324,17 +323,20 @@ class Vitalus:
 
         #Dump outputs in log files
         #TODO TENTATIVE ICI AUSSI...
-        loghandler = open(thread_log, 'a')
+        #loghandler = open(thread_log, 'a')
         #loghandler.write(stdout.decode())
         log = stdout.decode()
-        loghandler.write(log)
+        #loghandler.write(log)
         job_logger.info(log)
 
         if stderr != b'':
-            loghandler.write('Errors:')
-            loghandler.write(stderr.decode())
+            #DEPRECATED 
+            #loghandler.write('Errors:')
+            #loghandler.write(stderr.decode())
+            job_logger.info('Errors:')
+            job_logger.info(stderr.decode())
             #TODO TENTENTIVE a faire
-        loghandler.close() 
+        #loghandler.close() 
 
         if incremental:
             #compress if not empty
