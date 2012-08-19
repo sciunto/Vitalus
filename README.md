@@ -44,3 +44,13 @@ You can adapt the root directory.
 
 # How to setup?
 See example.py
+
+
+# About ssh
+Keys must be configured with an empty passphrase.
+Add in your ~/.ssh/config, something like
+
+    Host sciunto.org
+        IdentityFile ~/.ssh/key-empty-passphrase
+
+Source or destination must have the format: login@server:path
