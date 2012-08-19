@@ -1,5 +1,6 @@
 ==== Version 0.2 ====
-* Set logger method
+* Set logger leve method (change log level) 
+* BUGFIX: if dest=SSH, create dirs
 
 ==== Version 0.1 ====
 * First release
