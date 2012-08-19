@@ -287,8 +287,9 @@ class Vitalus:
         job_logger.info('='*20 + str(self.now) + '='*20)
 
 
-        #define dirs
-        #FIXME BUG if dest == 'SSH'
+        #TODO : hightly possible bug if SSH + incremental
+        #define dirs for the destination
+        #create them if needed
         if dest_type != 'SSH':
             if incremental:
                 incrementdir = os.path.join(destination, str(name), 'INC')
@@ -296,11 +297,8 @@ class Vitalus:
                 self.logger.debug('increment path: %s' % increment)
 
             backup = os.path.join(destination, str(name), 'BAK')
-            self.logger.debug('source path: %s' % source)
-            self.logger.debug('backup path: %s' % backup)
-            self.logger.debug('filter path: %s' % filter)
 
-            #Create dirs
+            #Create dirs (locally)
             try:
                 if incremental:
                     os.makedirs(increment)
@@ -310,7 +308,16 @@ class Vitalus:
                 pass
         else:
             self.logger.critical('Destination on ssh not supported!')
-            return
+            # Create dirs on the server
+            login, dest_dir_path = destination.split(':')
+            dest_dir_path = os.path.join(dest_dir_path, str(name), 'BAK')
+            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', dest_dir_path], bufsize=4096, stdout=subprocess.PIPE)
+            output = process.communicate()[0] #TODO log it!
+            backup = login + ':' + dest_dir_path
+
+        self.logger.debug('source path: %s' % source)
+        self.logger.debug('backup path: %s' % backup)
+        self.logger.debug('filter path: %s' % filter)
 
         command = list()
         command.append('/usr/bin/rsync')
