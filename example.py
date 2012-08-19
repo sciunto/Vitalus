@@ -5,7 +5,7 @@
 # It is designed to be run frequently
 # by a cron job (e.g. each few hours)
 
-import vitalus
+import Vitalus.vitalus as vitalus
 
 # Create an instance
 # min_disk_space correspond to the minimal disk space (destination)
