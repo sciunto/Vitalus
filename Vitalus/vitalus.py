@@ -288,24 +288,29 @@ class Vitalus:
 
 
         #define dirs
-        if incremental:
-            incrementdir = os.path.join(destination, str(name), 'INC')
-            increment = os.path.join(incrementdir, self.current_date)
-            self.logger.debug('increment path: %s' % increment)
-
-        backup = os.path.join(destination, str(name), 'BAK')
-        self.logger.debug('source path: %s' % source)
-        self.logger.debug('backup path: %s' % backup)
-        self.logger.debug('filter path: %s' % filter)
-
-        #Create dirs
-        try:
+        #FIXME BUG if dest == 'SSH'
+        if dest_type != 'SSH':
             if incremental:
-                os.makedirs(increment)
-            os.makedirs(backup)
-        except OSError:
-            #they could already exist
-            pass
+                incrementdir = os.path.join(destination, str(name), 'INC')
+                increment = os.path.join(incrementdir, self.current_date)
+                self.logger.debug('increment path: %s' % increment)
+
+            backup = os.path.join(destination, str(name), 'BAK')
+            self.logger.debug('source path: %s' % source)
+            self.logger.debug('backup path: %s' % backup)
+            self.logger.debug('filter path: %s' % filter)
+
+            #Create dirs
+            try:
+                if incremental:
+                    os.makedirs(increment)
+                os.makedirs(backup)
+            except OSError:
+                #they could already exist
+                pass
+        else:
+            self.logger.critical('Destination on ssh not supported!')
+            return
 
         command = list()
         command.append('/usr/bin/rsync')
@@ -406,7 +411,7 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Vitalus(min_disk_space=0.5)
+    b = Vitalus(min_disk_space=0.1)
     b.set_debug_level('DEBUG')
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
