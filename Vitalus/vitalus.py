@@ -81,6 +81,30 @@ class Vitalus:
     def __del__(self):
         self._timebase.close()
 
+    def set_debug_level(self, level='INFO'):
+        """
+        Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)
+        """
+        if level == 'INFO':
+            self.logger.setLevel(logging.INFO)
+            self.logger.info('Set logger level: ' + level)
+        elif level == 'CRITICAL':
+            self.logger.setLevel(logging.CRITICAL) 
+            self.logger.info('Set logger level: ' + level)
+        elif level == 'DEBUG':
+            self.logger.setLevel(logging.DEBUG)   
+            self.logger.info('Set logger level: ' + level)
+        elif level == 'ERROR':
+            self.logger.setLevel(logging.ERROR)   
+            self.logger.info('Set logger level: ' + level)
+        elif level == 'FATAL':
+            self.logger.setLevel(logging.FATAL)
+            self.logger.info('Set logger level: ' + level)
+        else:
+            self.logger.ERROR('Unknown level')
+            
+        
+
     def _set_lastbackup_time(self, name):
         """
         Set the last backup (labeled name) time 
@@ -382,7 +406,8 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Vitalus()
+    b = Vitalus(min_disk_space=0.5)
+    b.set_debug_level('DEBUG')
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
