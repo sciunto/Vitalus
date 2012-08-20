@@ -287,33 +287,42 @@ class Vitalus:
         job_logger.info('='*20 + str(self.now) + '='*20)
 
 
-        #TODO : hightly possible bug if SSH + incremental
         #define dirs for the destination
         #create them if needed
         if dest_type != 'SSH':
             if incremental:
-                incrementdir = os.path.join(destination, str(name), 'INC')
-                increment = os.path.join(incrementdir, self.current_date)
-                self.logger.debug('increment path: %s' % increment)
+                #incrementdir = os.path.join(destination, str(name), 'INC')
+                inc_path = os.path.join(destination, str(name), 'INC', self.current_date)
+                #increment = os.path.join(incrementdir, self.current_date)
+                self.logger.debug('increment path: %s' % inc_path)
 
             backup = os.path.join(destination, str(name), 'BAK')
 
             #Create dirs (locally)
             try:
                 if incremental:
-                    os.makedirs(increment)
+                    os.makedirs(inc_path)
                 os.makedirs(backup)
             except OSError:
                 #they could already exist
                 pass
         else:
-            self.logger.critical('Destination on ssh not supported!')
             # Create dirs on the server
             login, dest_dir_path = destination.split(':')
-            dest_dir_path = os.path.join(dest_dir_path, str(name), 'BAK')
-            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', dest_dir_path], bufsize=4096, stdout=subprocess.PIPE)
+
+            if incremental:
+                inc_path = os.path.join(dest_dir_path, str(name), 'INC', self.current_date)
+                #add ~/ if does not start with /
+                if not inc_path.startswith('/'):
+                    inc_path = os.path.join('~', inc_path)
+                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
+                output = process.communicate()[0] #TODO log it!
+                self.logger.debug('increment path: %s' % inc_path)
+
+            back_path = os.path.join(dest_dir_path, str(name), 'BAK')
+            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
             output = process.communicate()[0] #TODO log it!
-            backup = login + ':' + dest_dir_path
+            backup = login + ':' + back_path
 
         self.logger.debug('source path: %s' % source)
         self.logger.debug('backup path: %s' % backup)
@@ -337,7 +346,7 @@ class Vitalus:
         # backup-dir: keep increments
         if incremental:
             command.append('--backup')
-            command.append('--backup-dir=' + increment)
+            command.append('--backup-dir=' + inc_path)
             command.append(source)
             command.append(backup)
         else:
@@ -375,16 +384,20 @@ class Vitalus:
         #loghandler.close() 
 
         if incremental:
-            #compress if not empty
-            if os.listdir(increment) != []:
-                self._compress(increment)
-            else:
-                self.logger.info('Empty increment')
-            #delete the dir (we keep only non-empty tarballs
-            shutil.rmtree(increment)
+            if dest_type != 'SSH':
+                #compress if not empty
+                if os.listdir(inc_path) != []:
+                    self._compress(increment)
+                else:
+                    self.logger.info('Empty increment')
+                #delete the dir (we keep only non-empty tarballs
+                shutil.rmtree(increment)
 
-            #MrProper: remove old tarballs
-            self._delete_old_files(incrementdir, days=duration)
+                #MrProper: remove old tarballs
+                self._delete_old_files(incrementdir, days=duration)
+            else:
+                pass
+                #TODO ! compress dir though ssh
 
         #Job done, update the time in the database
         self._set_lastbackup_time(name)
