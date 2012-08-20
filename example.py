@@ -19,6 +19,11 @@ target = '/media/disk/backup'
 # I want to keep increments (default: False)
 my_backup.add_job('my_documents', '/home/myself/documents', target, incremental=True)
 
+# Copy data excepting *.html files.
+# This is a rsync filter rule (man rsync to learn more)
+# filter is a tuple. Don't forget the coma.
+my_backup.add_job('my_data', '/home/myself/data', target, incremental=True, filter=('- *.html',))
+
 # Another job
 # minimal duration between two backups: 5 hours (default: 24h)
 my_backup.add_job('thunderbird', '/home/myself/.thunderbird', target, period=5, incremental=False)
