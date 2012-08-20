@@ -344,9 +344,11 @@ class Vitalus:
             command.append(backup)
         if filter:
             #TODO 
+            # Add filters, the resulting command must look like
             # rsync -av a b --filter='- *.txt' --filter='- *dir'
-            #command.append(' --filter=' + filter)
-            pass
+            for element in filter:
+                command.append('--filter=' + element)
+                self.logger.debug('add filter: ' + element)
 
         #If a signal is received, stop the process
         if self.terminate: return
