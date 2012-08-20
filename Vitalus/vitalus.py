@@ -65,10 +65,6 @@ class Vitalus:
         log_rotator.setFormatter(formatter)
         self.logger.addHandler(log_rotator)
         
-        # Roll over on application start
-        #FIXME : rollover only when needed!
-        #self.logger.handlers[0].doRollover()
-
         self.logger.setLevel(logging.INFO)
 
         #Priority 
@@ -247,6 +243,7 @@ class Vitalus:
         """ Backup fonction
         make rsync command and run it
         """
+        #TODO it might be worth to reduce the length of this method!
 
         #If a signal is received, stop the process
         if self.terminate: return
@@ -271,14 +268,7 @@ class Vitalus:
                 self.logger.critical('Low disk space: ' + str(destination))
                 return
 
-
-        #This file is a log dedicated to the current backup
-        #thread_log = os.path.join(self.backup_log_dir, name + '.log')
-        #with open(thread_log, 'a') as f:
-        #    f.write('\n\n' + '='*20 + str(self.now) + '='*20 + '\n\n')
-        #    f.close()
-
-        #TENTATIVE Via logger + rotate
+        #Logs
         job_log = os.path.join(self.backup_log_dir, name + '.log')
         job_logger = logging.getLogger(name)
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
@@ -367,21 +357,12 @@ class Vitalus:
         stdout, stderr = process.communicate()
 
         #Dump outputs in log files
-        #TODO TENTATIVE ICI AUSSI...
-        #loghandler = open(thread_log, 'a')
-        #loghandler.write(stdout.decode())
         log = stdout.decode()
-        #loghandler.write(log)
         job_logger.info(log)
 
         if stderr != b'':
-            #DEPRECATED 
-            #loghandler.write('Errors:')
-            #loghandler.write(stderr.decode())
             job_logger.info('Errors:')
             job_logger.info(stderr.decode())
-            #TODO TENTENTIVE a faire
-        #loghandler.close() 
 
         if incremental:
             if dest_type != 'SSH':
