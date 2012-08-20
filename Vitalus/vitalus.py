@@ -305,19 +305,26 @@ class Vitalus:
                 #add ~/ if does not start with /
                 if not inc_path.startswith('/'):
                     inc_path = os.path.join('~', inc_path)
-                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
-                output = process.communicate()[0] #TODO log it!
                 self.logger.debug('increment path: %s' % inc_path)
+
+                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                self.logger.debug('SSH mkdir INC: ' + stdout.decode())
+                self.logger.warning('SSH mkdir INC: ' stderr.decode())
 
             back_path = os.path.join(dest_dir_path, str(name), 'BAK')
             process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
-            output = process.communicate()[0] #TODO log it!
+            stdout, stderr = process.communicate()
+            self.logger.debug('SSH mkdir BAK: ' + stdout.decode())
+            self.logger.warning('SSH mkdir BAK: ' stderr.decode())
             backup = login + ':' + back_path
 
         self.logger.debug('source path: %s' % source)
         self.logger.debug('backup path: %s' % backup)
         self.logger.debug('filter path: %s' % filter)
 
+
+        #Compose the command
         command = list()
         command.append('/usr/bin/rsync')
         # a: archive (recursivity, preserve rights and times...)
@@ -325,11 +332,10 @@ class Vitalus:
         # h: human readable
         # stat: file rate stats
         # delete-filterd: if a file is deleted in source, delete it in backup
-        #command += ' -avh --stats --delete-excluded'
         command.append('-avh') 
         command.append('--stats')
         command.append('--delete-excluded')
-        # z: compress if transfert thought a network
+        # z: compress the flux if transfert thought a network
         if (source_type or dest_type) == 'SSH':
             command.append('-z')
 
@@ -337,13 +343,12 @@ class Vitalus:
         if incremental:
             command.append('--backup')
             command.append('--backup-dir=' + inc_path)
-            command.append(source)
-            command.append(backup)
-        else:
-            command.append(source)
-            command.append(backup)
+
+        # Add source and destination
+        command.append(source)
+        command.append(backup)
+
         if filter:
-            #TODO 
             # Add filters, the resulting command must look like
             # rsync -av a b --filter='- *.txt' --filter='- *dir'
             for element in filter:
@@ -366,6 +371,7 @@ class Vitalus:
             job_logger.info('Errors:')
             job_logger.info(stderr.decode())
 
+        #Crompress Increments
         if incremental:
             if dest_type != 'SSH':
                 #compress if not empty
@@ -381,6 +387,7 @@ class Vitalus:
             else:
                 pass
                 #TODO ! compress dir though ssh
+                #TODO Remove old dirs though ssh
 
         #Job done, update the time in the database
         self._set_lastbackup_time(name)
