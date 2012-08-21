@@ -310,13 +310,13 @@ class Vitalus:
                 process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
                 stdout, stderr = process.communicate()
                 self.logger.debug('SSH mkdir INC: ' + stdout.decode())
-                self.logger.warning('SSH mkdir INC: ' stderr.decode())
+                self.logger.warning('SSH mkdir INC: ' + stderr.decode())
 
             back_path = os.path.join(dest_dir_path, str(name), 'BAK')
             process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir BAK: ' + stdout.decode())
-            self.logger.warning('SSH mkdir BAK: ' stderr.decode())
+            self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
             backup = login + ':' + back_path
 
         self.logger.debug('source path: %s' % source)
