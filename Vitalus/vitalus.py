@@ -77,7 +77,7 @@ class Vitalus:
     def __del__(self):
         self._timebase.close()
 
-    def set_debug_level(self, level='INFO'):
+    def set_log_level(self, level='INFO'):
         """
         Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)
         """
@@ -280,13 +280,13 @@ class Vitalus:
         #define dirs for the destination
         #create them if needed
         if dest_type != 'SSH':
+            dest_dir_path = destination
             if incremental:
-                #incrementdir = os.path.join(destination, str(name), 'INC')
-                inc_path = os.path.join(destination, str(name), 'INC', self.current_date)
-                #increment = os.path.join(incrementdir, self.current_date)
+                inc_dir = os.path.join(destination, str(name), 'INC')
+                inc_path = os.path.join(inc_dir, self.current_date)
                 self.logger.debug('increment path: %s' % inc_path)
 
-            backup = os.path.join(destination, str(name), 'BAK')
+            backup = os.path.join(dest_dir_path, str(name), 'BAK')
 
             #Create dirs (locally)
             try:
@@ -301,7 +301,8 @@ class Vitalus:
             login, dest_dir_path = destination.split(':')
 
             if incremental:
-                inc_path = os.path.join(dest_dir_path, str(name), 'INC', self.current_date)
+                inc_dir = os.path.join(dest_dir_path, str(name), 'INC')
+                inc_path = os.path.join(inc_dir, self.current_date)
                 #add ~/ if does not start with /
                 if not inc_path.startswith('/'):
                     inc_path = os.path.join('~', inc_path)
@@ -376,14 +377,14 @@ class Vitalus:
             if dest_type != 'SSH':
                 #compress if not empty
                 if os.listdir(inc_path) != []:
-                    self._compress(increment)
+                    self._compress(inc_path)
                 else:
                     self.logger.info('Empty increment')
                 #delete the dir (we keep only non-empty tarballs
-                shutil.rmtree(increment)
+                shutil.rmtree(inc_path)
 
                 #MrProper: remove old tarballs
-                self._delete_old_files(incrementdir, days=duration)
+                self._delete_old_files(inc_dir, days=duration)
             else:
                 pass
                 #TODO ! compress dir though ssh
