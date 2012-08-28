@@ -423,7 +423,7 @@ class Vitalus:
 if __name__ == '__main__':
     #An example...
     b = Vitalus(min_disk_space=0.1)
-    b.set_debug_level('DEBUG')
+    b.set_log_level('DEBUG')
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
