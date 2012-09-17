@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -520,6 +521,7 @@ if __name__ == '__main__':
     b = Vitalus(min_disk_space=0.1)
     b.set_log_level('DEBUG')
     b.add_destination('/tmp/sauvegarde')
+    #TODO Check that job names are uniq
     b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', incremental=True)
