@@ -76,16 +76,17 @@ class Job:
         
             
 
-    def _set_lastbackup_time(self, timebase):
+    def _set_lastbackup_time(self):
         """
         Set the last backup (labeled name) time 
         """
         self.logger.debug('Set lastbackup time')
+        timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #FIXME with ?
         timebase[self.name] = datetime.datetime.now() 
+        timebase.close()
 
 
-
-    def _check_need_backup(self, timebase):
+    def _check_need_backup(self):
         """
         Return True if backup needed
         False otherwise
@@ -94,7 +95,9 @@ class Job:
         """
         self.logger.debug('Check time between backups for ' + str(self.name))
         try:
+            timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #FIXME with ?
             last = timebase[self.name]
+            timebase.close()
         except KeyError:
             #Not yet stored
             #Run the first backup
@@ -271,7 +274,7 @@ class Job:
         self.logger.debug('rsync command: %s' % command)
         return command
 
-    def _do_backup(self, timebase):
+    def _do_backup(self):
         """ Backup fonction
         """
         #TODO it might be worth to reduce the length of this method!
@@ -337,20 +340,16 @@ class Job:
                 #TODO Remove old dirs though ssh
 
         #Job done, update the time in the database
-        self._set_lastbackup_time(timebase)
+        self._set_lastbackup_time()
 
 
-
-
-
-
-    def run(self, timebase):
+    def run(self):
         """Run...
         """
-        if self._check_need_backup(timebase):
+        if self._check_need_backup():
             print(self.name)
             self.logger.info('backup %s' % self.name)
-            self._do_backup(timebase)
+            self._do_backup()
 
 class Vitalus:
     """
@@ -390,11 +389,8 @@ class Vitalus:
         self._set_process_low_priority()
 
         #timebase
-        self._timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #TODO move the timebase in Job class
+        
         signal.signal(signal.SIGTERM, self._signal_handler)
-   
-    def __del__(self):
-        self._timebase.close()
 
     def set_log_level(self, level='INFO'):
         """
@@ -442,9 +438,9 @@ class Vitalus:
                 self.logger.info('Removing old PID file')
                 os.remove(self.pidfilename)
 
-        pidfile = open(self.pidfilename, "w")
-        pidfile.write("%s" % os.getpid())
-        pidfile.close
+        with open(self.pidfilename, "w") as pidfile:
+            pidfile.write("%s" % os.getpid())
+
 
     def _release_pidfile(self):
         """ Release the pidfile """
@@ -503,7 +499,7 @@ class Vitalus:
         self.logger.info('The script starts...')
         self._create_pidfile()
         for job in self.jobs:
-            job.run(self._timebase)
+            job.run()
             #if self._check_need_backup(job['name'], job['period']): 
                 #print(job['name'])
                 #self._do_backup(job['name'], job['source'], job['destination'], 
