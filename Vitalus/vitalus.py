@@ -334,6 +334,8 @@ class Vitalus:
         self.terminate = False
         self.min_disk_space = min_disk_space * 10**9
 
+        self.destination = None
+
         #Logging
         self.backup_log_dir = os.path.expanduser('~/.backup/')
         if not os.path.isdir(self.backup_log_dir):
@@ -435,9 +437,10 @@ class Vitalus:
         #nice
         p.nice = 15
 
+    def add_destination(self, destination):
+        self.destination = destination
 
-
-    def add_job(self, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
+    def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
         name: backup label
         source: backup from...
@@ -452,7 +455,7 @@ class Vitalus:
         self.logger.debug('add job+ ' + 'name' + str(name))
         #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
         #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
-        self.jobs.append(Job(self.logger, name, source, destination, period, incremental, duration, keep, filter))
+        self.jobs.append(Job(self.logger, name, source, self.destination, period, incremental, duration, keep, filter))
 
     def run(self):
         """ Run all jobs """
@@ -471,10 +474,11 @@ if __name__ == '__main__':
     #An example...
     b = Vitalus(min_disk_space=0.1)
     b.set_log_level('DEBUG')
-    b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
-    b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', period=0.0, incremental=True)
-    b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
-    b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', period=0, incremental=True)
+    b.add_destination('/tmp/sauvegarde')
+    b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, incremental=True)
+    b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, incremental=True)
+    b.add_job('test3', '/home/gnu/tmp/photos', incremental=True)
+    b.add_job('test4', '/home/gnu/tmp/www', period=0, incremental=True)
 
     b.run()
     
