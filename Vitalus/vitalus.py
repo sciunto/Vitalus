@@ -106,7 +106,7 @@ class Job:
             self.logger.debug(str(self.name) + ' does not need backup')
             return False
 
-    def _check_target(self, target):
+    def _get_target_type(self, target):
         """ Check the target"""
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
@@ -179,13 +179,13 @@ class Job:
 
         #Check if the source exists
         try:
-            source_type = self._check_target(self.source)
+            source_type = self._get_target_type(self.source)
         except TARGETError:
             return
 
         #check if the destination exists
         try:
-            dest_type = self._check_target(self.destination)
+            dest_type = self._get_target_type(self.destination)
         except TARGETError:
             return
 
@@ -438,7 +438,14 @@ class Vitalus:
         p.nice = 15
 
     def add_destination(self, destination):
-        self.destination = destination
+        
+        #TODO check if destination is valid
+        #Otherwise, self.destination = None
+        if True:
+            self.destination = destination
+        else:
+            self.destination = None
+            self.logger.warning('Wrong or unreachable destination')
 
     def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
@@ -451,11 +458,13 @@ class Vitalus:
         keep: How many incrementals are (at least) kept
         filter: filter, must be a tuple
         """
-        period_in_seconds = period * 3600
-        self.logger.debug('add job+ ' + 'name' + str(name))
-        #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
-        #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
-        self.jobs.append(Job(self.logger, name, source, self.destination, period, incremental, duration, keep, filter))
+        if self.destination:
+            period_in_seconds = period * 3600
+            self.logger.debug('add job+ ' + 'name' + str(name))
+            #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
+            #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
+            self.jobs.append(Job(self.logger, name, source, self.destination, period, incremental, duration, keep, filter))
+
 
     def run(self):
         """ Run all jobs """
