@@ -34,6 +34,288 @@ class TARGETError(Exception):
         Exception.__init__(self)
 
 
+class Job:
+    """
+    Class containing a job
+    """
+    def __init__(self, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
+        self.name = name
+        self.source = source
+        self.destination = destination
+        self.period = period
+        self.incremental = incremental
+        self.duration = duration
+        self.keep = keep
+        self.filter = filter
+
+        self.now = 0 #TODO
+        self.current_date = 0 #TODO
+
+        self.backup_log_dir = '/tmp' #FIXME
+        #Logs
+        job_log = os.path.join(self.backup_log_dir, self.name + '.log')
+        self.job_logger = logging.getLogger(self.name)
+        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
+        self.job_logger.addHandler(log_rotator)
+        self.job_logger.setLevel(logging.INFO)
+        self.job_logger.info('='*20 + str(self.now) + '='*20)
+        
+        
+        
+        
+
+    def _set_lastbackup_time(self, timebase):
+        """
+        Set the last backup (labeled name) time 
+        """
+        #FIXME self.logger.debug('Set lastbackup time')
+        timebase[self.name] = datetime.datetime.now() 
+
+
+
+    def _check_need_backup(self, timebase):
+        """
+        Return True if backup needed
+        False otherwise
+        name (backup label)
+        period (seconds)
+        """
+        #FIXME self.logger.debug('Check time between backups for ' + str(self.name))
+        try:
+            last = timebase[self.name]
+        except KeyError:
+            #Not yet stored
+            #Run the first backup
+            #FIXME self.logger.debug(str(self.name) + ': first backup')
+            return True
+       
+        #Calculate the difference
+        #FIXME self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
+        #FIXME self.logger.debug('last=' + str(last) + ' seconds')
+        diff = datetime.datetime.now() - last
+        difftime = diff.seconds + diff.days * 3600*24
+        #FIXME self.logger.debug('diff=' + str(difftime) + ' seconds')
+        #FIXME self.logger.debug('period=' + str(period) + ' seconds')
+        if difftime > self.period:
+            #FIXME self.logger.debug(str(name) + ' need backup')
+            return True
+        else:
+            #FIXME self.logger.debug(str(name) + ' does not need backup')
+            return False
+
+    def _check_target(self, target):
+        """ Check the target"""
+        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
+            #ssh
+            #FIXME self.logger.debug('the target looks like SSH')
+            #TODO check connection
+            return 'SSH'
+        else:
+            if not os.path.exists(target):
+                #FIXME self.logger.warn('target %s: does not exist' % target)
+                #FIXME self.logger.info('Aborting...')
+                raise TARGETError
+            else:
+                return 'DIR'
+
+    def _delete_old_files(self, path, days=10, keep=10):
+        """ Delete files older than #days
+        but keep at least #keep files
+        """
+        ####if self.terminate: return
+        filenames = [os.path.join(path, el) for el in os.listdir(path) if os.path.isfile(os.path.join(path, el))]
+        #delete first the older one
+        filenames.sort()
+        nb_archives = len(filenames)
+        for filepath in enumerate(filenames):
+            #keep a sufficient number of archives
+            if (nb_archives - filepath[0]) <= keep:
+                self.logger.debug('nb archives %s, keep %s, archive %s' % (nb_archives, keep, filepath[0]))
+                return
+            #Are they too old?
+            file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
+            if datetime.datetime.now() - file_date - datetime.timedelta(days=days) < datetime.timedelta():
+                self.logger.info('remove %s' % filepath[1])
+                try:
+                    os.remove(filepath[1])
+                except OSError:
+                    self.logger.warn('Impossible to remove %s' % filepath[1])
+
+            else:
+                self.logger.debug('keep %s' % filepath[1])
+                return
+
+
+    def _compress(self, path):
+        """ Compress the directory """
+        self.logger.debug('Zip the directory: ' + str(path))
+        head, tail = os.path.split(path)
+        archive = str(path) + '.bz2'
+        tar = tarfile.open(archive, "w:bz2")
+        tar.add(path, arcname=tail)
+        tar.close()
+
+
+    def _do_backup(self, timebase):
+        """ Backup fonction
+        make rsync command and run it
+        name:
+        source:
+        destination:
+        incremental: Activate incremental backup (Boolean)
+        duration: How many days incrementals are kept
+        keep: How many incrementals are (at least) kept
+        filter: 
+        """
+        #TODO it might be worth to reduce the length of this method!
+
+        #If a signal is received, stop the process
+        #FIXME if self.terminate: return
+
+        #FIXME self.logger.info('backup %s' % name)
+
+        #Check if the source exists
+        try:
+            source_type = self._check_target(self.source)
+        except TARGETError:
+            return
+
+        #check if the destination exists
+        try:
+            dest_type = self._check_target(self.destination)
+        except TARGETError:
+            return
+
+
+        #define dirs for the destination
+        #create them if needed
+        if dest_type != 'SSH':
+            dest_dir_path = self.destination
+            if self.incremental:
+                inc_dir = os.path.join(self.destination, str(self.name), 'INC')
+                inc_path = os.path.join(inc_dir, str(self.current_date))
+                #FIXME self.logger.debug('increment path: %s' % inc_path)
+
+            backup = os.path.join(dest_dir_path, str(self.name), 'BAK')
+
+            #Create dirs (locally)
+            try:
+                if self.incremental:
+                    os.makedirs(inc_path)
+                os.makedirs(backup)
+            except OSError:
+                #they could already exist
+                pass
+        else:
+            # Create dirs on the server
+            login, dest_dir_path = destination.split(':')
+
+            if incremental:
+                inc_dir = os.path.join(dest_dir_path, str(self.name), 'INC')
+                inc_path = os.path.join(inc_dir, self.current_date)
+                #add ~/ if does not start with /
+                if not inc_path.startswith('/'):
+                    inc_path = os.path.join('~', inc_path)
+                self.logger.debug('increment path: %s' % inc_path)
+
+                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                self.logger.debug('SSH mkdir INC: ' + stdout.decode())
+                #self.logger.warning('SSH mkdir INC: ' + stderr.decode())
+
+            back_path = os.path.join(dest_dir_path, str(name), 'BAK')
+            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            self.logger.debug('SSH mkdir BAK: ' + stdout.decode())
+            #self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
+            backup = login + ':' + back_path
+
+        #FIXME self.logger.debug('source path: %s' % source)
+        #FIXME self.logger.debug('backup path: %s' % backup)
+        #FIXME self.logger.debug('filter path: %s' % filter)
+
+
+        #Compose the command
+        command = list()
+        command.append('/usr/bin/rsync')
+        # a: archive (recursivity, preserve rights and times...)
+        # v: verbose
+        # h: human readable
+        # stat: file rate stats
+        # delete-filterd: if a file is deleted in source, delete it in backup
+        command.append('-avh') 
+        command.append('--stats')
+        command.append('--delete-excluded')
+        # z: compress the flux if transfert thought a network
+        if (source_type or dest_type) == 'SSH':
+            command.append('-z')
+
+        # backup-dir: keep increments
+        if self.incremental:
+            command.append('--backup')
+            command.append('--backup-dir=' + inc_path)
+
+        # Add source and destination
+        command.append(self.source)
+        command.append(backup)
+
+        if self.filter:
+            # Add filters, the resulting command must look like
+            # rsync -av a b --filter='- *.txt' --filter='- *dir'
+            for element in self.filter:
+                command.append('--filter=' + element)
+                #FIXME self.logger.debug('add filter: ' + element)
+
+        #If a signal is received, stop the process
+        #if self.terminate: return
+
+        #Run the command
+        #FIXME self.logger.debug('rsync command: %s' % command)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+        #Dump outputs in log files
+        log = stdout.decode()
+        self.job_logger.info(log)
+
+        if stderr != b'':
+            self.job_logger.info('Errors:')
+            self.job_logger.info(stderr.decode())
+
+        #Crompress Increments
+        if self.incremental:
+            if dest_type != 'SSH':
+                #compress if not empty
+                if os.listdir(inc_path) != []:
+                    self._compress(inc_path)
+                else:
+                    #FIXME self.logger.info('Empty increment')
+                    pass
+                #delete the dir (we keep only non-empty tarballs
+                shutil.rmtree(inc_path)
+
+                #MrProper: remove old tarballs
+                self._delete_old_files(inc_dir, days=self.duration, keep=self.keep)
+            else:
+                pass
+                #TODO ! compress dir though ssh
+                #TODO Remove old dirs though ssh
+
+        #Job done, update the time in the database
+        self._set_lastbackup_time(timebase)
+
+
+
+
+
+
+    def run(self, timebase):
+        """Run...
+        """
+        if self._check_need_backup(timebase):
+            print(self.name)
+            self._do_backup(timebase)
+
 class Vitalus:
     """
     Class for backups
@@ -99,44 +381,7 @@ class Vitalus:
         else:
             self.logger.ERROR('Unknown level')
             
-        
 
-    def _set_lastbackup_time(self, name):
-        """
-        Set the last backup (labeled name) time 
-        """
-        self.logger.debug('Set lastbackup time')
-        self._timebase[name] = datetime.datetime.now() 
-
-    def _check_need_backup(self, name, period):
-        """
-        Return True if backup needed
-        False otherwise
-        name (backup label)
-        period (seconds)
-        """
-        self.logger.debug('Check time between backups for ' + str(name))
-        try:
-            last = self._timebase[name]
-        except KeyError:
-            #Not yet stored
-            #Run the first backup
-            self.logger.debug(str(name) + ': first backup')
-            return True
-       
-        #Calculate the difference
-        self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
-        self.logger.debug('last=' + str(last) + ' seconds')
-        diff = datetime.datetime.now() - last
-        difftime = diff.seconds + diff.days * 3600*24
-        self.logger.debug('diff=' + str(difftime) + ' seconds')
-        self.logger.debug('period=' + str(period) + ' seconds')
-        if difftime > period:
-            self.logger.debug(str(name) + ' need backup')
-            return True
-        else:
-            self.logger.debug(str(name) + ' does not need backup')
-            return False
 
     def _signal_handler(self, signal, frame):
         self.logger.warn('Signal received %s' % signal)
@@ -187,218 +432,7 @@ class Vitalus:
         #nice
         p.nice = 15
 
-    def _delete_old_files(self, path, days=10, keep=10):
-        """ Delete files older than #days
-        but keep at least #keep files
-        """
-        if self.terminate: return
-        filenames = [os.path.join(path, el) for el in os.listdir(path) if os.path.isfile(os.path.join(path, el))]
-        #delete first the older one
-        filenames.sort()
-        nb_archives = len(filenames)
-        for filepath in enumerate(filenames):
-            #keep a sufficient number of archives
-            if (nb_archives - filepath[0]) <= keep:
-                self.logger.debug('nb archives %s, keep %s, archive %s' % (nb_archives, keep, filepath[0]))
-                return
-            #Are they too old?
-            file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
-            if datetime.datetime.now() - file_date - datetime.timedelta(days=days) < datetime.timedelta():
-                self.logger.info('remove %s' % filepath[1])
-                try:
-                    os.remove(filepath[1])
-                except OSError:
-                    self.logger.warn('Impossible to remove %s' % filepath[1])
 
-            else:
-                self.logger.debug('keep %s' % filepath[1])
-                return
-
-
-    def _compress(self, path):
-        """ Compress the directory """
-        self.logger.debug('Zip the directory: ' + str(path))
-        head, tail = os.path.split(path)
-        archive = str(path) + '.bz2'
-        tar = tarfile.open(archive, "w:bz2")
-        tar.add(path, arcname=tail)
-        tar.close()
-
-    def _check_target(self, target):
-        """ Check the target"""
-        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
-            #ssh
-            self.logger.debug('the target looks like SSH')
-            #TODO check connection
-            return 'SSH'
-        else:
-            if not os.path.exists(target):
-                self.logger.warn('target %s: does not exist' % target)
-                self.logger.info('Aborting...')
-                raise TARGETError
-            else:
-                return 'DIR'
-
-    def _do_backup(self, name, source, destination, incremental=False, duration=50, keep=10, filter=None):
-        """ Backup fonction
-        make rsync command and run it
-        name:
-        source:
-        destination:
-        incremental: Activate incremental backup (Boolean)
-        duration: How many days incrementals are kept
-        keep: How many incrementals are (at least) kept
-        filter: 
-        """
-        #TODO it might be worth to reduce the length of this method!
-
-        #If a signal is received, stop the process
-        if self.terminate: return
-
-        self.logger.info('backup %s' % name)
-
-        #Check if the source exists
-        try:
-            source_type = self._check_target(source)
-        except TARGETError:
-            return
-
-        #check if the destination exists
-        try:
-            dest_type = self._check_target(destination)
-        except TARGETError:
-            return
-
-        #TODO: run the command though ssh...
-        if dest_type != 'SSH':
-            if psutil.disk_usage(destination)[2] < self.min_disk_space:
-                self.logger.critical('Low disk space: ' + str(destination))
-                return
-
-        #Logs
-        job_log = os.path.join(self.backup_log_dir, name + '.log')
-        job_logger = logging.getLogger(name)
-        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
-        job_logger.addHandler(log_rotator)
-        job_logger.setLevel(logging.INFO)
-        job_logger.info('='*20 + str(self.now) + '='*20)
-
-
-        #define dirs for the destination
-        #create them if needed
-        if dest_type != 'SSH':
-            dest_dir_path = destination
-            if incremental:
-                inc_dir = os.path.join(destination, str(name), 'INC')
-                inc_path = os.path.join(inc_dir, self.current_date)
-                self.logger.debug('increment path: %s' % inc_path)
-
-            backup = os.path.join(dest_dir_path, str(name), 'BAK')
-
-            #Create dirs (locally)
-            try:
-                if incremental:
-                    os.makedirs(inc_path)
-                os.makedirs(backup)
-            except OSError:
-                #they could already exist
-                pass
-        else:
-            # Create dirs on the server
-            login, dest_dir_path = destination.split(':')
-
-            if incremental:
-                inc_dir = os.path.join(dest_dir_path, str(name), 'INC')
-                inc_path = os.path.join(inc_dir, self.current_date)
-                #add ~/ if does not start with /
-                if not inc_path.startswith('/'):
-                    inc_path = os.path.join('~', inc_path)
-                self.logger.debug('increment path: %s' % inc_path)
-
-                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
-                stdout, stderr = process.communicate()
-                self.logger.debug('SSH mkdir INC: ' + stdout.decode())
-                #self.logger.warning('SSH mkdir INC: ' + stderr.decode())
-
-            back_path = os.path.join(dest_dir_path, str(name), 'BAK')
-            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            self.logger.debug('SSH mkdir BAK: ' + stdout.decode())
-            #self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
-            backup = login + ':' + back_path
-
-        self.logger.debug('source path: %s' % source)
-        self.logger.debug('backup path: %s' % backup)
-        self.logger.debug('filter path: %s' % filter)
-
-
-        #Compose the command
-        command = list()
-        command.append('/usr/bin/rsync')
-        # a: archive (recursivity, preserve rights and times...)
-        # v: verbose
-        # h: human readable
-        # stat: file rate stats
-        # delete-filterd: if a file is deleted in source, delete it in backup
-        command.append('-avh') 
-        command.append('--stats')
-        command.append('--delete-excluded')
-        # z: compress the flux if transfert thought a network
-        if (source_type or dest_type) == 'SSH':
-            command.append('-z')
-
-        # backup-dir: keep increments
-        if incremental:
-            command.append('--backup')
-            command.append('--backup-dir=' + inc_path)
-
-        # Add source and destination
-        command.append(source)
-        command.append(backup)
-
-        if filter:
-            # Add filters, the resulting command must look like
-            # rsync -av a b --filter='- *.txt' --filter='- *dir'
-            for element in filter:
-                command.append('--filter=' + element)
-                self.logger.debug('add filter: ' + element)
-
-        #If a signal is received, stop the process
-        if self.terminate: return
-
-        #Run the command
-        self.logger.debug('rsync command: %s' % command)
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-
-        #Dump outputs in log files
-        log = stdout.decode()
-        job_logger.info(log)
-
-        if stderr != b'':
-            job_logger.info('Errors:')
-            job_logger.info(stderr.decode())
-
-        #Crompress Increments
-        if incremental:
-            if dest_type != 'SSH':
-                #compress if not empty
-                if os.listdir(inc_path) != []:
-                    self._compress(inc_path)
-                else:
-                    self.logger.info('Empty increment')
-                #delete the dir (we keep only non-empty tarballs
-                shutil.rmtree(inc_path)
-
-                #MrProper: remove old tarballs
-                self._delete_old_files(inc_dir, days=duration, keep=keep)
-            else:
-                pass
-                #TODO ! compress dir though ssh
-                #TODO Remove old dirs though ssh
-
-        #Job done, update the time in the database
-        self._set_lastbackup_time(name)
 
     def add_job(self, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
@@ -413,18 +447,20 @@ class Vitalus:
         """
         period_in_seconds = period * 3600
         self.logger.debug('add job+ ' + 'name' + str(name))
-        self.jobs.append({'name':name, 'source':source, 'destination':destination,\
-            'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
+        #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
+        #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
+        self.jobs.append(Job(name, source, destination, period, incremental, duration, keep, filter))
 
     def run(self):
         """ Run all jobs """
         self.logger.info('The script starts...')
         self._create_pidfile()
         for job in self.jobs:
-            if self._check_need_backup(job['name'], job['period']): 
-                print(job['name'])
-                self._do_backup(job['name'], job['source'], job['destination'], 
-                incremental=job['incremental'], duration=job['duration'], keep=job['keep'], filter=job['filter'])
+            job.run(self._timebase)
+            #if self._check_need_backup(job['name'], job['period']): 
+                #print(job['name'])
+                #self._do_backup(job['name'], job['source'], job['destination'], 
+                #incremental=job['incremental'], duration=job['duration'], keep=job['keep'], filter=job['filter'])
         self._release_pidfile()
         self.logger.info('The script exited gracefully')
 
@@ -438,3 +474,12 @@ if __name__ == '__main__':
     b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', period=0, incremental=True)
 
     b.run()
+    
+    
+    
+#TODOCheck disk usage
+        ##TODO: run the command though ssh...
+        #if dest_type != 'SSH':
+            #if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
+                ##FIXME self.logger.critical('Low disk space: ' + str(destination))
+                #return
