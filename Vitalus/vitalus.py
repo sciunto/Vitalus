@@ -48,8 +48,8 @@ class Job:
         self.keep = keep
         self.filter = filter
 
-        self.now = 0 #TODO
-        self.current_date = 0 #TODO
+        self.now = datetime.datetime.now()
+        self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
         self.backup_log_dir = '/tmp' #FIXME
         
@@ -159,37 +159,8 @@ class Job:
         tar.close()
 
 
-    def _do_backup(self, timebase):
-        """ Backup fonction
-        make rsync command and run it
-        name:
-        source:
-        destination:
-        incremental: Activate incremental backup (Boolean)
-        duration: How many days incrementals are kept
-        keep: How many incrementals are (at least) kept
-        filter: 
-        """
-        #TODO it might be worth to reduce the length of this method!
 
-        #If a signal is received, stop the process
-        #FIXME if self.terminate: return
-
-        self.logger.info('backup %s' % self.name)
-
-        #Check if the source exists
-        try:
-            source_type = self._get_target_type(self.source)
-        except TARGETError:
-            return
-
-        #check if the destination exists
-        try:
-            dest_type = self._get_target_type(self.destination)
-        except TARGETError:
-            return
-
-
+    def _prepare_destination(self, dest_type):
         #define dirs for the destination
         #create them if needed
         if dest_type != 'SSH':
@@ -233,11 +204,13 @@ class Job:
             #self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
             backup = login + ':' + back_path
 
-        self.logger.debug('source path: %s' % self.source)
-        self.logger.debug('backup path: %s' % backup)
-        self.logger.debug('filter path: %s' % self.filter)
+        self.backup_path = backup
+        self.inc_path = inc_path
+        self.inc_dir = inc_dir
 
 
+
+    def _prepare_rsync_command(self, source_type, dest_type):
         #Compose the command
         command = list()
         command.append('/usr/bin/rsync')
@@ -256,11 +229,11 @@ class Job:
         # backup-dir: keep increments
         if self.incremental:
             command.append('--backup')
-            command.append('--backup-dir=' + inc_path)
+            command.append('--backup-dir=' + self.inc_path)
 
         # Add source and destination
         command.append(self.source)
-        command.append(backup)
+        command.append(self.backup_path)
 
         if self.filter:
             # Add filters, the resulting command must look like
@@ -268,6 +241,47 @@ class Job:
             for element in self.filter:
                 command.append('--filter=' + element)
                 self.logger.debug('add filter: ' + element)
+        return command
+
+    def _do_backup(self, timebase):
+        """ Backup fonction
+        make rsync command and run it
+        name:
+        source:
+        destination:
+        incremental: Activate incremental backup (Boolean)
+        duration: How many days incrementals are kept
+        keep: How many incrementals are (at least) kept
+        filter: 
+        """
+        #TODO it might be worth to reduce the length of this method!
+
+        #If a signal is received, stop the process
+        #FIXME if self.terminate: return
+
+        self.logger.info('backup %s' % self.name)
+
+        #Check if the source exists
+        try:
+            source_type = self._get_target_type(self.source)
+        except TARGETError:
+            return
+
+        #check if the destination exists
+        try:
+            dest_type = self._get_target_type(self.destination)
+        except TARGETError:
+            return
+
+
+        self._prepare_destination(dest_type)
+
+        self.logger.debug('source path: %s' % self.source)
+        self.logger.debug('backup path: %s' % self.backup_path)
+        self.logger.debug('filter path: %s' % self.filter)
+
+
+        command = self._prepare_rsync_command(source_type, dest_type)
 
         #If a signal is received, stop the process
         #if self.terminate: return
@@ -289,16 +303,16 @@ class Job:
         if self.incremental:
             if dest_type != 'SSH':
                 #compress if not empty
-                if os.listdir(inc_path) != []:
-                    self._compress(inc_path)
+                if os.listdir(self.inc_path) != []:
+                    self._compress(self.inc_path)
                 else:
                     self.logger.info('Empty increment')
                     pass
                 #delete the dir (we keep only non-empty tarballs
-                shutil.rmtree(inc_path)
+                shutil.rmtree(self.inc_path)
 
                 #MrProper: remove old tarballs
-                self._delete_old_files(inc_dir, days=self.duration, keep=self.keep)
+                self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
             else:
                 pass
                 #TODO ! compress dir though ssh
@@ -328,8 +342,7 @@ class Vitalus:
         min_disk_space: minimal disk space (destination) [Go]
         """
         #Variables
-        self.now = datetime.datetime.now()
-        self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+
         self.jobs = []
         self.terminate = False
         self.min_disk_space = min_disk_space * 10**9
@@ -358,7 +371,7 @@ class Vitalus:
         self._set_process_low_priority()
 
         #timebase
-        self._timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db'))
+        self._timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #TODO move the timebase in Job class
         signal.signal(signal.SIGTERM, self._signal_handler)
    
     def __del__(self):
