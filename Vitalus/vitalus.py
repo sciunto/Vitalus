@@ -39,6 +39,17 @@ class Job:
     Class containing a job
     """
     def __init__(self, logger, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
+        """
+        logger:
+        name:
+        source:
+        destination:
+        incremental: Activate incremental backup (Boolean)
+        duration: How many days incrementals are kept
+        keep: How many incrementals are (at least) kept
+        filter: 
+        """
+        
         self.name = name
         self.source = source
         self.destination = destination
@@ -246,13 +257,7 @@ class Job:
     def _do_backup(self, timebase):
         """ Backup fonction
         make rsync command and run it
-        name:
-        source:
-        destination:
-        incremental: Activate incremental backup (Boolean)
-        duration: How many days incrementals are kept
-        keep: How many incrementals are (at least) kept
-        filter: 
+
         """
         #TODO it might be worth to reduce the length of this method!
 
