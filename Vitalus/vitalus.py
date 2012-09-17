@@ -50,7 +50,7 @@ class Job:
     """
     Class containing a job
     """
-    def __init__(self, logger, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
+    def __init__(self, logger, name, source, destination, period, incremental, duration, keep, filter):
         """
         logger:
         name:
