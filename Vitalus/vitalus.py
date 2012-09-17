@@ -74,9 +74,7 @@ class Job:
         self.job_logger.setLevel(logging.INFO)
         self.job_logger.info('='*20 + str(self.now) + '='*20)
         
-        
-        
-        
+            
 
     def _set_lastbackup_time(self, timebase):
         """
@@ -118,11 +116,18 @@ class Job:
             return False
 
     def _get_target_type(self, target):
-        """ Check the target"""
+        """
+        Return the target type
+        SSH if matches name@domaine.tld:dir
+        DIR if it's a directory
+        
+        Raise
+        -----
+        TARGETError: weird target type 
+        """
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
             self.logger.debug('the target looks like SSH')
-            #TODO check connection
             return 'SSH'
         else:
             if not os.path.exists(target):
@@ -133,8 +138,11 @@ class Job:
                 return 'DIR'
 
     def _delete_old_files(self, path, days=10, keep=10):
-        """ Delete files older than #days
-        but keep at least #keep files
+        """
+        Delete old archives in a path
+        path: path to clean
+        days: delete files older than this value
+        keep: keep at least this amount of archives
         """
         ####if self.terminate: return
         filenames = [os.path.join(path, el) for el in os.listdir(path) if os.path.isfile(os.path.join(path, el))]
@@ -171,7 +179,12 @@ class Job:
 
 
 
-    def _prepare_destination(self, dest_type):
+    def _prepare_destination(self, dest_type): #FIXME dest_type (self ?)
+        """
+        Prepare the destination to receive a backup:
+        * create dirs
+        * Initialize paths
+        """
         #define dirs for the destination
         #create them if needed
         if dest_type != 'SSH':
@@ -221,8 +234,10 @@ class Job:
 
 
 
-    def _prepare_rsync_command(self, source_type, dest_type):
-        #Compose the command
+    def _prepare_rsync_command(self, source_type, dest_type): #FIXME (self ?)
+        """
+        Compose the rsync command
+        """
         command = list()
         command.append('/usr/bin/rsync')
         # a: archive (recursivity, preserve rights and times...)
@@ -252,19 +267,18 @@ class Job:
             for element in self.filter:
                 command.append('--filter=' + element)
                 self.logger.debug('add filter: ' + element)
+                
+        self.logger.debug('rsync command: %s' % command)
         return command
 
     def _do_backup(self, timebase):
         """ Backup fonction
-        make rsync command and run it
-
         """
         #TODO it might be worth to reduce the length of this method!
+        #It must be short enough to go in run()
 
         #If a signal is received, stop the process
         #FIXME if self.terminate: return
-
-        self.logger.info('backup %s' % self.name)
 
         #Check if the source exists
         try:
@@ -292,7 +306,6 @@ class Job:
         #if self.terminate: return
 
         #Run the command
-        self.logger.debug('rsync command: %s' % command)
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
@@ -336,6 +349,7 @@ class Job:
         """
         if self._check_need_backup(timebase):
             print(self.name)
+            self.logger.info('backup %s' % self.name)
             self._do_backup(timebase)
 
 class Vitalus:
