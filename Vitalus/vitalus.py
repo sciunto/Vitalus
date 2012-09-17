@@ -38,7 +38,7 @@ class Job:
     """
     Class containing a job
     """
-    def __init__(self, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
+    def __init__(self, logger, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
         self.name = name
         self.source = source
         self.destination = destination
@@ -52,7 +52,10 @@ class Job:
         self.current_date = 0 #TODO
 
         self.backup_log_dir = '/tmp' #FIXME
-        #Logs
+        
+        self.logger = logger #FIXME : define sub logger
+        
+        #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
         self.job_logger = logging.getLogger(self.name)
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
@@ -68,7 +71,7 @@ class Job:
         """
         Set the last backup (labeled name) time 
         """
-        #FIXME self.logger.debug('Set lastbackup time')
+        self.logger.debug('Set lastbackup time')
         timebase[self.name] = datetime.datetime.now() 
 
 
@@ -80,40 +83,40 @@ class Job:
         name (backup label)
         period (seconds)
         """
-        #FIXME self.logger.debug('Check time between backups for ' + str(self.name))
+        self.logger.debug('Check time between backups for ' + str(self.name))
         try:
             last = timebase[self.name]
         except KeyError:
             #Not yet stored
             #Run the first backup
-            #FIXME self.logger.debug(str(self.name) + ': first backup')
+            self.logger.debug(str(self.name) + ': first backup')
             return True
        
         #Calculate the difference
-        #FIXME self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
-        #FIXME self.logger.debug('last=' + str(last) + ' seconds')
+        self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
+        self.logger.debug('last=' + str(last) + ' seconds')
         diff = datetime.datetime.now() - last
         difftime = diff.seconds + diff.days * 3600*24
-        #FIXME self.logger.debug('diff=' + str(difftime) + ' seconds')
-        #FIXME self.logger.debug('period=' + str(period) + ' seconds')
+        self.logger.debug('diff=' + str(difftime) + ' seconds')
+        self.logger.debug('period=' + str(self.period) + ' seconds')
         if difftime > self.period:
-            #FIXME self.logger.debug(str(name) + ' need backup')
+            self.logger.debug(str(self.name) + ' need backup')
             return True
         else:
-            #FIXME self.logger.debug(str(name) + ' does not need backup')
+            self.logger.debug(str(self.name) + ' does not need backup')
             return False
 
     def _check_target(self, target):
         """ Check the target"""
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
-            #FIXME self.logger.debug('the target looks like SSH')
+            self.logger.debug('the target looks like SSH')
             #TODO check connection
             return 'SSH'
         else:
             if not os.path.exists(target):
-                #FIXME self.logger.warn('target %s: does not exist' % target)
-                #FIXME self.logger.info('Aborting...')
+                self.logger.warn('target %s: does not exist' % target)
+                self.logger.info('Aborting...')
                 raise TARGETError
             else:
                 return 'DIR'
@@ -172,7 +175,7 @@ class Job:
         #If a signal is received, stop the process
         #FIXME if self.terminate: return
 
-        #FIXME self.logger.info('backup %s' % name)
+        self.logger.info('backup %s' % self.name)
 
         #Check if the source exists
         try:
@@ -194,7 +197,7 @@ class Job:
             if self.incremental:
                 inc_dir = os.path.join(self.destination, str(self.name), 'INC')
                 inc_path = os.path.join(inc_dir, str(self.current_date))
-                #FIXME self.logger.debug('increment path: %s' % inc_path)
+                self.logger.debug('increment path: %s' % inc_path)
 
             backup = os.path.join(dest_dir_path, str(self.name), 'BAK')
 
@@ -230,9 +233,9 @@ class Job:
             #self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
             backup = login + ':' + back_path
 
-        #FIXME self.logger.debug('source path: %s' % source)
-        #FIXME self.logger.debug('backup path: %s' % backup)
-        #FIXME self.logger.debug('filter path: %s' % filter)
+        self.logger.debug('source path: %s' % self.source)
+        self.logger.debug('backup path: %s' % backup)
+        self.logger.debug('filter path: %s' % self.filter)
 
 
         #Compose the command
@@ -264,13 +267,13 @@ class Job:
             # rsync -av a b --filter='- *.txt' --filter='- *dir'
             for element in self.filter:
                 command.append('--filter=' + element)
-                #FIXME self.logger.debug('add filter: ' + element)
+                self.logger.debug('add filter: ' + element)
 
         #If a signal is received, stop the process
         #if self.terminate: return
 
         #Run the command
-        #FIXME self.logger.debug('rsync command: %s' % command)
+        self.logger.debug('rsync command: %s' % command)
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
@@ -289,7 +292,7 @@ class Job:
                 if os.listdir(inc_path) != []:
                     self._compress(inc_path)
                 else:
-                    #FIXME self.logger.info('Empty increment')
+                    self.logger.info('Empty increment')
                     pass
                 #delete the dir (we keep only non-empty tarballs
                 shutil.rmtree(inc_path)
@@ -449,7 +452,7 @@ class Vitalus:
         self.logger.debug('add job+ ' + 'name' + str(name))
         #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
         #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
-        self.jobs.append(Job(name, source, destination, period, incremental, duration, keep, filter))
+        self.jobs.append(Job(self.logger, name, source, destination, period, incremental, duration, keep, filter))
 
     def run(self):
         """ Run all jobs """
@@ -469,7 +472,7 @@ if __name__ == '__main__':
     b = Vitalus(min_disk_space=0.1)
     b.set_log_level('DEBUG')
     b.add_job('test', '/home/gnu/tmp/firefox', '/tmp/sauvegarde', period=0.0, incremental=True)
-    b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', incremental=True)
+    b.add_job('test2', '/home/gnu/tmp/debian', '/tmp/sauvegarde', period=0.0, incremental=True)
     b.add_job('test3', '/home/gnu/tmp/photos', '/tmp/sauvegarde', incremental=True)
     b.add_job('test4', '/home/gnu/tmp/www', '/tmp/sauvegarde', period=0, incremental=True)
 
@@ -481,5 +484,5 @@ if __name__ == '__main__':
         ##TODO: run the command though ssh...
         #if dest_type != 'SSH':
             #if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
-                ##FIXME self.logger.critical('Low disk space: ' + str(destination))
+                #self.logger.critical('Low disk space: ' + str(destination))
                 #return
