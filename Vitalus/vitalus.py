@@ -50,9 +50,10 @@ class Job:
     """
     Class containing a job
     """
-    def __init__(self, logger, name, source, destination, period, incremental, duration, keep, filter):
+    def __init__(self, logger, log_dir, name, source, destination, period, incremental, duration, keep, filter):
         """
         logger:
+        log_dir:
         name:
         source:
         destination:
@@ -74,7 +75,7 @@ class Job:
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
-        self.backup_log_dir = '/tmp' #FIXME
+        self.backup_log_dir = log_dir
         
         self.logger = logger #FIXME : define sub logger
         
@@ -501,7 +502,8 @@ class Vitalus:
         if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug('add job+ ' + 'name' + str(name)) 
-            self.jobs.append(Job(self.logger, name, source, self.destination, period, incremental, duration, keep, filter))
+            self.jobs.append(Job(self.logger, self.backup_log_dir, name, source, 
+                    self.destination, period, incremental, duration, keep, filter))
 
 
     def run(self):
