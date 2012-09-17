@@ -239,9 +239,16 @@ class Vitalus:
             else:
                 return 'DIR'
 
-    def _do_backup(self, name, source, destination, incremental=False, duration=50, filter=None):
+    def _do_backup(self, name, source, destination, incremental=False, duration=50, keep=10, filter=None):
         """ Backup fonction
         make rsync command and run it
+        name:
+        source:
+        destination:
+        incremental: Activate incremental backup (Boolean)
+        duration: How many days incrementals are kept
+        keep: How many incrementals are (at least) kept
+        filter: 
         """
         #TODO it might be worth to reduce the length of this method!
 
@@ -384,7 +391,7 @@ class Vitalus:
                 shutil.rmtree(inc_path)
 
                 #MrProper: remove old tarballs
-                self._delete_old_files(inc_dir, days=duration)
+                self._delete_old_files(inc_dir, days=duration, keep=keep)
             else:
                 pass
                 #TODO ! compress dir though ssh
@@ -393,21 +400,21 @@ class Vitalus:
         #Job done, update the time in the database
         self._set_lastbackup_time(name)
 
-    def add_job(self, name, source, destination, period=24, incremental=False, duration=50, filter=None):
+    def add_job(self, name, source, destination, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
         name: backup label
         source: backup from...
         destination: backup to...
         period: min time (hours) between backups
-        incremental: Create diffs
-        duration: How long we keep diffs (days)
+        incremental: Activate incremental backup (Boolean)
+        duration: How many days incrementals are kept
+        keep: How many incrementals are (at least) kept
         filter: filter, must be a tuple
         """
         period_in_seconds = period * 3600
-        self.logger.debug('add job+ ' + 'name' + str(name))#+ 'source'+source+ 'destination'+destination+\
-            #'period'+period_in_seconds+ 'incremental'+incremental+ 'duration'+duration+ 'filter'+filter)
+        self.logger.debug('add job+ ' + 'name' + str(name))
         self.jobs.append({'name':name, 'source':source, 'destination':destination,\
-            'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'filter':filter})
+            'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
 
     def run(self):
         """ Run all jobs """
@@ -416,7 +423,8 @@ class Vitalus:
         for job in self.jobs:
             if self._check_need_backup(job['name'], job['period']): 
                 print(job['name'])
-                self._do_backup(job['name'], job['source'], job['destination'], job['incremental'], job['duration'], job['filter'])
+                self._do_backup(job['name'], job['source'], job['destination'], 
+                incremental=job['incremental'], duration=job['duration'], keep=job['keep'], filter=job['filter'])
         self._release_pidfile()
         self.logger.info('The script exited gracefully')
 
