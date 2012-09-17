@@ -26,6 +26,18 @@ import signal
 import shelve
 
 
+    
+    
+#TODO Check disk usage
+        ##TODO: run the command though ssh...
+        #if dest_type != 'SSH':
+            #if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
+                #self.logger.critical('Low disk space: ' + str(destination))
+                #return
+
+
+
+
 class TARGETError(Exception):
     """
     Class: exception for target validity
@@ -488,9 +500,7 @@ class Vitalus:
         """
         if self.destination:
             period_in_seconds = period * 3600
-            self.logger.debug('add job+ ' + 'name' + str(name))
-            #self.jobs.append({'name':name, 'source':source, 'destination':destination,\
-            #    'period':period_in_seconds, 'incremental':incremental, 'duration':duration, 'keep':keep, 'filter':filter})
+            self.logger.debug('add job+ ' + 'name' + str(name)) 
             self.jobs.append(Job(self.logger, name, source, self.destination, period, incremental, duration, keep, filter))
 
 
@@ -500,10 +510,6 @@ class Vitalus:
         self._create_pidfile()
         for job in self.jobs:
             job.run()
-            #if self._check_need_backup(job['name'], job['period']): 
-                #print(job['name'])
-                #self._do_backup(job['name'], job['source'], job['destination'], 
-                #incremental=job['incremental'], duration=job['duration'], keep=job['keep'], filter=job['filter'])
         self._release_pidfile()
         self.logger.info('The script exited gracefully')
 
@@ -519,11 +525,3 @@ if __name__ == '__main__':
 
     b.run()
     
-    
-    
-#TODOCheck disk usage
-        ##TODO: run the command though ssh...
-        #if dest_type != 'SSH':
-            #if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
-                #self.logger.critical('Low disk space: ' + str(destination))
-                #return
