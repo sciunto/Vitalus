@@ -41,7 +41,7 @@ import shelve
 
 class TARGETError(Exception):
     """
-    Class: exception for target validity
+    Exception for target validity
     """
     def __init__(self):
         Exception.__init__(self)
@@ -50,19 +50,18 @@ class TARGETError(Exception):
 class Job:
     """
     Class containing a job
+
+    :param logger: Log handler
+    :param log_dir: Log directory path
+    :param name: Job name
+    :param source: Source path
+    :param destination: Destination path
+    :param incremental: Activate incremental backup (Boolean)
+    :param duration: How many days incrementals are kept
+    :param keep: How many incrementals are (at least) kept
+    :param filter: Rsync filters
     """
     def __init__(self, logger, log_dir, name, source, destination, period, incremental, duration, keep, filter):
-        """
-        logger:
-        log_dir:
-        name:
-        source:
-        destination:
-        incremental: Activate incremental backup (Boolean)
-        duration: How many days incrementals are kept
-        keep: How many incrementals are (at least) kept
-        filter: 
-        """
         
         self.name = name
         self.source = source
@@ -104,8 +103,8 @@ class Job:
         """
         Return True if backup needed
         False otherwise
-        name (backup label)
-        period (seconds)
+
+        :returns: bool
         """
         self.logger.debug('Check time between backups for ' + str(self.name))
         try:
@@ -137,10 +136,9 @@ class Job:
         Return the target type
         SSH if matches name@domaine.tld:dir
         DIR if it's a directory
-        
-        Raise
-        -----
-        TARGETError: weird target type 
+       
+        :param target: Target (source or destination)
+        :raise TARGETError: weird target type 
         """
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
@@ -157,9 +155,10 @@ class Job:
     def _delete_old_files(self, path, days=10, keep=10):
         """
         Delete old archives in a path
-        path: path to clean
-        days: delete files older than this value
-        keep: keep at least this amount of archives
+
+        :param path: path to clean
+        :param days: delete files older than this value
+        :param keep: keep at least this amount of archives
         """
         ####if self.terminate: return
         filenames = [os.path.join(path, el) for el in os.listdir(path) if os.path.isfile(os.path.join(path, el))]
