@@ -9,8 +9,9 @@ Welcome to Vitalus's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
-
+    :maxdepth: 2
+    
+    vitalus
 
 
 Indices and tables
