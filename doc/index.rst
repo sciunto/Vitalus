@@ -3,8 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Vitalus's documentation!
+Welcome to Vitalus' documentation!
 ===================================
+
+Vitalus is a rsync wrapper. Rsync is a good atomic tool, but it needs to be wrapped to have a real backup solution. 
+Backup solutions are generally too basic or very difficult. This one fits my needs.
 
 Contents:
 
@@ -13,12 +16,23 @@ Contents:
     
     vitalus
 
+Philosophy
+==========
+* I want to centralize my backup in a unique script to achieve many tasks.
+* I want to backup my desktop on external disks.
+* I want to backup external disks to other external disks.
+* I want to backup my homes on hosts accessible via ssh.
+* I want to keep increment if I need it.
+* I want to adjust the frequency of copies for each task. The script starts much more frequently.
+* I want readable log files telling me if everything goes fine.
+* ...
 
 Functionalities
 ==============
+This is just another way to express the philosophy :)
 * Manage different tasks
 * rsync from or to local disks
-* rsync from or to SSH
+* rsync from SSH (to SSH not fully supported yet)
 * Check disk space (local disks)
 * Possibility to keep zipped increments
 * Old increments deleted (keeping a minimal amount of increments)
@@ -43,6 +57,7 @@ How to setup?
 =============
 See example.py
 
+In my use case, I have a cron job running every hour. IMHO, this is quite atomic. Then, the script decides which task has to be done.
 
 About ssh
 ---------
