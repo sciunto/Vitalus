@@ -69,7 +69,7 @@ class Job:
 
         self.backup_log_dir = log_dir
         
-        self.logger = logging.getLogger('Vitalus.Job')
+        self.logger = logging.getLogger('Vitalus.Job') #TODO add the job name in the format
         
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
@@ -351,7 +351,7 @@ class Job:
             self.job_logger.info('Errors:')
             self.job_logger.info(stderr.decode())
 
-        self._compress_increments()
+        self._compress_increments() #FIXME: bug... remove non empty increments
 
         #Job done, update the time in the database
         self._set_lastbackup_time()
@@ -524,7 +524,7 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Vitalus(min_disk_space=99990.1)
+    b = Vitalus(min_disk_space=0.1)
     b.set_log_level('DEBUG')
     b.add_destination('/tmp/sauvegarde')
     #TODO Check that job names are uniq
