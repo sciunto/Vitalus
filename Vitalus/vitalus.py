@@ -30,15 +30,17 @@ import shelve
 class TARGETError(Exception):
     """
     Exception for target validity
+    :param message: Message
     """
-    def __init__(self):
-        Exception.__init__(self)
+    def __init__(self, message=''):
+        Exception.__init__(self, message)
 
 
 class Job:
     """
     Class containing a job
 
+    :param min_disk_space: minimal disk space
     :param log_dir: Log directory path
     :param name: Job name
     :param source: Source path
@@ -48,8 +50,11 @@ class Job:
     :param keep: How many incrementals are (at least) kept
     :param filter: Rsync filters
     """
-    def __init__(self, log_dir, name, source, destination, period, incremental, duration, keep, filter):
-        
+    #TODO signal...
+
+    def __init__(self, min_disk_space, log_dir, name, source, destination, period, incremental, duration, keep, filter):
+       
+        self.min_disk_space = min_disk_space
         self.name = name
         self.source = source
         self.destination = destination
@@ -74,18 +79,45 @@ class Job:
         self.job_logger.setLevel(logging.INFO)
         self.job_logger.info('='*20 + str(self.now) + '='*20)
         
-            
-        #Check if the source exists
-        try:
-            self.source_type = self._get_target_type(self.source)
-        except TARGETError:
-            pass #FIXME
+        #Source types
+        self.source_type = self._get_target_type(self.source)
+        self.dest_type = self._get_target_type(self.destination)
 
-        #check if the destination exists
-        try:
-            self.dest_type = self._get_target_type(self.destination)
-        except TARGETError:
-            pass #FIXME
+        self._check_disk_usage()
+
+    def _get_target_type(self, target):
+        """
+        Return the target type
+        SSH if matches name@domaine.tld:dir
+        DIR if it's a directory
+       
+        :param target: Target (source or destination)
+        :raises TARGETError: weird target type 
+        """
+        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
+            #ssh
+            self.logger.debug('the target looks like SSH')
+            return 'SSH'
+        else:
+            if not os.path.exists(target):
+                self.logger.warn('target %s: does not exist' % target)
+                self.logger.info('Aborting...')
+                raise TARGETError('Target %s: does not exist' % target)
+            else:
+                return 'DIR'
+
+    def _check_disk_usage(self):
+        """
+        Check the disk usage
+        :raises TARGETError: if low disk space
+        """
+        if self.dest_type == 'DIR':
+            if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
+                self.logger.critical('Low disk space: ' + str(self.destination))
+                raise TARGETError('Low disk space on %s' % self.destination)
+        elif self.dest_type == 'SSH':
+            #TODO
+            pass
 
     def _set_lastbackup_time(self):
         """
@@ -129,27 +161,6 @@ class Job:
             self.logger.debug(str(self.name) + ' does not need backup')
             return False
 
-    def _get_target_type(self, target):
-        """
-        Return the target type
-        SSH if matches name@domaine.tld:dir
-        DIR if it's a directory
-       
-        :param target: Target (source or destination)
-        :raise TARGETError: weird target type 
-        """
-        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
-            #ssh
-            self.logger.debug('the target looks like SSH')
-            return 'SSH'
-        else:
-            if not os.path.exists(target):
-                self.logger.warn('target %s: does not exist' % target)
-                self.logger.info('Aborting...')
-                raise TARGETError
-            else:
-                return 'DIR'
-
     def _delete_old_files(self, path, days=10, keep=10):
         """
         Delete old archives in a path
@@ -191,18 +202,6 @@ class Job:
         tar.add(path, arcname=tail)
         tar.close()
 
-    def _check_disk_usage(self):
-        """
-        Check the disk usage
-        todo
-        """
-        if self.dest_type == 'DIR':
-            if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
-                self.logger.critical('Low disk space: ' + str(self.destination))
-                #TODO: do something
-        elif self.dest_type == 'SSH':
-            #TODO
-            pass
 
     def _prepare_destination(self): 
         """
@@ -259,7 +258,7 @@ class Job:
 
 
 
-    def _prepare_rsync_command(self): #FIXME (self ?)
+    def _prepare_rsync_command(self): 
         """
         Compose the rsync command
         """
@@ -296,6 +295,28 @@ class Job:
         self.logger.debug('rsync command: %s' % command)
         return command
 
+    def _compress_increments(self):
+        """
+        Compress increments
+        """
+        if self.incremental:
+            if self.dest_type == 'DIR':
+                #compress if not empty
+                if os.listdir(self.inc_path) != []:
+                    self._compress(self.inc_path)
+                else:
+                    self.logger.info('Empty increment')
+                    pass
+                #delete the dir (we keep only non-empty tarballs
+                shutil.rmtree(self.inc_path)
+
+                #MrProper: remove old tarballs
+                self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
+            elif self.dest_type == 'SSH':
+                pass
+                #TODO ! compress dir though ssh
+                #TODO Remove old dirs though ssh
+
     def _do_backup(self):
         """ Backup fonction
         """
@@ -330,24 +351,7 @@ class Job:
             self.job_logger.info('Errors:')
             self.job_logger.info(stderr.decode())
 
-        #Crompress Increments
-        if self.incremental:
-            if self.dest_type != 'SSH':
-                #compress if not empty
-                if os.listdir(self.inc_path) != []:
-                    self._compress(self.inc_path)
-                else:
-                    self.logger.info('Empty increment')
-                    pass
-                #delete the dir (we keep only non-empty tarballs
-                shutil.rmtree(self.inc_path)
-
-                #MrProper: remove old tarballs
-                self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
-            else:
-                pass
-                #TODO ! compress dir though ssh
-                #TODO Remove old dirs though ssh
+        self._compress_increments()
 
         #Job done, update the time in the database
         self._set_lastbackup_time()
@@ -501,8 +505,12 @@ class Vitalus:
         if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug('add job+ ' + 'name' + str(name)) 
-            self.jobs.append(Job(self.backup_log_dir, name, source, 
+            try: 
+                self.jobs.append(Job(self.min_disk_space, self.backup_log_dir, name, source, 
                     self.destination, period, incremental, duration, keep, filter))
+            except TARGETError:
+                #TODO : message
+                pass
 
 
     def run(self):
@@ -516,7 +524,7 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Vitalus(min_disk_space=0.1)
+    b = Vitalus(min_disk_space=99990.1)
     b.set_log_level('DEBUG')
     b.add_destination('/tmp/sauvegarde')
     #TODO Check that job names are uniq
