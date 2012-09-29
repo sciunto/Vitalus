@@ -1,3 +1,6 @@
+# Description
+Wrapper for rsync
+
 # Author 
 F. Boulogne <fboulogne at april dot org>
 
@@ -16,41 +19,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-# Description
-Wrapper for rsync
-
-
-# Functionalities
-* Manage different tasks
-* rsync from or to local disks
-* rsync from or to SSH
-* Check disk space (local disks)
-* Possibility to keep zipped increments
-* Old increments deleted (keeping a minimal amount of increments)
-* Rotated logs (general + one per task)
-
-# Requirements
-* python 3
-* python-psutil
-* rsync
-* distutils (install)
-
-# How to install?
-Archlinux: https://aur.archlinux.org/packages.php?ID=61901
-
-Otherwise:
-python setup.py install --root='/tmp'
-You can adapt the root directory.
-
-# How to setup?
-See example.py
-
-
-# About ssh
-Keys must be configured with an empty passphrase.
-Add in your ~/.ssh/config, something like
-
-    Host sciunto.org
-        IdentityFile ~/.ssh/key-empty-passphrase
-
-Source or destination must have the format: login@server:path
+# Documentation
+http://sciunto.github.com/Vitalus/
