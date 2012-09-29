@@ -1,5 +1,6 @@
-==== Version 0.3 ===
+==== Version 0.2.5 ===
 * Code refactoring
+* Documentation
 
 ==== Version 0.2 ====
 * Set logger level method (change log level) 

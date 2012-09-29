@@ -1,5 +1,5 @@
 # Description
-Wrapper for rsync
+Wrapper for rsync, still under heavy dev.
 
 # Author 
 F. Boulogne <fboulogne at april dot org>
