@@ -27,12 +27,6 @@ import signal
 import shelve
 
 
-    
-    
-
-
-
-
 class TARGETError(Exception):
     """
     Exception for target validity
