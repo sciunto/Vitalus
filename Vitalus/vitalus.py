@@ -51,7 +51,6 @@ class Job:
     """
     Class containing a job
 
-    :param logger: Log handler
     :param log_dir: Log directory path
     :param name: Job name
     :param source: Source path
@@ -61,7 +60,7 @@ class Job:
     :param keep: How many incrementals are (at least) kept
     :param filter: Rsync filters
     """
-    def __init__(self, logger, log_dir, name, source, destination, period, incremental, duration, keep, filter):
+    def __init__(self, log_dir, name, source, destination, period, incremental, duration, keep, filter):
         
         self.name = name
         self.source = source
@@ -77,7 +76,7 @@ class Job:
 
         self.backup_log_dir = log_dir
         
-        self.logger = logger #FIXME : define sub logger
+        self.logger = logging.getLogger('Vitalus.Job')
         
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
@@ -392,7 +391,7 @@ class Vitalus:
 
         # Add the log message handler to the logger
         log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
         log_rotator.setFormatter(formatter)
         self.logger.addHandler(log_rotator)
         
@@ -502,7 +501,7 @@ class Vitalus:
         if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug('add job+ ' + 'name' + str(name)) 
-            self.jobs.append(Job(self.logger, self.backup_log_dir, name, source, 
+            self.jobs.append(Job(self.backup_log_dir, name, source, 
                     self.destination, period, incremental, duration, keep, filter))
 
 
