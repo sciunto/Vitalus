@@ -192,9 +192,6 @@ class Job:
                 return
 
 
-
-
-
     def _prepare_destination(self): 
         """
         Prepare the destination to receive a backup:
@@ -289,44 +286,30 @@ class Job:
 
     def _compress_increments(self):
         """
-        Compress increments
+        Compress increments and delete old ones
         """
-        if self.incremental:
-            if self.dest_type == 'DIR':
-                #compress if not empty
-                if os.listdir(self.inc_path) != []:
-                    self.logger.debug('Zip the directory: ' + str(path))
-                    utils.compress(self.inc_path)
-                else:
-                    self.logger.info('Empty increment')
-                    pass
-                #delete the dir (we keep only non-empty tarballs
-                shutil.rmtree(self.inc_path)
-
-                #MrProper: remove old tarballs
-                self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
-            elif self.dest_type == 'SSH':
+        if self.dest_type == 'DIR':
+            #compress if not empty
+            if os.listdir(self.inc_path) != []:
+                self.logger.debug('Zip the directory: ' + str(path))
+                utils.compress(self.inc_path)
+            else:
+                self.logger.info('Empty increment')
                 pass
-                #TODO ! compress dir though ssh
-                #TODO Remove old dirs though ssh
+            #delete the dir (we keep only non-empty tarballs
+            shutil.rmtree(self.inc_path)
 
-    def _do_backup(self):
-        """ Backup fonction
+            #MrProper: remove old tarballs
+            self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
+        elif self.dest_type == 'SSH':
+            pass
+            #TODO ! compress dir though ssh
+            #TODO Remove old dirs though ssh
+
+    def _rsync(self):
+        """ 
+        Run rsync to do the task.
         """
-        #TODO it might be worth to reduce the length of this method!
-        #It must be short enough to go in run()
-
-        #If a signal is received, stop the process
-        #FIXME if self.terminate: return
-
-
-        self._prepare_destination()
-
-        self.logger.debug('source path: %s' % self.source)
-        self.logger.debug('backup path: %s' % self.backup_path)
-        self.logger.debug('filter path: %s' % self.filter)
-
-
         command = self._prepare_rsync_command()
 
         #If a signal is received, stop the process
@@ -344,16 +327,22 @@ class Job:
             self.job_logger.info('Errors:')
             self.job_logger.info(stderr.decode())
 
-        self._compress_increments() #FIXME: bug... remove non empty increments
-
-        #Job done, update the time in the database
-        self._set_lastbackup_time()
-
-
     def run(self):
-        """Run...
+        """
+        Run the job
         """
         if self._check_need_backup():
             print(self.name)
             self.logger.info('backup %s' % self.name)
-            self._do_backup()
+            #Prepare the destination
+            self._prepare_destination()
+            self.logger.debug('source path: %s' % self.source)
+            self.logger.debug('backup path: %s' % self.backup_path)
+            self.logger.debug('filter path: %s' % self.filter)
+            #Run rsync
+            self._rsync()
+            #Compress
+            if self.incremental:
+                self._compress_increments() #FIXME: bug... it removes non empty increments
+            #Job done, update the time in the database
+            self._set_lastbackup_time()
