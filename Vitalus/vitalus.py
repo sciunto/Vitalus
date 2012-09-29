@@ -16,16 +16,7 @@
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
-#import psutil, os, sys
-#import subprocess
-#import shutil
 import datetime
-#import logging, logging.handlers
-#import tarfile
-#import re
-#import signal
-#import shelve
-
 import os
 import psutil
 import signal
@@ -159,6 +150,7 @@ class Vitalus:
         else:
             self.destination = None
             self.logger.warning('Wrong or unreachable destination')
+        #TODO : no, this must be implemented in job.__init__, and raise a TARGETError if wrong
 
     def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
