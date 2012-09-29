@@ -29,12 +29,6 @@ import shelve
 
     
     
-#TODO Check disk usage
-        ##TODO: run the command though ssh...
-        #if dest_type != 'SSH':
-            #if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
-                #self.logger.critical('Low disk space: ' + str(destination))
-                #return
 
 
 
@@ -87,6 +81,17 @@ class Job:
         self.job_logger.info('='*20 + str(self.now) + '='*20)
         
             
+        #Check if the source exists
+        try:
+            self.source_type = self._get_target_type(self.source)
+        except TARGETError:
+            pass #FIXME
+
+        #check if the destination exists
+        try:
+            self.dest_type = self._get_target_type(self.destination)
+        except TARGETError:
+            pass #FIXME
 
     def _set_lastbackup_time(self):
         """
@@ -192,9 +197,20 @@ class Job:
         tar.add(path, arcname=tail)
         tar.close()
 
+    def _check_disk_usage(self):
+        """
+        Check the disk usage
+        todo
+        """
+        if self.dest_type == 'DIR':
+            if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
+                self.logger.critical('Low disk space: ' + str(self.destination))
+                #TODO: do something
+        elif self.dest_type == 'SSH':
+            #TODO
+            pass
 
-
-    def _prepare_destination(self, dest_type): #FIXME dest_type (self ?)
+    def _prepare_destination(self): 
         """
         Prepare the destination to receive a backup:
         * create dirs
@@ -202,7 +218,7 @@ class Job:
         """
         #define dirs for the destination
         #create them if needed
-        if dest_type != 'SSH':
+        if self.dest_type != 'SSH':
             dest_dir_path = self.destination
             if self.incremental:
                 inc_dir = os.path.join(self.destination, str(self.name), 'INC')
@@ -249,7 +265,7 @@ class Job:
 
 
 
-    def _prepare_rsync_command(self, source_type, dest_type): #FIXME (self ?)
+    def _prepare_rsync_command(self): #FIXME (self ?)
         """
         Compose the rsync command
         """
@@ -264,7 +280,7 @@ class Job:
         command.append('--stats')
         command.append('--delete-excluded')
         # z: compress the flux if transfert thought a network
-        if (source_type or dest_type) == 'SSH':
+        if (self.source_type or self.dest_type) == 'SSH':
             command.append('-z')
 
         # backup-dir: keep increments
@@ -295,27 +311,15 @@ class Job:
         #If a signal is received, stop the process
         #FIXME if self.terminate: return
 
-        #Check if the source exists
-        try:
-            source_type = self._get_target_type(self.source)
-        except TARGETError:
-            return
 
-        #check if the destination exists
-        try:
-            dest_type = self._get_target_type(self.destination)
-        except TARGETError:
-            return
-
-
-        self._prepare_destination(dest_type)
+        self._prepare_destination()
 
         self.logger.debug('source path: %s' % self.source)
         self.logger.debug('backup path: %s' % self.backup_path)
         self.logger.debug('filter path: %s' % self.filter)
 
 
-        command = self._prepare_rsync_command(source_type, dest_type)
+        command = self._prepare_rsync_command()
 
         #If a signal is received, stop the process
         #if self.terminate: return
@@ -334,7 +338,7 @@ class Job:
 
         #Crompress Increments
         if self.incremental:
-            if dest_type != 'SSH':
+            if self.dest_type != 'SSH':
                 #compress if not empty
                 if os.listdir(self.inc_path) != []:
                     self._compress(self.inc_path)
@@ -407,6 +411,8 @@ class Vitalus:
     def set_log_level(self, level='INFO'):
         """
         Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)
+
+        :param level: Loger level
         """
         if level == 'INFO':
             self.logger.setLevel(logging.INFO)
@@ -489,14 +495,14 @@ class Vitalus:
 
     def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
-        name: backup label
-        source: backup from...
-        destination: backup to...
-        period: min time (hours) between backups
-        incremental: Activate incremental backup (Boolean)
-        duration: How many days incrementals are kept
-        keep: How many incrementals are (at least) kept
-        filter: filter, must be a tuple
+        :param name: backup label
+        :param source: backup from...
+        :param destination: backup to...
+        :param period: min time (hours) between backups
+        :param incremental: Activate incremental backup (Boolean)
+        :param duration: How many days incrementals are kept
+        :param keep: How many incrementals are (at least) kept
+        :param filter: filter, must be a tuple
         """
         if self.destination:
             period_in_seconds = period * 3600
