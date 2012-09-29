@@ -6,6 +6,13 @@
 Welcome to Vitalus' documentation!
 ===================================
 
+:Author: François Boulogne
+:Source code: `github.com project <https://github.com/sciunto/Vitalus>`_
+:Generated: |today|
+:License: GPL v3
+:Version: |release|
+
+
 Vitalus is a rsync wrapper. Rsync is a good atomic tool, but it needs to be wrapped to have a real backup solution. 
 Backup solutions are generally too basic or very difficult. This one fits my needs.
 
@@ -28,7 +35,7 @@ Philosophy
 * ...
 
 Functionalities
-==============
+===============
 This is just another way to express the philosophy :)
 * Manage different tasks
 * rsync from or to local disks
