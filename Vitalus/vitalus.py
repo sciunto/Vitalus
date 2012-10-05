@@ -162,6 +162,9 @@ class Vitalus:
         :param duration: How many days incrementals are kept
         :param keep: How many incrementals are (at least) kept
         :param filter: filter, must be a tuple
+
+        Note: filter syntax is the same of rsync. See "FILTER RULES" section
+        in the rsync man page.
         """
         if self.destination:
             period_in_seconds = period * 3600
