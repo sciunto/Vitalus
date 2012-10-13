@@ -152,6 +152,7 @@ class Vitalus:
             self.logger.warning('Wrong or unreachable destination')
         #TODO : no, this must be implemented in job.__init__, and raise a TARGETError if wrong
 
+    #TODO: filter -> *filter ?
     def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
         """ Add a new job 
         :param name: backup label
