@@ -291,7 +291,7 @@ class Job:
         if self.dest_type == 'DIR':
             #compress if not empty
             if os.listdir(self.inc_path) != []:
-                self.logger.debug('Zip the directory: ' + str(path))
+                self.logger.debug('Zip the directory: ' + str(self.inc_path))
                 utils.compress(self.inc_path)
             else:
                 self.logger.info('Empty increment')
