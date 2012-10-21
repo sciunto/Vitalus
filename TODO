@@ -3,3 +3,5 @@
 * Try to support the backup local->SSH
  - compress
  - disk space
+
+* Add version in log (starts)
