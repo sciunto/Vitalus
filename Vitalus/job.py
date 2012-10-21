@@ -31,7 +31,7 @@ import psutil
 import shelve
 import subprocess
 import shutil
-import utils
+import Vitalus.utils as utils
 import datetime
 import logging
 from contextlib import closing
@@ -199,6 +199,8 @@ class Job:
         """
         #define dirs for the destination
         #create them if needed
+        inc_path = None
+        inc_dir = None
         if self.dest_type != 'SSH':
             dest_dir_path = self.destination
             if self.incremental:
@@ -220,7 +222,7 @@ class Job:
             # Create dirs on the server
             login, dest_dir_path = destination.split(':')
 
-            if incremental:
+            if self.incremental:
                 inc_dir = os.path.join(dest_dir_path, str(self.name), 'INC')
                 inc_path = os.path.join(inc_dir, self.current_date)
                 #add ~/ if does not start with /

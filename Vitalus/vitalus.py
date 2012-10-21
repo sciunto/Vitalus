@@ -23,7 +23,7 @@ import signal
 import logging, logging.handlers
 import sys
 
-from job import Job, TARGETError
+from Vitalus.job import Job, TARGETError
 
 
 class Vitalus:
