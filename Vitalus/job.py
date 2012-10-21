@@ -342,6 +342,6 @@ class Job:
             self._rsync()
             #Compress
             if self.incremental:
-                self._compress_increments() #FIXME: bug... it removes non empty increments
+                self._compress_increments() 
             #Job done, update the time in the database
             self._set_lastbackup_time()
