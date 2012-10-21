@@ -34,6 +34,7 @@ import shutil
 import utils
 import datetime
 import logging
+from contextlib import closing
 
 class Job:
     """
@@ -123,9 +124,8 @@ class Job:
         Set the last backup (labeled name) time 
         """
         self.logger.debug('Set lastbackup time')
-        timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #FIXME with ?
-        timebase[self.name] = datetime.datetime.now() 
-        timebase.close()
+        with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
+            timebase[self.name] = datetime.datetime.now()
 
 
     def _check_need_backup(self):
@@ -137,9 +137,8 @@ class Job:
         """
         self.logger.debug('Check time between backups for ' + str(self.name))
         try:
-            timebase = shelve.open(os.path.join(self.backup_log_dir, 'time.db')) #FIXME with ?
-            last = timebase[self.name]
-            timebase.close()
+            with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
+                last = timebase[self.name] 
         except KeyError:
             #Not yet stored
             #Run the first backup
