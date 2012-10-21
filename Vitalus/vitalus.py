@@ -16,7 +16,7 @@
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
-import datetime
+#import datetime
 import os
 import psutil
 import signal
