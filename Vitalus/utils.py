@@ -17,6 +17,7 @@
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
 import tarfile
+import os.path
 
 def compress(path):
     """ Compress the directory """
