@@ -18,7 +18,7 @@
 
 import tarfile
 
-def compress(self, path):
+def compress(path):
     """ Compress the directory """
 
     head, tail = os.path.split(path)
