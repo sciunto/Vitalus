@@ -20,7 +20,7 @@ my_backup = vitalus.Vitalus(min_disk_space=0.5)
 my_backup.set_log_level('DEBUG')
 
 # This is my external disk
-my_backup.add_destination('/media/disk/backup')
+my_backup.set_destination('/media/disk/backup')
 
 # I add a job for 'my_documents'
 # I want to keep increments (default: False)

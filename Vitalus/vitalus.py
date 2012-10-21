@@ -142,16 +142,9 @@ class Vitalus:
         #nice
         p.nice = 15
 
-    def add_destination(self, destination):
-        
-        #TODO check if destination is valid
-        #Otherwise, self.destination = None
-        if True:
-            self.destination = destination
-        else:
-            self.destination = None
-            self.logger.warning('Wrong or unreachable destination')
-        #TODO : no, this must be implemented in job.__init__, and raise a TARGETError if wrong
+    def set_destination(self, destination): 
+        """ Set the destination"""        
+        self.destination = destination
 
     #TODO: filter -> *filter ?
     def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
@@ -175,7 +168,8 @@ class Vitalus:
                 self.jobs.append(Job(self.min_disk_space, self.backup_log_dir, name, source, 
                     self.destination, period, incremental, duration, keep, filter))
             except TARGETError:
-                #TODO : message
+                #FIXME: message
+                self.logger.warning('Wrong or unreachable destination')
                 pass
 
 
@@ -192,7 +186,7 @@ if __name__ == '__main__':
     #An example...
     b = Vitalus(min_disk_space=0.1)
     b.set_log_level('DEBUG')
-    b.add_destination('/tmp/sauvegarde')
+    b.set_destination('/tmp/sauvegarde')
     #TODO Check that job names are uniq
     b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, incremental=True)
     b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, incremental=True)
