@@ -1,9 +1,0 @@
-How to release
-==============
-
-* Build the doc
-* Update the file info.py
-* Update CHANGELOG
-* Create a tarball
-    git archive master | bzip2 > vitalus-x.y.tar.bz2
-
