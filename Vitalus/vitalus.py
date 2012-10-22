@@ -24,7 +24,7 @@ import logging, logging.handlers
 import sys
 
 from Vitalus.job import Job, TARGETError
-
+import Vitalus.info as info
 
 class Vitalus:
     """
@@ -175,7 +175,7 @@ class Vitalus:
 
     def run(self):
         """ Run all jobs """
-        self.logger.info('The script starts...')
+        self.logger.info('Vitalus %s starts...' % info.VERSION)
         self._create_pidfile()
         for job in self.jobs:
             job.run()
