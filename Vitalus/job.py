@@ -100,9 +100,9 @@ class Job:
             return 'SSH'
         else:
             if not os.path.exists(target):
-                self.logger.warn("target %s: does not exist", target)
+                self.logger.warn("target %s does not exist", target)
                 self.logger.info('Aborting...')
-                raise TARGETError("Target %s: does not exist", target)
+                raise TARGETError("Target %s does not exist", target)
             else:
                 self.logger.debug('the target looks like DIR')
                 return 'DIR'
@@ -147,8 +147,8 @@ class Job:
             return True
        
         #Calculate the difference
-        self.logger.debug("now= %s seconds", datetime.datetime.now())
-        self.logger.debug("last= %s seconds", last)
+        self.logger.debug("now= %s", datetime.datetime.now())
+        self.logger.debug("last= %s", last)
         diff = datetime.datetime.now() - last
         difftime = diff.seconds + diff.days * 3600*24
         self.logger.debug("diff= %s seconds", difftime)
@@ -281,9 +281,9 @@ class Job:
             # rsync -av a b --filter='- *.txt' --filter='- *dir'
             for element in self.filter:
                 command.append('--filter=' + element)
-                self.logger.debug('add filter: ' + element)
+                self.logger.debug("add filter: %s", element)
                 
-        self.logger.debug('rsync command: %s' % command)
+        self.logger.debug("rsync command: %s", command)
         return command
 
     def _compress_increments(self):
@@ -293,7 +293,7 @@ class Job:
         if self.dest_type == 'DIR':
             #compress if not empty
             if os.listdir(self.inc_path) != []:
-                self.logger.debug('Zip the directory: ' + str(self.inc_path))
+                self.logger.debug("Zip the directory: %s", self.inc_path)
                 utils.compress(self.inc_path)
             else:
                 self.logger.info('Empty increment')
@@ -335,12 +335,12 @@ class Job:
         """
         if self._check_need_backup():
             print(self.name)
-            self.logger.info('backup %s' % self.name)
+            self.logger.info("backup %s", self.name)
             #Prepare the destination
             self._prepare_destination()
-            self.logger.debug('source path: %s' % self.source)
-            self.logger.debug('backup path: %s' % self.backup_path)
-            self.logger.debug('filter path: %s' % self.filter)
+            self.logger.debug("source path %s", self.source)
+            self.logger.debug("backup path %s", self.backup_path)
+            self.logger.debug("filter path %s", self.filter)
             #Run rsync
             self._rsync()
             #Compress
