@@ -65,6 +65,7 @@ class Vitalus:
 
         #timebase
         
+        self.logger.info('Vitalus %s starts...' % info.VERSION)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
     def set_log_level(self, level='INFO'):
@@ -75,26 +76,26 @@ class Vitalus:
         """
         if level == 'INFO':
             self.logger.setLevel(logging.INFO)
-            self.logger.info('Set logger level: ' + level)
+            self.logger.info('Set logger level: %s', level)
         elif level == 'CRITICAL':
             self.logger.setLevel(logging.CRITICAL) 
-            self.logger.info('Set logger level: ' + level)
+            self.logger.info('Set logger level: %s', level)
         elif level == 'DEBUG':
             self.logger.setLevel(logging.DEBUG)   
-            self.logger.info('Set logger level: ' + level)
+            self.logger.info('Set logger level: %s', level)
         elif level == 'ERROR':
             self.logger.setLevel(logging.ERROR)   
-            self.logger.info('Set logger level: ' + level)
+            self.logger.info('Set logger level: %s', level)
         elif level == 'FATAL':
             self.logger.setLevel(logging.FATAL)
-            self.logger.info('Set logger level: ' + level)
+            self.logger.info('Set logger level: %s', level)
         else:
             self.logger.ERROR('Unknown level')
             
 
 
     def _signal_handler(self, signal, frame):
-        self.logger.warn('Signal received %s' % signal)
+        self.logger.warn('Signal received %s', signal)
         self._set_process_high_priority()
         self.terminate = True
 
@@ -144,6 +145,7 @@ class Vitalus:
 
     def set_destination(self, destination): 
         """ Set the destination"""        
+        self.logger.debug("Set destination: %s", destination)
         self.destination = destination
 
     #TODO: filter -> *filter ?
@@ -163,7 +165,7 @@ class Vitalus:
         """
         if self.destination:
             period_in_seconds = period * 3600
-            self.logger.debug('add job+ ' + 'name' + str(name)) 
+            self.logger.debug("add job: %s", name) 
             try: 
                 self.jobs.append(Job(self.min_disk_space, self.backup_log_dir, name, source, 
                     self.destination, period, incremental, duration, keep, filter))
@@ -175,7 +177,6 @@ class Vitalus:
 
     def run(self):
         """ Run all jobs """
-        self.logger.info('Vitalus %s starts...' % info.VERSION)
         self._create_pidfile()
         for job in self.jobs:
             job.run()
