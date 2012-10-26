@@ -100,10 +100,11 @@ class Job:
             return 'SSH'
         else:
             if not os.path.exists(target):
-                self.logger.warn('target %s: does not exist' % target)
+                self.logger.warn("target %s: does not exist", target)
                 self.logger.info('Aborting...')
-                raise TARGETError('Target %s: does not exist' % target)
+                raise TARGETError("Target %s: does not exist", target)
             else:
+                self.logger.debug('the target looks like DIR')
                 return 'DIR'
 
     def _check_disk_usage(self):
@@ -113,7 +114,7 @@ class Job:
         """
         if self.dest_type == 'DIR':
             if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
-                self.logger.critical('Low disk space: ' + str(self.destination))
+                self.logger.critical("Low disk space: %s", self.destination)
                 raise TARGETError('Low disk space on %s' % self.destination)
         elif self.dest_type == 'SSH':
             #TODO
@@ -135,28 +136,28 @@ class Job:
 
         :returns: bool
         """
-        self.logger.debug('Check time between backups for ' + str(self.name))
+        self.logger.debug("Check time between backups for %s", self.name)
         try:
             with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
                 last = timebase[self.name] 
         except KeyError:
             #Not yet stored
             #Run the first backup
-            self.logger.debug(str(self.name) + ': first backup')
+            self.logger.debug("%s: first backup", self.name)
             return True
        
         #Calculate the difference
-        self.logger.debug('now=' + str(datetime.datetime.now()) + ' seconds')
-        self.logger.debug('last=' + str(last) + ' seconds')
+        self.logger.debug("now= %s seconds", datetime.datetime.now())
+        self.logger.debug("last= %s seconds", last)
         diff = datetime.datetime.now() - last
         difftime = diff.seconds + diff.days * 3600*24
-        self.logger.debug('diff=' + str(difftime) + ' seconds')
-        self.logger.debug('period=' + str(self.period) + ' seconds')
+        self.logger.debug("diff= %s seconds", difftime)
+        self.logger.debug("period= %s seconds", self.period)
         if difftime > self.period:
-            self.logger.debug(str(self.name) + ' need backup')
+            self.logger.debug("%s need backup", self.name)
             return True
         else:
-            self.logger.debug(str(self.name) + ' does not need backup')
+            self.logger.debug("%s does not need backup", self.name)
             return False
 
     def _delete_old_files(self, path, days=10, keep=10):
@@ -180,14 +181,14 @@ class Job:
             #Are they too old?
             file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
             if datetime.datetime.now() - file_date - datetime.timedelta(days=days) < datetime.timedelta():
-                self.logger.info('remove %s' % filepath[1])
+                self.logger.info("remove %s", filepath[1])
                 try:
                     os.remove(filepath[1])
                 except OSError:
-                    self.logger.warn('Impossible to remove %s' % filepath[1])
+                    self.logger.warn("Impossible to remove %s", filepath[1])
 
             else:
-                self.logger.debug('keep %s' % filepath[1])
+                self.logger.debug("keep %s", filepath[1])
                 return
 
 
@@ -206,7 +207,7 @@ class Job:
             if self.incremental:
                 inc_dir = os.path.join(self.destination, str(self.name), 'INC')
                 inc_path = os.path.join(inc_dir, str(self.current_date))
-                self.logger.debug('increment path: %s' % inc_path)
+                self.logger.debug("increment path: %s", inc_path)
 
             backup = os.path.join(dest_dir_path, str(self.name), 'BAK')
 
