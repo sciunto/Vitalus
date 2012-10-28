@@ -96,15 +96,15 @@ class Job:
         """
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
-            self.logger.debug('the target looks like SSH')
+            self.logger.debug('The target looks like SSH')
             return 'SSH'
         else:
             if not os.path.exists(target):
-                self.logger.warn("target %s does not exist", target)
+                self.logger.warn("The target %s does not exist", target)
                 self.logger.info('Aborting...')
                 raise TARGETError("Target %s does not exist", target)
             else:
-                self.logger.debug('the target looks like DIR')
+                self.logger.debug('The target looks like DIR')
                 return 'DIR'
 
     def _check_disk_usage(self):
@@ -137,14 +137,14 @@ class Job:
         :returns: bool
         """
         self.logger.debug("Check time between backups for %s", self.name)
-        try:
-            with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
+        with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
+            try:
                 last = timebase[self.name] 
-        except KeyError:
-            #Not yet stored
-            #Run the first backup
-            self.logger.debug("%s: first backup", self.name)
-            return True
+            except KeyError:
+                #Not yet stored
+                #Run the first backup
+                self.logger.debug("%s: first backup", self.name)
+                return True
        
         #Calculate the difference
         self.logger.debug("now= %s", datetime.datetime.now())
@@ -335,7 +335,7 @@ class Job:
         """
         if self._check_need_backup():
             print(self.name)
-            self.logger.info("backup %s", self.name)
+            self.logger.info("Backup %s", self.name)
             #Prepare the destination
             self._prepare_destination()
             self.logger.debug("source path %s", self.source)
