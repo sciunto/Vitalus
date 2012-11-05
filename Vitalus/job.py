@@ -150,7 +150,7 @@ class Job:
         self.logger.debug("now= %s", datetime.datetime.now())
         self.logger.debug("last= %s", last)
         diff = datetime.datetime.now() - last
-        difftime = diff.seconds + diff.days * 3600*24
+        difftime = diff.total_seconds()
         self.logger.debug("diff= %s seconds", difftime)
         self.logger.debug("period= %s seconds", self.period)
         if difftime > self.period:
