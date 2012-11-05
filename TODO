@@ -1,3 +1,6 @@
+
+* In job, take datetime as parameter
+
 * Improve logging messages
 * Send an email via logging when a job has not been performed for a while.
 * Try to support the backup local->SSH
