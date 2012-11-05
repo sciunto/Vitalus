@@ -45,6 +45,7 @@ class Job:
     :param name: Job name
     :param source: Source path
     :param destination: Destination path
+    :param period: Min duration between two backups 
     :param incremental: Activate incremental backup (Boolean)
     :param duration: How many days incrementals are kept
     :param keep: How many incrementals are (at least) kept
