@@ -161,7 +161,7 @@ class Job:
             self.logger.debug("%s does not need backup", self.name)
             return False
 
-    def _delete_old_files(self, path, days=10, keep=10): #FIXME not archive anymore
+    def _delete_old_files(self, path, days=10, keep=10): 
         """
         Delete old archives in a path
 
@@ -169,10 +169,12 @@ class Job:
         :param days: delete files older than this value
         :param keep: keep at least this amount of archives
         """
+        #TODO : review logs
+
         ####if self.terminate: return
-        filenames = [os.path.join(path, el) for el in os.listdir(path) if os.path.isfile(os.path.join(path, el))]
+        filenames = [os.path.join(path, el) for el in os.listdir(path) ]
         #delete first the older one
-        filenames.sort()
+        filenames.sort() #newer first
         nb_archives = len(filenames)
         for filepath in enumerate(filenames):
             #keep a sufficient number of archives
@@ -181,12 +183,13 @@ class Job:
                 return
             #Are they too old?
             file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
-            if datetime.datetime.now() - file_date - datetime.timedelta(days=days) < datetime.timedelta():
+            if datetime.datetime.now() - file_date > datetime.timedelta(days=days): 
                 self.logger.info("remove %s", filepath[1])
-                try:
-                    os.remove(filepath[1])
-                except OSError:
-                    self.logger.warn("Impossible to remove %s", filepath[1])
+                shutil.rmtree(filepath[1]) #FIXME: raise something?
+                #try:
+                #    os.remove(filepath[1])
+                #except OSError:
+                #    self.logger.warn("Impossible to remove %s", filepath[1])
 
             else:
                 self.logger.debug("keep %s", filepath[1])
@@ -449,7 +452,9 @@ class Job:
             #Run rsync
             self._rsync()
             #Compress
-            #if self.incremental:
-            #    self._compress_increments() 
             #Job done, update the time in the database
             self._set_lastbackup_time()
+        #Remove old increments, local only
+        if self.dest_type == 'DIR' and self.incremental:
+            dest = os.path.join(self.destination, self.name)
+            self._delete_old_files(dest, days=self.duration, keep=self.keep)
