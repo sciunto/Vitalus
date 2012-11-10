@@ -46,21 +46,21 @@ class Job:
     :param source: Source path
     :param destination: Destination path
     :param period: Min duration between two backups 
-    :param incremental: Activate incremental backup (Boolean)
-    :param duration: How many days incrementals are kept
-    :param keep: How many incrementals are (at least) kept
+    :param snapshot: Activate snapshots (Boolean)
+    :param duration: How many days snapshots are kept
+    :param keep: How many snapshots are (at least) kept
     :param filter: Rsync filters
     """
     #TODO signal...
 
-    def __init__(self, min_disk_space, log_dir, name, source, destination, period, incremental, duration, keep, filter):
+    def __init__(self, min_disk_space, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
        
         self.min_disk_space = min_disk_space
         self.name = name
         self.source = source
         self.destination = destination
         self.period = period
-        self.incremental = incremental
+        self.snapshot = snapshot
         self.duration = duration
         self.keep = keep
         self.filter = filter
@@ -223,7 +223,7 @@ class Job:
         inc_dir = None
         if self.dest_type != 'SSH':
             dest_dir_path = self.destination
-            if self.incremental:
+            if self.snapshot:
                 inc_dir = os.path.join(self.destination, str(self.name), 'INC')
                 inc_path = os.path.join(inc_dir, str(self.current_date))
                 self.logger.debug("increment path: %s", inc_path)
@@ -232,7 +232,7 @@ class Job:
 
             #Create dirs (locally)
             try:
-                if self.incremental:
+                if self.snapshot:
                     os.makedirs(inc_path)
                 os.makedirs(backup)
             except OSError:
@@ -242,7 +242,7 @@ class Job:
             # Create dirs on the server
             login, dest_dir_path = destination.split(':')
 
-            if self.incremental:
+            if self.snapshot:
                 inc_dir = os.path.join(dest_dir_path, str(self.name), 'INC')
                 inc_path = os.path.join(inc_dir, self.current_date)
                 #add ~/ if does not start with /
@@ -276,7 +276,7 @@ class Job:
         self.current_backup_path = None
 
         if self.dest_type != 'SSH':
-            if self.incremental:
+            if self.snapshot:
                 last_date = self._get_last_backup(os.path.join(self.destination, self.name))
                 if last_date is None:
                     #It means that this is the first backup.
@@ -298,8 +298,8 @@ class Job:
             #add ~/ if does not start with /
             if not dest_dir_path.startswith('/'):
                 dest_dir_path = os.path.join('~', dest_dir_path)
-            if self.incremental:
-                #For the moment, we do not support increments via SSH
+            if self.snapshot:
+                #For the moment, we do not support snapshots via SSH
                 pass
             else:
                 self.current_backup_path = os.path.join(dest_dir_path, self.name)
@@ -335,8 +335,8 @@ class Job:
         if (self.source_type or self.dest_type) == 'SSH':
             command.append('-z')
 
-        # backup-dir: keep increments
-        if self.incremental:
+        # backup-dir: keep snapshots
+        if self.snapshot:
             command.append('--backup')
             command.append('--backup-dir=' + self.inc_path)
 
@@ -375,9 +375,9 @@ class Job:
         # z: compress the flux if transfert thought a network
         if (self.source_type or self.dest_type) == 'SSH':
             command.append('-z')
-        else: #FIXME for the moment, no increment though SSH !
-            # link-dest: keep increments with hard-links
-            if self.incremental and self.previous_backup_path is not None:
+        else: #FIXME for the moment, no snapshots though SSH !
+            # link-dest: write snapshots with hard-links
+            if self.snapshot and self.previous_backup_path is not None:
                 command.append('--link-dest=' + self.previous_backup_path)
 
         # Add source and destination
@@ -454,7 +454,7 @@ class Job:
             #Compress
             #Job done, update the time in the database
             self._set_lastbackup_time()
-        #Remove old increments, local only
-        if self.dest_type == 'DIR' and self.incremental:
+        #Remove old snapshots, local only
+        if self.dest_type == 'DIR' and self.snapshot:
             dest = os.path.join(self.destination, self.name)
             self._delete_old_files(dest, days=self.duration, keep=self.keep)
