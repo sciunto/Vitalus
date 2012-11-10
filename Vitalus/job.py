@@ -192,6 +192,20 @@ class Job:
                 self.logger.debug("keep %s", filepath[1])
                 return
 
+    def _get_last_backup(self, path):
+        """
+        Get the last backup in path
+        Return None if not available
+
+        :param path: path to look at
+        """
+        if not os.path.isdir(path):
+            return None
+        filenames = [os.path.join(path, el) for el in os.listdir(path)]
+        filenames.sort()
+        if filenames == []:
+            return None
+        return filenames[-1] 
 
     def _prepare_destination(self): 
         """
@@ -248,6 +262,40 @@ class Job:
         self.inc_path = inc_path
         self.inc_dir = inc_dir
 
+    def _prepare_destination2(self): 
+        """
+        Prepare the destination to receive a backup:
+        * create dirs
+        * Initialize paths
+        """
+        self.previous_backup_path = None
+        self.current_backup_path = None
+
+        if self.dest_type != 'SSH':
+            if self.incremental:
+                last_date = self._get_last_backup(os.path.join(self.destination, self.name))
+                if last_date is None:
+                    #It means that this is the first backup.
+                    self.previous_backup_path = None
+                else:
+                    self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
+                self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
+                os.makedirs(self.current_backup_path) #This one does not exist!
+            else:
+                self.current_backup_path = os.path.join(self.destination, self.name)
+                try:
+                    os.makedirs(self.current_backup_path) #This one may exist!
+                except OSError:
+                    #they could already exist
+                    pass
+        else:
+            # Create dirs on the server
+            login, dest_dir_path = destination.split(':')
+            pass
+            #TODO
+
+        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
+        self.logger.debug("Current backup path: %s", self.current_backup_path)
 
 
     def _prepare_rsync_command(self): 
@@ -289,6 +337,46 @@ class Job:
         self.logger.debug("rsync command: %s", command)
         return command
 
+    def _prepare_rsync_command2(self): 
+        """
+        Compose the rsync command
+        """
+        command = list()
+        command.append('/usr/bin/rsync')
+
+        # a: archive (recursivity, preserve rights and times...)
+        # v: verbose
+        # h: human readable
+        # stat: file rate stats
+        # delete: delete extraneous files from dest dirs
+        # delete-excluded: also delete excluded files from dest dirs
+        command.append('-avh') 
+        command.append('--stats')
+        command.append('--delete')
+        command.append('--delete-excluded')
+
+        # z: compress the flux if transfert thought a network
+        if (self.source_type or self.dest_type) == 'SSH':
+            command.append('-z')
+
+        # backup-dir: keep increments
+        if self.incremental and self.previous_backup_path is not None:
+            command.append('--link-dest=' + self.previous_backup_path)
+
+        # Add source and destination
+        command.append(self.source)
+        command.append(self.current_backup_path)
+
+        if self.filter:
+            # Add filters, the resulting command must look like
+            # rsync -av a b --filter='- *.txt' --filter='- *dir'
+            for element in self.filter:
+                command.append('--filter=' + element)
+                self.logger.debug("add filter: %s", element)
+                
+        self.logger.debug("rsync command: %s", command)
+        return command
+
     def _compress_increments(self):
         """
         Compress increments and delete old ones
@@ -315,7 +403,7 @@ class Job:
         """ 
         Run rsync to do the task.
         """
-        command = self._prepare_rsync_command()
+        command = self._prepare_rsync_command2()
 
         #If a signal is received, stop the process
         #if self.terminate: return
@@ -340,14 +428,14 @@ class Job:
             print(self.name)
             self.logger.info("Backup %s", self.name)
             #Prepare the destination
-            self._prepare_destination()
-            self.logger.debug("source path %s", self.source)
-            self.logger.debug("backup path %s", self.backup_path)
+            self._prepare_destination2()
+            #self.logger.debug("source path %s", self.source) #FIXME
+            #self.logger.debug("backup path %s", self.backup_path)
             self.logger.debug("filter path %s", self.filter)
             #Run rsync
             self._rsync()
             #Compress
-            if self.incremental:
-                self._compress_increments() 
+            #if self.incremental:
+            #    self._compress_increments() 
             #Job done, update the time in the database
             self._set_lastbackup_time()
