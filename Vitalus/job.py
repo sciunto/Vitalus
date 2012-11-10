@@ -31,7 +31,7 @@ import psutil
 import shelve
 import subprocess
 import shutil
-import Vitalus.utils as utils
+#import Vitalus.utils as utils
 import datetime
 import logging
 from contextlib import closing
@@ -161,7 +161,7 @@ class Job:
             self.logger.debug("%s does not need backup", self.name)
             return False
 
-    def _delete_old_files(self, path, days=10, keep=10):
+    def _delete_old_files(self, path, days=10, keep=10): #FIXME not archive anymore
         """
         Delete old archives in a path
 
@@ -199,6 +199,7 @@ class Job:
 
         :param path: path to look at
         """
+        #TODO : SSH look via ssh
         if not os.path.isdir(path):
             return None
         filenames = [os.path.join(path, el) for el in os.listdir(path)]
@@ -291,9 +292,22 @@ class Job:
         else:
             # Create dirs on the server
             login, dest_dir_path = destination.split(':')
-            pass
-            #TODO
+            #add ~/ if does not start with /
+            if not dest_dir_path.startswith('/'):
+                dest_dir_path = os.path.join('~', dest_dir_path)
+            if self.incremental:
+                #For the moment, we do not support increments via SSH
+                pass
+            else:
+                self.current_backup_path = os.path.join(dest_dir_path, self.name)
 
+            #Create dirs
+            command = ['ssh', '-t', login, 'mkdir', '-p', self.current_backup_path]
+            self.logger.debug('SSH mkdir command: ' + str(command))
+            process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            self.logger.debug('SSH mkdir result: ' + stdout.decode())
+                
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
 
@@ -358,10 +372,10 @@ class Job:
         # z: compress the flux if transfert thought a network
         if (self.source_type or self.dest_type) == 'SSH':
             command.append('-z')
-
-        # backup-dir: keep increments
-        if self.incremental and self.previous_backup_path is not None:
-            command.append('--link-dest=' + self.previous_backup_path)
+        else: #FIXME for the moment, no increment though SSH !
+            # link-dest: keep increments with hard-links
+            if self.incremental and self.previous_backup_path is not None:
+                command.append('--link-dest=' + self.previous_backup_path)
 
         # Add source and destination
         command.append(self.source)
@@ -377,27 +391,27 @@ class Job:
         self.logger.debug("rsync command: %s", command)
         return command
 
-    def _compress_increments(self):
-        """
-        Compress increments and delete old ones
-        """
-        if self.dest_type == 'DIR':
-            #compress if not empty
-            if os.listdir(self.inc_path) != []:
-                self.logger.debug("Zip the directory: %s", self.inc_path)
-                utils.compress(self.inc_path)
-            else:
-                self.logger.info('Empty increment')
-                pass
-            #delete the dir (we keep only non-empty tarballs
-            shutil.rmtree(self.inc_path)
-
-            #MrProper: remove old tarballs
-            self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
-        elif self.dest_type == 'SSH':
-            pass
-            #TODO ! compress dir though ssh
-            #TODO Remove old dirs though ssh
+#    def _compress_increments(self):
+#        """
+#        Compress increments and delete old ones
+#        """
+#        if self.dest_type == 'DIR':
+#            #compress if not empty
+#            if os.listdir(self.inc_path) != []:
+#                self.logger.debug("Zip the directory: %s", self.inc_path)
+#                utils.compress(self.inc_path)
+#            else:
+#                self.logger.info('Empty increment')
+#                pass
+#            #delete the dir (we keep only non-empty tarballs
+#            shutil.rmtree(self.inc_path)
+#
+#            #MrProper: remove old tarballs
+#            self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
+#        elif self.dest_type == 'SSH':
+#            pass
+#            #TODO ! compress dir though ssh
+#            #TODO Remove old dirs though ssh
 
     def _rsync(self):
         """ 
