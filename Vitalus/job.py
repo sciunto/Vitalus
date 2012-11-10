@@ -260,9 +260,11 @@ class Job:
         # v: verbose
         # h: human readable
         # stat: file rate stats
-        # delete-filterd: if a file is deleted in source, delete it in backup
+        # delete: delete extraneous files from dest dirs
+        # delete-excluded: also delete excluded files from dest dirs
         command.append('-avh') 
         command.append('--stats')
+        command.append('--delete')
         command.append('--delete-excluded')
         # z: compress the flux if transfert thought a network
         if (self.source_type or self.dest_type) == 'SSH':
