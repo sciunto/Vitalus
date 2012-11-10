@@ -1,5 +1,5 @@
 ==== Version ? ====
-
+* use hard links instead of increments
 
 ==== Version 0.2.5 ====
 * Code refactoring
