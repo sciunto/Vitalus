@@ -103,7 +103,7 @@ class Job:
             if not os.path.exists(target):
                 self.logger.warn("The target %s does not exist", target)
                 self.logger.info('Aborting...')
-                raise TARGETError("Target %s does not exist", target)
+                raise TARGETError("Target %s does not exist" % target)
             else:
                 self.logger.debug('The target looks like DIR')
                 return 'DIR'
