@@ -363,3 +363,13 @@ class Job:
         if self.dest_type == 'DIR' and self.snapshot:
             dest = os.path.join(self.destination, self.name)
             self._delete_old_files(dest, days=self.duration, keep=self.keep)
+            #Symlink
+            last = os.path.join(self.destination , self.name, 'last')
+            if os.path.islink(last):
+                os.remove(last)
+            try:
+                os.symlink(self.current_backup_path, last)
+            except FileExistsError:
+                self.logger.warn('The symlink %s could not be created because a file exists', last)
+
+

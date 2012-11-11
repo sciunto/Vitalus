@@ -13,7 +13,6 @@ Snapshots
 * When the script does not exit gracefully, remove bad snapshots
 * Implement different snapshots retentions (lin, log...)
 * Do not keep a number of archives, but a ratio size of snapshots/size last snapshot
-* Create symlinks to the last backups
 
 SSH support
 -----------
@@ -26,3 +25,10 @@ Tools
 Some tools can be developped 
 * to track the evolution of a specific file though snapshots...
 * restore a snapshot
+
+
+
+
+DONE
+----
+* Create symlinks to the last backups
