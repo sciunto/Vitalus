@@ -352,8 +352,8 @@ class Job:
             self.logger.info("Backup %s", self.name)
             #Prepare the destination
             self._prepare_destination2()
-            #self.logger.debug("source path %s", self.source) #FIXME
-            #self.logger.debug("backup path %s", self.backup_path)
+            self.logger.debug("source path %s", self.source) 
+            self.logger.debug("destination path %s", self.destination) 
             self.logger.debug("filter path %s", self.filter)
             #Run rsync
             self._rsync()
