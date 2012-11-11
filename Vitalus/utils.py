@@ -18,6 +18,7 @@
 
 import tarfile
 import os.path
+import logging
 
 logger = logging.getLogger('Vitalus.utils')
 
