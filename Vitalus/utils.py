@@ -19,6 +19,8 @@
 import tarfile
 import os.path
 
+logger = logging.getLogger('Vitalus.utils')
+
 def compress(path):
     """ Compress the directory """
 
@@ -39,5 +41,5 @@ def get_folder_size(path):
             try:
                 size += os.path.getsize(os.path.join(item[0], file))
             except:
-                print("error with file:  " + os.path.join(item[0], file))
+                logger.warn("error with file: %s", os.path.join(item[0], file))
     return size
