@@ -8,9 +8,8 @@
 import Vitalus.vitalus as vitalus
 
 # Create an instance
-# min_disk_space correspond to the minimal disk space (destination)
 # if it is lower, the backup is aborted and a critical message written in log
-my_backup = vitalus.Vitalus(min_disk_space=0.5)
+my_backup = vitalus.Vitalus()
 
 
 # When I want to check my script, I set the log level to DEBUG.

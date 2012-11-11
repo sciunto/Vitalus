@@ -31,7 +31,8 @@ import psutil
 import shelve
 import subprocess
 import shutil
-#import Vitalus.utils as utils
+import Vitalus.utils as utils
+import utils
 import datetime
 import logging
 from contextlib import closing
@@ -53,9 +54,8 @@ class Job:
     """
     #TODO signal...
 
-    def __init__(self, min_disk_space, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
+    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
        
-        self.min_disk_space = min_disk_space
         self.name = name
         self.source = source
         self.destination = destination
@@ -114,7 +114,7 @@ class Job:
         :raises TARGETError: if low disk space
         """
         if self.dest_type == 'DIR':
-            if psutil.disk_usage(self.destination)[2] < self.min_disk_space:
+            if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source):
                 self.logger.critical("Low disk space: %s", self.destination)
                 raise TARGETError('Low disk space on %s' % self.destination)
         elif self.dest_type == 'SSH':
