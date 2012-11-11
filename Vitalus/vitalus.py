@@ -29,8 +29,10 @@ import Vitalus.info as info
 class Vitalus:
     """
     Class for backups
+
+    :params log_path: directory for logs and database
     """
-    def __init__(self):
+    def __init__(self, log_path='~/.backup'):
         #Variables
 
         self.jobs = []
@@ -39,7 +41,7 @@ class Vitalus:
         self.destination = None
 
         #Logging
-        self.backup_log_dir = os.path.expanduser('~/.backup/')
+        self.backup_log_dir = os.path.expanduser(log_path)
         if not os.path.isdir(self.backup_log_dir):
             os.makedirs(self.backup_log_dir)
         self.pidfilename = os.path.join(self.backup_log_dir, 'backup.pid')
