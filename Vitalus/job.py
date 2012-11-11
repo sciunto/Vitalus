@@ -211,61 +211,6 @@ class Job:
             return None
         return filenames[-1] 
 
-    def _prepare_destination(self): 
-        """
-        Prepare the destination to receive a backup:
-        * create dirs
-        * Initialize paths
-        """
-        #define dirs for the destination
-        #create them if needed
-        inc_path = None
-        inc_dir = None
-        if self.dest_type != 'SSH':
-            dest_dir_path = self.destination
-            if self.snapshot:
-                inc_dir = os.path.join(self.destination, str(self.name), 'INC')
-                inc_path = os.path.join(inc_dir, str(self.current_date))
-                self.logger.debug("increment path: %s", inc_path)
-
-            backup = os.path.join(dest_dir_path, str(self.name), 'BAK')
-
-            #Create dirs (locally)
-            try:
-                if self.snapshot:
-                    os.makedirs(inc_path)
-                os.makedirs(backup)
-            except OSError:
-                #they could already exist
-                pass
-        else:
-            # Create dirs on the server
-            login, dest_dir_path = destination.split(':')
-
-            if self.snapshot:
-                inc_dir = os.path.join(dest_dir_path, str(self.name), 'INC')
-                inc_path = os.path.join(inc_dir, self.current_date)
-                #add ~/ if does not start with /
-                if not inc_path.startswith('/'):
-                    inc_path = os.path.join('~', inc_path)
-                self.logger.debug('increment path: %s' % inc_path)
-
-                process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', inc_path], bufsize=4096, stdout=subprocess.PIPE)
-                stdout, stderr = process.communicate()
-                self.logger.debug('SSH mkdir INC: ' + stdout.decode())
-                #self.logger.warning('SSH mkdir INC: ' + stderr.decode())
-
-            back_path = os.path.join(dest_dir_path, str(name), 'BAK')
-            process = subprocess.Popen(['ssh', '-t', login, 'mkdir', '-p', back_path], bufsize=4096, stdout=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            self.logger.debug('SSH mkdir BAK: ' + stdout.decode())
-            #self.logger.warning('SSH mkdir BAK: ' + stderr.decode())
-            backup = login + ':' + back_path
-
-        self.backup_path = backup
-        self.inc_path = inc_path
-        self.inc_dir = inc_dir
-
     def _prepare_destination2(self): 
         """
         Prepare the destination to receive a backup:
@@ -314,45 +259,6 @@ class Job:
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
 
-
-    def _prepare_rsync_command(self): 
-        """
-        Compose the rsync command
-        """
-        command = list()
-        command.append('/usr/bin/rsync')
-        # a: archive (recursivity, preserve rights and times...)
-        # v: verbose
-        # h: human readable
-        # stat: file rate stats
-        # delete: delete extraneous files from dest dirs
-        # delete-excluded: also delete excluded files from dest dirs
-        command.append('-avh') 
-        command.append('--stats')
-        command.append('--delete')
-        command.append('--delete-excluded')
-        # z: compress the flux if transfert thought a network
-        if (self.source_type or self.dest_type) == 'SSH':
-            command.append('-z')
-
-        # backup-dir: keep snapshots
-        if self.snapshot:
-            command.append('--backup')
-            command.append('--backup-dir=' + self.inc_path)
-
-        # Add source and destination
-        command.append(self.source)
-        command.append(self.backup_path)
-
-        if self.filter:
-            # Add filters, the resulting command must look like
-            # rsync -av a b --filter='- *.txt' --filter='- *dir'
-            for element in self.filter:
-                command.append('--filter=' + element)
-                self.logger.debug("add filter: %s", element)
-                
-        self.logger.debug("rsync command: %s", command)
-        return command
 
     def _prepare_rsync_command2(self): 
         """
