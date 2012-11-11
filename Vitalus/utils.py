@@ -27,3 +27,17 @@ def compress(path):
     tar = tarfile.open(archive, "w:bz2")
     tar.add(path, arcname=tail)
     tar.close()
+
+
+def get_folder_size(path):
+    """
+    Get the size of the content in path
+    """
+    size = 0
+    for item in os.walk(path):
+        for file in item[2]:
+            try:
+                size += os.path.getsize(os.path.join(item[0], file))
+            except:
+                print("error with file:  " + os.path.join(item[0], file))
+    return size
