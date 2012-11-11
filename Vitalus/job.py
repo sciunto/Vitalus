@@ -32,7 +32,6 @@ import shelve
 import subprocess
 import shutil
 import Vitalus.utils as utils
-import utils
 import datetime
 import logging
 from contextlib import closing

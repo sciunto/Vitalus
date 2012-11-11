@@ -30,15 +30,11 @@ class Vitalus:
     """
     Class for backups
     """
-    def __init__(self, min_disk_space=1):
-        """
-        min_disk_space: minimal disk space (destination) [Go]
-        """
+    def __init__(self):
         #Variables
 
         self.jobs = []
         self.terminate = False
-        self.min_disk_space = min_disk_space * 10**9
 
         self.destination = None
 
@@ -170,7 +166,7 @@ class Vitalus:
             period_in_seconds = period * 3600
             self.logger.debug("add job: %s", name) 
             try: 
-                self.jobs.append(Job(self.min_disk_space, self.backup_log_dir, name, source, 
+                self.jobs.append(Job(self.backup_log_dir, name, source, 
                     self.destination, period, history, duration, keep, filter))
             except TARGETError:
                 #FIXME: message
@@ -188,7 +184,7 @@ class Vitalus:
 
 if __name__ == '__main__':
     #An example...
-    b = Vitalus(min_disk_space=0.1)
+    b = Vitalus()
     b.set_log_level('DEBUG')
     b.set_destination('/tmp/sauvegarde')
     #TODO Check that job names are uniq
