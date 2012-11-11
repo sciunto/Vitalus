@@ -23,16 +23,16 @@ my_backup.set_destination('/media/disk/backup')
 
 # I add a job for 'my_documents'
 # I want to keep increments (default: False)
-my_backup.add_job('my_documents', '/home/myself/documents', incremental=True)
+my_backup.add_job('my_documents', '/home/myself/documents', history=True)
 
 # Copy data excepting *.html files.
 # This is a rsync filter rule (man rsync to learn more)
 # filter is a tuple. Don't forget the coma.
-my_backup.add_job('my_data', '/home/myself/data', incremental=True, filter=('- *.html',))
+my_backup.add_job('my_data', '/home/myself/data', history=True, filter=('- *.html',))
 
 # Another job
 # minimal duration between two backups: 5 hours (default: 24h)
-my_backup.add_job('thunderbird', '/home/myself/.thunderbird', period=5, incremental=False)
+my_backup.add_job('thunderbird', '/home/myself/.thunderbird', period=5, history=False)
 
 
 # Sync my home space on a server though SSH
