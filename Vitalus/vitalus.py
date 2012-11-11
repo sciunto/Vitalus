@@ -144,20 +144,23 @@ class Vitalus:
         p.nice = 15
 
     def set_destination(self, destination): 
-        """ Set the destination"""        
+        """ Set the destination of the backup
+        
+        :param destination: path
+        """        
         self.logger.debug("Set destination: %s", destination)
         self.destination = destination
 
     #TODO: filter -> *filter ?
-    def add_job(self, name, source, period=24, incremental=False, duration=50, keep=10, filter=None):
+    def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
         """ Add a new job 
         :param name: backup label
         :param source: backup from...
         :param destination: backup to...
         :param period: min time (hours) between backups
-        :param incremental: Activate incremental backup (Boolean)
-        :param duration: How many days incrementals are kept
-        :param keep: How many incrementals are (at least) kept
+        :param history: Activate snapshots (Boolean)
+        :param duration: How many days snapshotss are kept
+        :param keep: How many snapshots are (at least) kept
         :param filter: filter, must be a tuple
 
         Note: filter syntax is the same of rsync. See "FILTER RULES" section
@@ -168,7 +171,7 @@ class Vitalus:
             self.logger.debug("add job: %s", name) 
             try: 
                 self.jobs.append(Job(self.min_disk_space, self.backup_log_dir, name, source, 
-                    self.destination, period, incremental, duration, keep, filter))
+                    self.destination, period, history, duration, keep, filter))
             except TARGETError:
                 #FIXME: message
                 self.logger.warning('Wrong or unreachable destination')
@@ -189,10 +192,10 @@ if __name__ == '__main__':
     b.set_log_level('DEBUG')
     b.set_destination('/tmp/sauvegarde')
     #TODO Check that job names are uniq
-    b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, incremental=True)
-    b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, incremental=True)
-    b.add_job('test3', '/home/gnu/tmp/photos', incremental=True)
-    b.add_job('test4', '/home/gnu/tmp/www', period=0, incremental=True)
+    b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, history=True)
+    b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, history=True)
+    b.add_job('test3', '/home/gnu/tmp/photos', period=0.001, history=False)
+    b.add_job('test4', '/home/gnu/tmp/www', period=0, history=True)
 
     b.run()
     
