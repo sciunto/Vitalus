@@ -42,7 +42,7 @@ This is just another way to express the philosophy :)
 * rsync from SSH to local disk
 * (from local to SSH not fully supported yet)
 * Check disk space (local disks)
-* Possibility to keep zipped increments
+* Keep track of time evolution (increments done with hard links), not possible via SSH for the moment. 
 * Old increments deleted (keeping a minimal amount of increments)
 * Rotated logs (general + one per task)
 

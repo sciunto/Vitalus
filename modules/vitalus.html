@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vitalus &mdash; Vitalus devel documentation</title>
+    <title>vitalus &mdash; Vitalus 0.3 documentation</title>
     
     <link rel="stylesheet" href="../static/default.css" type="text/css" />
     <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     'devel',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../static/jquery.js"></script>
     <script type="text/javascript" src="../static/underscore.js"></script>
     <script type="text/javascript" src="../static/doctools.js"></script>
-    <link rel="top" title="Vitalus devel documentation" href="../index.html" />
+    <link rel="top" title="Vitalus 0.3 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus devel documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -75,26 +75,24 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">Vitalus.job</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">TARGETError</span>
-
+<span class="kn">import</span> <span class="nn">Vitalus.info</span> <span class="kn">as</span> <span class="nn">info</span>
 
 <div class="viewcode-block" id="Vitalus"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus">[docs]</a><span class="k">class</span> <span class="nc">Vitalus</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for backups</span>
+
+<span class="sd">    :params log_path: directory for logs and database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_disk_space</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        min_disk_space: minimal disk space (destination) [Go]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_path</span><span class="o">=</span><span class="s">&#39;~/.backup&#39;</span><span class="p">):</span>
         <span class="c">#Variables</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">terminate</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min_disk_space</span> <span class="o">=</span> <span class="n">min_disk_space</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c">#Logging</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&#39;~/.backup/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pidfilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">,</span> <span class="s">&#39;backup.pid&#39;</span><span class="p">)</span>
@@ -116,6 +114,7 @@
 
         <span class="c">#timebase</span>
         
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Vitalus </span><span class="si">%s</span><span class="s"> starts...&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="o">.</span><span class="n">VERSION</span><span class="p">)</span>
         <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signal_handler</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Vitalus.set_log_level"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus.set_log_level">[docs]</a>    <span class="k">def</span> <span class="nf">set_log_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
@@ -126,26 +125,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s">&#39;INFO&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: &#39;</span> <span class="o">+</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s">&#39;CRITICAL&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: &#39;</span> <span class="o">+</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>   
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: &#39;</span> <span class="o">+</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s">&#39;ERROR&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>   
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: &#39;</span> <span class="o">+</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s">&#39;FATAL&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">FATAL</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: &#39;</span> <span class="o">+</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Set logger level: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">ERROR</span><span class="p">(</span><span class="s">&#39;Unknown level&#39;</span><span class="p">)</span>
             
 
 </div>
     <span class="k">def</span> <span class="nf">_signal_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Signal received </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">signal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Signal received </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_process_high_priority</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">terminate</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -194,19 +193,23 @@
         <span class="n">p</span><span class="o">.</span><span class="n">nice</span> <span class="o">=</span> <span class="mi">15</span>
 
 <div class="viewcode-block" id="Vitalus.set_destination"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus.set_destination">[docs]</a>    <span class="k">def</span> <span class="nf">set_destination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span> 
-        <span class="sd">&quot;&quot;&quot; Set the destination&quot;&quot;&quot;</span>        
+        <span class="sd">&quot;&quot;&quot; Set the destination of the backup</span>
+<span class="sd">        </span>
+<span class="sd">        :param destination: path</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Set destination: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span>
 
     <span class="c">#TODO: filter -&gt; *filter ?</span></div>
-<div class="viewcode-block" id="Vitalus.add_job"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus.add_job">[docs]</a>    <span class="k">def</span> <span class="nf">add_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">incremental</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Vitalus.add_job"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus.add_job">[docs]</a>    <span class="k">def</span> <span class="nf">add_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add a new job </span>
 <span class="sd">        :param name: backup label</span>
 <span class="sd">        :param source: backup from...</span>
 <span class="sd">        :param destination: backup to...</span>
 <span class="sd">        :param period: min time (hours) between backups</span>
-<span class="sd">        :param incremental: Activate incremental backup (Boolean)</span>
-<span class="sd">        :param duration: How many days incrementals are kept</span>
-<span class="sd">        :param keep: How many incrementals are (at least) kept</span>
+<span class="sd">        :param history: Activate snapshots (Boolean)</span>
+<span class="sd">        :param duration: How many days snapshotss are kept</span>
+<span class="sd">        :param keep: How many snapshots are (at least) kept</span>
 <span class="sd">        :param filter: filter, must be a tuple</span>
 
 <span class="sd">        Note: filter syntax is the same of rsync. See &quot;FILTER RULES&quot; section</span>
@@ -214,10 +217,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">:</span>
             <span class="n">period_in_seconds</span> <span class="o">=</span> <span class="n">period</span> <span class="o">*</span> <span class="mi">3600</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;add job+ &#39;</span> <span class="o">+</span> <span class="s">&#39;name&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;add job: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> 
             <span class="k">try</span><span class="p">:</span> 
-                <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Job</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_disk_space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">incremental</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="nb">filter</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Job</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="nb">filter</span><span class="p">))</span>
             <span class="k">except</span> <span class="n">TARGETError</span><span class="p">:</span>
                 <span class="c">#FIXME: message</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Wrong or unreachable destination&#39;</span><span class="p">)</span>
@@ -226,7 +229,6 @@
 </div>
 <div class="viewcode-block" id="Vitalus.run"><a class="viewcode-back" href="../vitalus.html#vitalus.Vitalus.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Run all jobs &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;The script starts...&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_pidfile</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -235,14 +237,14 @@
 </div></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="c">#An example...</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">Vitalus</span><span class="p">(</span><span class="n">min_disk_space</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Vitalus</span><span class="p">()</span>
     <span class="n">b</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
     <span class="n">b</span><span class="o">.</span><span class="n">set_destination</span><span class="p">(</span><span class="s">&#39;/tmp/sauvegarde&#39;</span><span class="p">)</span>
     <span class="c">#TODO Check that job names are uniq</span>
-    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/firefox&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test2&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/debian&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test3&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/photos&#39;</span><span class="p">,</span> <span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test4&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/www&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">incremental</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/firefox&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test2&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/debian&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test3&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/photos&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="s">&#39;test4&#39;</span><span class="p">,</span> <span class="s">&#39;/home/gnu/tmp/www&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="n">b</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
     
@@ -279,7 +281,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus devel documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

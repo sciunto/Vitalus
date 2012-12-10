@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Vitalus library &mdash; Vitalus devel documentation</title>
+    <title>Vitalus library &mdash; Vitalus 0.3 documentation</title>
     
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     'devel',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Vitalus devel documentation" href="index.html" />
+    <link rel="top" title="Vitalus 0.3 documentation" href="index.html" />
     <link rel="prev" title="Welcome to Vitalus’ documentation!" href="index.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to Vitalus’ documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Vitalus devel documentation</a> &raquo;</li> 
+        <li><a href="index.html">Vitalus 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,40 +54,57 @@
 <span id="vitalus-library"></span><h1>Vitalus library<a class="headerlink" href="#module-vitalus" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vitalus.Vitalus">
-<em class="property">class </em><tt class="descclassname">vitalus.</tt><tt class="descname">Vitalus</tt><big>(</big><em>min_disk_space=1</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">vitalus.</tt><tt class="descname">Vitalus</tt><big>(</big><em>log_path='~/.backup'</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
 <p>Class for backups</p>
-<dl class="method">
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params log_path:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">directory for logs and database</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
 <dt id="vitalus.Vitalus.add_job">
-<tt class="descname">add_job</tt><big>(</big><em>name</em>, <em>source</em>, <em>period=24</em>, <em>incremental=False</em>, <em>duration=50</em>, <em>keep=10</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.add_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.add_job" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_job</tt><big>(</big><em>self</em>, <em>name</em>, <em>source</em>, <em>period=24</em>, <em>history=False</em>, <em>duration=50</em>, <em>keep=10</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.add_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.add_job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new job 
 :param name: backup label
 :param source: backup from...
 :param destination: backup to...
 :param period: min time (hours) between backups
-:param incremental: Activate incremental backup (Boolean)
-:param duration: How many days incrementals are kept
-:param keep: How many incrementals are (at least) kept
+:param history: Activate snapshots (Boolean)
+:param duration: How many days snapshotss are kept
+:param keep: How many snapshots are (at least) kept
 :param filter: filter, must be a tuple</p>
 <p>Note: filter syntax is the same of rsync. See &#8220;FILTER RULES&#8221; section
 in the rsync man page.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run all jobs</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.set_destination">
-<tt class="descname">set_destination</tt><big>(</big><em>destination</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_destination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_destination" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the destination</p>
+<tt class="descname">set_destination</tt><big>(</big><em>self</em>, <em>destination</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_destination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_destination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the destination of the backup</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>destination</strong> &#8211; path</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.set_log_level">
-<tt class="descname">set_log_level</tt><big>(</big><em>level='INFO'</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_log_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_log_level" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_log_level</tt><big>(</big><em>self</em>, <em>level='INFO'</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_log_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_log_level" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -103,7 +120,7 @@ in the rsync man page.</p>
 
 <span class="target" id="module-job"></span><dl class="class">
 <dt id="job.Job">
-<em class="property">class </em><tt class="descclassname">job.</tt><tt class="descname">Job</tt><big>(</big><em>min_disk_space</em>, <em>log_dir</em>, <em>name</em>, <em>source</em>, <em>destination</em>, <em>period</em>, <em>incremental</em>, <em>duration</em>, <em>keep</em>, <em>filter</em><big>)</big><a class="reference internal" href="modules/job.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">job.</tt><tt class="descname">Job</tt><big>(</big><em>log_dir</em>, <em>name</em>, <em>source</em>, <em>destination</em>, <em>period</em>, <em>snapshot</em>, <em>duration</em>, <em>keep</em>, <em>filter</em><big>)</big><a class="reference internal" href="modules/job.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
 <p>Class containing a job</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -116,18 +133,19 @@ in the rsync man page.</p>
 <li><strong>name</strong> &#8211; Job name</li>
 <li><strong>source</strong> &#8211; Source path</li>
 <li><strong>destination</strong> &#8211; Destination path</li>
-<li><strong>incremental</strong> &#8211; Activate incremental backup (Boolean)</li>
-<li><strong>duration</strong> &#8211; How many days incrementals are kept</li>
-<li><strong>keep</strong> &#8211; How many incrementals are (at least) kept</li>
+<li><strong>period</strong> &#8211; Min duration between two backups</li>
+<li><strong>snapshot</strong> &#8211; Activate snapshots (Boolean)</li>
+<li><strong>duration</strong> &#8211; How many days snapshots are kept</li>
+<li><strong>keep</strong> &#8211; How many snapshots are (at least) kept</li>
 <li><strong>filter</strong> &#8211; Rsync filters</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="function">
 <dt id="job.Job.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="modules/job.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/job.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the job</p>
 </dd></dl>
 
@@ -198,7 +216,7 @@ set self.__traceback__ to tb and return self.</p>
         <li class="right" >
           <a href="index.html" title="Welcome to Vitalus’ documentation!"
              >previous</a> |</li>
-        <li><a href="index.html">Vitalus devel documentation</a> &raquo;</li> 
+        <li><a href="index.html">Vitalus 0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
