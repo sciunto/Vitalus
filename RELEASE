@@ -2,7 +2,7 @@ How to release
 ==============
 
 * Update CHANGELOG
-* Update doc/conf.py
+* Update version in doc/conf.py
 * Update the file info.py
 * Build doc, push it in the gh-pages branch
 * Create a tarball and upload it on github
