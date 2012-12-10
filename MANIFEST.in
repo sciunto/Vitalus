@@ -1,0 +1,6 @@
+include COPYING
+include CHANGELOG
+include *md
+include doc/Makefile
+include doc/conf.py
+recursive-include doc *rst
