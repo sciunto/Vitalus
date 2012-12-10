@@ -169,7 +169,7 @@ class Vitalus:
             self.logger.debug("add job: %s", name) 
             try: 
                 self.jobs.append(Job(self.backup_log_dir, name, source, 
-                    self.destination, period, history, duration, keep, filter))
+                    self.destination, period_in_seconds, history, duration, keep, filter))
             except TARGETError:
                 #FIXME: message
                 self.logger.warning('Wrong or unreachable destination')

@@ -1,3 +1,6 @@
+==== Version 0. ====
+* BugFix: period unit
+
 ==== Version 0.3 ====
 * use hard links instead of increments
 * API improvements

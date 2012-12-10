@@ -45,7 +45,7 @@ class Job:
     :param name: Job name
     :param source: Source path
     :param destination: Destination path
-    :param period: Min duration between two backups 
+    :param period: Min duration between two backups (in seconds)
     :param snapshot: Activate snapshots (Boolean)
     :param duration: How many days snapshots are kept
     :param keep: How many snapshots are (at least) kept
