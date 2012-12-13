@@ -113,7 +113,7 @@ class Job:
         :raises TARGETError: if low disk space
         """
         if self.dest_type == 'DIR':
-            if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source):
+            if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source): #TODO, change the criterion
                 self.logger.critical("Low disk space: %s", self.destination)
                 raise TARGETError('Low disk space on %s' % self.destination)
         elif self.dest_type == 'SSH':
