@@ -1,6 +1,7 @@
-==== Version 0. ====
+==== Version 0.3.1 ====
 * BugFix: period unit
-* Workarounds
+* Various Q&D orkarounds
+* history = True or False creates similar backup paths
 
 ==== Version 0.3 ====
 * use hard links instead of increments
