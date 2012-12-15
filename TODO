@@ -1,4 +1,4 @@
-
+* symlink are not often created. (AttributeError)
 * In job, take datetime as parameter
 
 * Check that names are uniq for a destination
