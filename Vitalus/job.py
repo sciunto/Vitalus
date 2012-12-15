@@ -371,5 +371,7 @@ class Job:
                 os.symlink(self.current_backup_path, last)
             except FileExistsError:
                 self.logger.warn('The symlink %s could not be created because a file exists', last)
+            except AttributeError:
+                self.logger.warn('Attribute error for symlink') #FIXME
 
 
