@@ -186,12 +186,10 @@ class Job:
             file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
             if datetime.datetime.now() - file_date > datetime.timedelta(days=days): 
                 self.logger.info("remove %s", filepath[1])
-                shutil.rmtree(filepath[1]) #FIXME: raise something?
-                #try:
-                #    os.remove(filepath[1])
-                #except OSError:
-                #    self.logger.warn("Impossible to remove %s", filepath[1])
-
+                try:
+                    shutil.rmtree(filepath[1])
+                except OSError:
+                    self.logger.error("Impossible to delete %s (symlink?)", filepath[1])
             else:
                 self.logger.debug("keep %s", filepath[1])
                 return
