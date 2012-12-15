@@ -191,7 +191,7 @@ class Job:
                 except OSError:
                     self.logger.error("Impossible to delete %s (symlink?)", filepath[1])
             else:
-                self.logger.debug("keep %s", filepath[1])
+                self.logger.debug("Keep backup %s", filepath[1])
                 return
 
     def _get_last_backup(self, path):
@@ -220,22 +220,27 @@ class Job:
         self.current_backup_path = None
 
         if self.dest_type != 'SSH':
+            last_date = self._get_last_backup(os.path.join(self.destination, self.name))
+            self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
+            if last_date is None:
+                #It means that this is the first backup.
+                self.previous_backup_path = None
+            else:
+                self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
+
             if self.snapshot:
-                last_date = self._get_last_backup(os.path.join(self.destination, self.name))
-                if last_date is None:
-                    #It means that this is the first backup.
-                    self.previous_backup_path = None
-                else:
-                    self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
-                self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
                 os.makedirs(self.current_backup_path) #This one does not exist!
             else:
-                self.current_backup_path = os.path.join(self.destination, self.name)
-                try:
-                    os.makedirs(self.current_backup_path) #This one may exist!
-                except OSError:
-                    #they could already exist
-                    pass
+                if self.previous_backup_path is None:
+                    #Create dir
+                    try:
+                        os.makedirs(self.current_backup_path) #This one may exist!
+                    except OSError:
+                        #they could already exist
+                        pass
+                else:
+                    #Move dir
+                    os.rename(self.previous_backup_path, self.current_backup_path)
         else:
             # Create dirs on the server
             login, dest_dir_path = destination.split(':')
