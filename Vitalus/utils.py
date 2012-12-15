@@ -42,5 +42,5 @@ def get_folder_size(path):
             try:
                 size += os.path.getsize(os.path.join(item[0], file))
             except:
-                logger.warn("error with file: %s", os.path.join(item[0], file))
+                logger.error("Impossible to get size of: %s", os.path.join(item[0], file))
     return size
