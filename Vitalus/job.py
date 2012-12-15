@@ -210,7 +210,7 @@ class Job:
             return None
         return filenames[-1] 
 
-    def _prepare_destination2(self): 
+    def _prepare_destination(self): 
         """
         Prepare the destination to receive a backup:
         * create dirs
@@ -259,7 +259,7 @@ class Job:
         self.logger.debug("Current backup path: %s", self.current_backup_path)
 
 
-    def _prepare_rsync_command2(self): 
+    def _prepare_rsync_command(self): 
         """
         Compose the rsync command
         """
@@ -325,7 +325,7 @@ class Job:
         """ 
         Run rsync to do the task.
         """
-        command = self._prepare_rsync_command2()
+        command = self._prepare_rsync_command()
 
         #If a signal is received, stop the process
         #if self.terminate: return
@@ -350,7 +350,7 @@ class Job:
             print(self.name)
             self.logger.info("Backup %s", self.name)
             #Prepare the destination
-            self._prepare_destination2()
+            self._prepare_destination()
             self.logger.debug("source path %s", self.source) 
             self.logger.debug("destination path %s", self.destination) 
             self.logger.debug("filter path %s", self.filter)
