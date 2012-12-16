@@ -1,5 +1,4 @@
 * symlink are not often created. (AttributeError)
-* symlink should be relative
 * review disk space usage
 * In job, take datetime as parameter
 
@@ -30,6 +29,11 @@ Tools
 Some tools can be developped 
 * to track the evolution of a specific file though snapshots...
 * restore a snapshot
+
+
+TOCHECK
+-------
+* symlink should be relative
 
 
 DONE

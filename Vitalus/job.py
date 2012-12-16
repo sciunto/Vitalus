@@ -373,7 +373,8 @@ class Job:
             if os.path.islink(last):
                 os.remove(last)
             try:
-                os.symlink(self.current_backup_path, last)
+                os.chdir(os.path.dirname(self.current_backup_path))
+                os.symlink(os.path.basename(self.current_backup_path), last)
             except FileExistsError:
                 self.logger.warn('The symlink %s could not be created because a file exists', last)
             except AttributeError:
