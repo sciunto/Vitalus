@@ -83,7 +83,34 @@ class Job:
         self.source_type = self._get_target_type(self.source)
         self.dest_type = self._get_target_type(self.destination)
 
-        self._check_disk_usage()
+        #Set previous and current backup paths
+        self.previous_backup_path = None
+        self.current_backup_path = None
+
+        if self.dest_type != 'SSH':
+            last_date = self._get_last_backup(os.path.join(self.destination, self.name))
+            self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
+            if last_date is None:
+                #It means that this is the first backup.
+                self.previous_backup_path = None
+            else:
+                self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
+
+        else:
+            login, dest_dir_path = destination.split(':')
+            #add ~/ if does not start with /
+            if not dest_dir_path.startswith('/'):
+                dest_dir_path = os.path.join('~', dest_dir_path)
+            if self.snapshot:
+                #For the moment, we do not support snapshots via SSH
+                pass
+            else:
+                self.current_backup_path = os.path.join(dest_dir_path, self.name)
+
+        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
+        self.logger.debug("Current backup path: %s", self.current_backup_path)
+
+
 
     def _get_target_type(self, target):
         """
@@ -210,24 +237,13 @@ class Job:
             return None
         return filenames[-1] 
 
+
     def _prepare_destination(self): 
         """
         Prepare the destination to receive a backup:
-        * create dirs
-        * Initialize paths
+        Create dirs
         """
-        self.previous_backup_path = None
-        self.current_backup_path = None
-
         if self.dest_type != 'SSH':
-            last_date = self._get_last_backup(os.path.join(self.destination, self.name))
-            self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
-            if last_date is None:
-                #It means that this is the first backup.
-                self.previous_backup_path = None
-            else:
-                self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
-
             if self.snapshot:
                 os.makedirs(self.current_backup_path) #This one does not exist!
             else:
@@ -242,17 +258,6 @@ class Job:
                     #Move dir
                     os.rename(self.previous_backup_path, self.current_backup_path)
         else:
-            # Create dirs on the server
-            login, dest_dir_path = destination.split(':')
-            #add ~/ if does not start with /
-            if not dest_dir_path.startswith('/'):
-                dest_dir_path = os.path.join('~', dest_dir_path)
-            if self.snapshot:
-                #For the moment, we do not support snapshots via SSH
-                pass
-            else:
-                self.current_backup_path = os.path.join(dest_dir_path, self.name)
-
             #Create dirs
             command = ['ssh', '-t', login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
@@ -333,6 +338,8 @@ class Job:
         """
         Run the job
         """
+        #TODO rewriting and integration
+        #self._check_disk_usage()
         if self._check_need_backup():
             print(self.name)
             self.logger.info("Backup %s", self.name)
