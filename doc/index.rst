@@ -7,7 +7,8 @@ Welcome to Vitalus' documentation!
 ===================================
 
 :Author: François Boulogne
-:Source code: `github.com project <https://github.com/sciunto/Vitalus>`_
+:Download: `Stable version <http://sciunto.org/source/>`_
+:Developer's corner: `github.com project <https://github.com/sciunto/Vitalus>`_
 :Generated: |today|
 :License: GPL v3
 :Version: |release|
