@@ -1,4 +1,3 @@
-* symlink are not often created. (AttributeError)
 * review disk space usage
 * In job, take datetime as parameter
 
@@ -34,6 +33,7 @@ Some tools can be developped
 TOCHECK
 -------
 * symlink should be relative
+* symlink are not often created. (AttributeError)
 
 
 DONE

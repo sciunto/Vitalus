@@ -364,20 +364,20 @@ class Job:
             #Compress
             #Job done, update the time in the database
             self._set_lastbackup_time()
-        #Remove old snapshots, local only
-        if self.dest_type == 'DIR' and self.snapshot:
-            dest = os.path.join(self.destination, self.name)
-            self._delete_old_files(dest, days=self.duration, keep=self.keep)
-            #Symlink
-            last = os.path.join(self.destination , self.name, 'last')
-            if os.path.islink(last):
-                os.remove(last)
-            try:
+            #Remove old snapshots, local only
+            if self.dest_type == 'DIR' and self.snapshot:
+                dest = os.path.join(self.destination, self.name)
+                self._delete_old_files(dest, days=self.duration, keep=self.keep)
+                #Symlink
+                last = os.path.join(self.destination , self.name, 'last')
+                if os.path.islink(last):
+                    os.remove(last)
                 os.chdir(os.path.dirname(self.current_backup_path))
-                os.symlink(os.path.basename(self.current_backup_path), last)
-            except FileExistsError:
-                self.logger.warn('The symlink %s could not be created because a file exists', last)
-            except AttributeError:
-                self.logger.warn('Attribute error for symlink') #FIXME
+                try:
+                    os.symlink(os.path.basename(self.current_backup_path), last)
+                except FileExistsError:
+                    self.logger.warn('The symlink %s could not be created because a file exists', last)
+                except AttributeError:
+                    self.logger.warn('Attribute error for symlink') 
 
 
