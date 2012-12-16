@@ -304,33 +304,15 @@ class Job:
         self.logger.debug("rsync command: %s", command)
         return command
 
-#    def _compress_increments(self):
-#        """
-#        Compress increments and delete old ones
-#        """
-#        if self.dest_type == 'DIR':
-#            #compress if not empty
-#            if os.listdir(self.inc_path) != []:
-#                self.logger.debug("Zip the directory: %s", self.inc_path)
-#                utils.compress(self.inc_path)
-#            else:
-#                self.logger.info('Empty increment')
-#                pass
-#            #delete the dir (we keep only non-empty tarballs
-#            shutil.rmtree(self.inc_path)
-#
-#            #MrProper: remove old tarballs
-#            self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)
-#        elif self.dest_type == 'SSH':
-#            pass
-#            #TODO ! compress dir though ssh
-#            #TODO Remove old dirs though ssh
-
-    def _rsync(self):
+    def _run_command(self, command):
         """ 
-        Run rsync to do the task.
+        Run a command and log stderr+stdout in a dedicated log file.
+        :param command: a list, each element is a part of the command line
+
+        Example
+        -------
+        command = ['/usr/bin/cp', '-r', '/home', '/tmp']
         """
-        command = self._prepare_rsync_command()
 
         #If a signal is received, stop the process
         #if self.terminate: return
@@ -360,8 +342,8 @@ class Job:
             self.logger.debug("destination path %s", self.destination) 
             self.logger.debug("filter path %s", self.filter)
             #Run rsync
-            self._rsync()
-            #Compress
+            command = self._prepare_rsync_command()
+            self._run_command(command)
             #Job done, update the time in the database
             self._set_lastbackup_time()
             #Remove old snapshots, local only
@@ -378,6 +360,6 @@ class Job:
                 except FileExistsError:
                     self.logger.warn('The symlink %s could not be created because a file exists', last)
                 except AttributeError:
-                    self.logger.warn('Attribute error for symlink') 
+                    self.logger.warn('Attribute error for symlink. Job: %s', self.name) 
 
 
