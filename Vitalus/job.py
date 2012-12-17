@@ -123,7 +123,7 @@ class Job:
         """
         if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
             #ssh
-            self.logger.debug('The target looks like SSH')
+            self.logger.debug("The target %s looks like SSH", target)
             return 'SSH'
         else:
             if not os.path.exists(target):
@@ -131,7 +131,7 @@ class Job:
                 self.logger.info('Aborting...')
                 raise TARGETError("Target %s does not exist" % target)
             else:
-                self.logger.debug('The target looks like DIR')
+                self.logger.debug("The target %s looks like DIR", target)
                 return 'DIR'
 
     def _check_disk_usage(self):
