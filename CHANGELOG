@@ -1,5 +1,6 @@
 ==== Version 0.3.2 ====
 * Code refactoring (job.py)
+* Fix symlinks
 
 ==== Version 0.3.1 ====
 * BugFix: period unit

@@ -32,10 +32,10 @@ Some tools can be developped
 
 TOCHECK
 -------
-* symlink should be relative
-* symlink are not often created. (AttributeError)
 
 
 DONE
 ----
 * Create symlinks to the last backups
+* symlink should be relative
+* symlink are not often created. (AttributeError)
