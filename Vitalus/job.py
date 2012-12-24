@@ -141,10 +141,6 @@ class Job:
         self.job_logger.setLevel(logging.INFO)
         self.job_logger.info('='*20 + str(self.now) + '='*20)
         
-        #Source types
-        #self.source_type = self._get_target_type(self.source)
-        #self.dest_type = self._get_target_type(self.destination)
-
         #Set previous and current backup paths
         self.previous_backup_path = None
         self.current_backup_path = None
@@ -174,29 +170,6 @@ class Job:
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
 
-
-
-    def _get_target_type(self, target):
-        """
-        Return the target type
-        SSH if matches name@domaine.tld:dir
-        DIR if it's a directory
-       
-        :param target: Target (source or destination)
-        :raises TARGETError: weird target type 
-        """
-        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', target):
-            #ssh
-            self.logger.debug("The target %s looks like SSH", target)
-            return 'SSH'
-        else:
-            if not os.path.exists(target):
-                self.logger.warn("The target %s does not exist", target)
-                self.logger.info('Aborting...')
-                raise TARGETError("Target %s does not exist" % target)
-            else:
-                self.logger.debug("The target %s looks like DIR", target)
-                return 'DIR'
 
     def _check_disk_usage(self):
         """
@@ -312,14 +285,9 @@ class Job:
                 os.makedirs(self.current_backup_path) #This one does not exist!
             else:
                 if self.previous_backup_path is None:
-                    #Create dir
-                    try:
-                        os.makedirs(self.current_backup_path) #This one may exist!
-                    except OSError:
-                        #they could already exist
-                        pass
+                    os.makedirs(self.current_backup_path, exist_ok=True) 
                 else:
-                    #Move dir
+                    #Move dir to set the new date in the path
                     os.rename(self.previous_backup_path, self.current_backup_path)
         elif self.destination.is_ssh():
             #Create dirs
