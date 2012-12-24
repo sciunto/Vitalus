@@ -50,6 +50,12 @@ class Job:
     :param duration: How many days snapshots are kept
     :param keep: How many snapshots are (at least) kept
     :param filter: Rsync filters
+
+
+    Note:
+    -----
+    Source and destination path can be either real path
+    or a ssh login joined to the path by a : caracter.
     """
     #TODO signal...
 
@@ -97,13 +103,14 @@ class Job:
                 self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
 
         else:
+            #TODO detect previous backup though SSH
             self.dest_login, dest_dir_path = destination.split(':')
             #add ./ if does not start with /
             if not dest_dir_path.startswith('/'):
-                dest_dir_path = os.path.join('.', dest_dir_path)
+                dest_dir_path = os.path.join('.', dest_dir_path) #FIXME this tends to write ././foo/bar
             if self.snapshot:
                 #For the moment, we do not support snapshots via SSH
-                pass
+                self.current_backup_path = os.path.join(dest_dir_path, self.name, str(self.current_date))
             else:
                 self.current_backup_path = os.path.join(dest_dir_path, self.name)
             
@@ -291,10 +298,11 @@ class Job:
         # z: compress the flux if transfert thought a network
         if (self.source_type or self.dest_type) == 'SSH':
             command.append('-z')
-        else: #FIXME for the moment, no snapshots though SSH !
+        #else: #FIXME for the moment, no snapshots though SSH !
+        #    pass
             # link-dest: write snapshots with hard-links
-            if self.snapshot and self.previous_backup_path is not None:
-                command.append('--link-dest=' + self.previous_backup_path)
+        if self.snapshot and self.previous_backup_path is not None:
+            command.append('--link-dest=' + self.previous_backup_path)
 
         # Add source and destination
         command.append(self.source)
