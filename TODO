@@ -1,17 +1,14 @@
-* Do not start a job log file if nothing in it
 * review disk space usage
 * In job, take datetime as parameter
 
 * Check that names are uniq for a destination
 
-
-* history false to true and conversly
+* history false to true and conversly (started)
 
 
 Style
 -----
 
-* structure for source/dest type
 
 
 Alerts
@@ -47,3 +44,5 @@ DONE
 * Create symlinks to the last backups
 * symlink should be relative
 * symlink are not often created. (AttributeError)
+* Do not start a job log file if nothing in it
+* structure for source/dest type

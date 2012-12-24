@@ -139,7 +139,6 @@ class Job:
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
         self.job_logger.addHandler(log_rotator)
         self.job_logger.setLevel(logging.INFO)
-        self.job_logger.info('='*20 + str(self.now) + '='*20)
         
         #Set previous and current backup paths
         self.previous_backup_path = None
@@ -376,6 +375,7 @@ class Job:
         #TODO rewriting and integration
         #self._check_disk_usage()
         if self._check_need_backup():
+            self.job_logger.info('='*20 + str(self.now) + '='*20)
             print(self.name)
             self.logger.info("Backup %s", self.name)
             #Prepare the destination
