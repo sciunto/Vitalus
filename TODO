@@ -1,3 +1,4 @@
+* Do not start a job log file if nothing in it
 * review disk space usage
 * In job, take datetime as parameter
 
@@ -5,6 +6,13 @@
 
 
 * history false to true and conversly
+
+
+Style
+-----
+
+* structure for source/dest type
+
 
 Alerts
 ------
