@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vitalus &mdash; Vitalus 0.3 documentation</title>
+    <title>vitalus &mdash; Vitalus 0.3.2 documentation</title>
     
     <link rel="stylesheet" href="../static/default.css" type="text/css" />
     <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3',
+        VERSION:     '0.3.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../static/jquery.js"></script>
     <script type="text/javascript" src="../static/underscore.js"></script>
     <script type="text/javascript" src="../static/doctools.js"></script>
-    <link rel="top" title="Vitalus 0.3 documentation" href="../index.html" />
+    <link rel="top" title="Vitalus 0.3.2 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3.2 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -220,7 +220,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;add job: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> 
             <span class="k">try</span><span class="p">:</span> 
                 <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Job</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_log_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="nb">filter</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">period_in_seconds</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="nb">filter</span><span class="p">))</span>
             <span class="k">except</span> <span class="n">TARGETError</span><span class="p">:</span>
                 <span class="c">#FIXME: message</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Wrong or unreachable destination&#39;</span><span class="p">)</span>
@@ -281,7 +281,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3.2 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

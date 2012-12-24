@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>job &mdash; Vitalus 0.3 documentation</title>
+    <title>job &mdash; Vitalus 0.3.2 documentation</title>
     
     <link rel="stylesheet" href="../static/default.css" type="text/css" />
     <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3',
+        VERSION:     '0.3.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../static/jquery.js"></script>
     <script type="text/javascript" src="../static/underscore.js"></script>
     <script type="text/javascript" src="../static/doctools.js"></script>
-    <link rel="top" title="Vitalus 0.3 documentation" href="../index.html" />
+    <link rel="top" title="Vitalus 0.3.2 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3.2 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -78,7 +78,7 @@
 </div>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="c">#import psutil</span>
 <span class="kn">import</span> <span class="nn">shelve</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -87,6 +87,62 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
 
+
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../vitalus.html#job.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A target is a source or a destination.</span>
+<span class="sd">    Both of them can be a local directory</span>
+<span class="sd">    or a distant one though SSH</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;Vitalus.Target&#39;</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Read target </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ttype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_target_type</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Target.is_dir"><a class="viewcode-back" href="../vitalus.html#job.Target.is_dir">[docs]</a>    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttype</span> <span class="o">==</span> <span class="s">&#39;DIR&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="Target.is_ssh"><a class="viewcode-back" href="../vitalus.html#job.Target.is_ssh">[docs]</a>    <span class="k">def</span> <span class="nf">is_ssh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttype</span> <span class="o">==</span> <span class="s">&#39;SSH&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">_detect_target_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the target type</span>
+<span class="sd">        SSH if matches name@domaine.tld:dir</span>
+<span class="sd">        DIR if it&#39;s a directory</span>
+<span class="sd">       </span>
+<span class="sd">        :param target: Target (source or destination)</span>
+<span class="sd">        :raises TARGETError: weird target type </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">):</span>
+            <span class="c">#ssh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;The target </span><span class="si">%s</span><span class="s"> looks like SSH&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&#39;SSH&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;The target </span><span class="si">%s</span><span class="s"> does not exist&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Aborting...&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">TARGETError</span><span class="p">(</span><span class="s">&quot;Target </span><span class="si">%s</span><span class="s"> does not exist&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;The target </span><span class="si">%s</span><span class="s"> looks like DIR&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s">&#39;DIR&#39;</span>
+
+
+</div>
 <div class="viewcode-block" id="Job"><a class="viewcode-back" href="../vitalus.html#job.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class containing a job</span>
@@ -96,19 +152,25 @@
 <span class="sd">    :param name: Job name</span>
 <span class="sd">    :param source: Source path</span>
 <span class="sd">    :param destination: Destination path</span>
-<span class="sd">    :param period: Min duration between two backups </span>
+<span class="sd">    :param period: Min duration between two backups (in seconds)</span>
 <span class="sd">    :param snapshot: Activate snapshots (Boolean)</span>
 <span class="sd">    :param duration: How many days snapshots are kept</span>
 <span class="sd">    :param keep: How many snapshots are (at least) kept</span>
 <span class="sd">    :param filter: Rsync filters</span>
+
+
+<span class="sd">    Note:</span>
+<span class="sd">    -----</span>
+<span class="sd">    Source and destination path can be either real path</span>
+<span class="sd">    or a ssh login joined to the path by a : caracter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c">#TODO signal...</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="nb">filter</span><span class="p">):</span>
        
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">snapshot</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span>
@@ -128,48 +190,37 @@
         <span class="n">log_rotator</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span><span class="n">job_log</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="s">&#39;midnight&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">backupCount</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">job_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">log_rotator</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">job_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">job_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="o">*</span><span class="mi">20</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span>
         
-        <span class="c">#Source types</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_target_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_target_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span>
+        <span class="c">#Set previous and current backup paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_disk_usage</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_get_target_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the target type</span>
-<span class="sd">        SSH if matches name@domaine.tld:dir</span>
-<span class="sd">        DIR if it&#39;s a directory</span>
-<span class="sd">       </span>
-<span class="sd">        :param target: Target (source or destination)</span>
-<span class="sd">        :raises TARGETError: weird target type </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*&#39;</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-            <span class="c">#ssh</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;The target looks like SSH&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s">&#39;SSH&#39;</span>
+        <span class="n">last_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_last_backup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">path</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_date</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">last_date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#It means that this is the first backup.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;The target </span><span class="si">%s</span><span class="s"> does not exist&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Aborting...&#39;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="n">TARGETError</span><span class="p">(</span><span class="s">&quot;Target </span><span class="si">%s</span><span class="s"> does not exist&quot;</span> <span class="o">%</span> <span class="n">target</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;The target looks like DIR&#39;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="s">&#39;DIR&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_date</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_check_disk_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check the disk usage</span>
-<span class="sd">        :raises TARGETError: if low disk space</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span> <span class="o">==</span> <span class="s">&#39;DIR&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">psutil</span><span class="o">.</span><span class="n">disk_usage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_folder_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s">&quot;Low disk space: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="n">TARGETError</span><span class="p">(</span><span class="s">&#39;Low disk space on </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span> <span class="o">==</span> <span class="s">&#39;SSH&#39;</span><span class="p">:</span>
-            <span class="c">#TODO</span>
-            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Previous backup path: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Current backup path: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
+
+
+<span class="c">#    def _check_disk_usage(self):</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        Check the disk usage</span>
+<span class="c">#        :raises TARGETError: if low disk space</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        if self.destination.is_dir():</span>
+<span class="c">#            #TODO, change the criterion</span>
+<span class="c">#            pass</span>
+<span class="c">#            #if psutil.disk_usage(self.destination)[2] &lt; utils.get_folder_size(self.source): </span>
+<span class="c">#            #    self.logger.critical(&quot;Low disk space: %s&quot;, self.destination)</span>
+<span class="c">#            #    raise TARGETError(&#39;Low disk space on %s&#39; % self.destination)</span>
+<span class="c">#        elif self.destination.is_ssh():</span>
+<span class="c">#            #TODO</span>
+<span class="c">#            pass</span>
 
     <span class="k">def</span> <span class="nf">_set_lastbackup_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -211,96 +262,116 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> does not need backup&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">False</span>
 
-    <span class="k">def</span> <span class="nf">_delete_old_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">_delete_old_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span> 
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Delete old archives in a path</span>
+<span class="sd">        Delete old archives in the destination</span>
 
-<span class="sd">        :param path: path to clean</span>
 <span class="sd">        :param days: delete files older than this value</span>
 <span class="sd">        :param keep: keep at least this amount of archives</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c">#TODO : review logs</span>
 
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="c">####if self.terminate: return</span>
-        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ssh&#39;</span><span class="p">,</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="s">&#39;ls&#39;</span><span class="p">,</span> <span class="s">&#39;-1&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;SSH ls command: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="n">filenames</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">x</span><span class="o">!=</span><span class="s">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+            <span class="c">#Not yet implemented!</span>
+            <span class="k">return</span>
+
         <span class="c">#delete first the older one</span>
+        <span class="n">to_delete</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">filenames</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="c">#newer first</span>
         <span class="n">nb_archives</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
             <span class="c">#keep a sufficient number of archives</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">nb_archives</span> <span class="o">-</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">keep</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;nb archives </span><span class="si">%s</span><span class="s">, keep </span><span class="si">%s</span><span class="s">, archive </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nb_archives</span><span class="p">,</span> <span class="n">keep</span><span class="p">,</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-                <span class="k">return</span>
+                <span class="k">continue</span>
             <span class="c">#Are they too old?</span>
             <span class="n">file_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
             <span class="k">if</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">file_date</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">):</span> 
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;remove </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c">#FIXME: raise something?</span>
-                <span class="c">#try:</span>
-                <span class="c">#    os.remove(filepath[1])</span>
-                <span class="c">#except OSError:</span>
-                <span class="c">#    self.logger.warn(&quot;Impossible to remove %s&quot;, filepath[1])</span>
 
+                <span class="n">to_delete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Remove backup </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;keep </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="k">return</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Keep backup </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">continue</span>
 
-    <span class="k">def</span> <span class="nf">_get_last_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="c">#FIXME</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Impossible to delete </span><span class="si">%s</span><span class="s"> (symlink?)&quot;</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="c">#FIXME</span>
+
+    <span class="k">def</span> <span class="nf">_get_last_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the last backup in path</span>
 <span class="sd">        Return None if not available</span>
-
-<span class="sd">        :param path: path to look at</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c">#TODO : SSH look via ssh</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">None</span>
-        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+            <span class="c">#First, create at least the target if does not exists</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ssh&#39;</span><span class="p">,</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="s">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;SSH mkdir command: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;SSH mkdir result: &#39;</span> <span class="o">+</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ssh&#39;</span><span class="p">,</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="s">&#39;ls&#39;</span><span class="p">,</span> <span class="s">&#39;-1&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;SSH ls command: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="n">filenames</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">x</span><span class="o">!=</span><span class="s">&#39;&#39;</span><span class="p">]</span>
+
         <span class="n">filenames</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">filenames</span> <span class="o">==</span> <span class="p">[]:</span>
             <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">return</span> <span class="n">filenames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">filenames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> 
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
 
-    <span class="k">def</span> <span class="nf">_prepare_destination2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">_prepare_destination</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare the destination to receive a backup:</span>
-<span class="sd">        * create dirs</span>
-<span class="sd">        * Initialize paths</span>
+<span class="sd">        Create dirs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span> <span class="o">!=</span> <span class="s">&#39;SSH&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">:</span>
-                <span class="n">last_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_last_backup</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">last_date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="c">#It means that this is the first backup.</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_date</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_date</span><span class="p">))</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span> <span class="c">#This one does not exist!</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span> <span class="c">#This one may exist!</span>
-                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                    <span class="c">#they could already exist</span>
-                    <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c"># Create dirs on the server</span>
-            <span class="n">login</span><span class="p">,</span> <span class="n">dest_dir_path</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
-            <span class="c">#add ~/ if does not start with /</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">dest_dir_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">):</span>
-                <span class="n">dest_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;~&#39;</span><span class="p">,</span> <span class="n">dest_dir_path</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">:</span>
-                <span class="c">#For the moment, we do not support snapshots via SSH</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest_dir_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> 
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c">#Move dir to set the new date in the path</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
             <span class="c">#Create dirs</span>
-            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ssh&#39;</span><span class="p">,</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="n">login</span><span class="p">,</span> <span class="s">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">]</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ssh&#39;</span><span class="p">,</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="s">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;SSH mkdir command: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
             <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
             <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
@@ -310,7 +381,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Current backup path: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">_prepare_rsync_command2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">_prepare_rsync_command</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compose the rsync command</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -329,16 +400,23 @@
         <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;--delete-excluded&#39;</span><span class="p">)</span>
 
         <span class="c"># z: compress the flux if transfert thought a network</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;SSH&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">()):</span>
             <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-z&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c">#FIXME for the moment, no snapshots though SSH !</span>
-            <span class="c"># link-dest: write snapshots with hard-links</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;--link-dest=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#Even if it works for ttype==Dir</span>
+            <span class="c">#It fails for ttype=SSH</span>
+            <span class="c">#If link-dest is not a relative path</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_backup_path</span><span class="p">)</span>
+            <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;--link-dest=../&#39;</span> <span class="o">+</span> <span class="n">path</span><span class="p">)</span>
+
 
         <span class="c"># Add source and destination</span>
-        <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-        <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
+        <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">():</span>
+            <span class="n">full_dest</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">login</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
+            <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">full_dest</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">:</span>
             <span class="c"># Add filters, the resulting command must look like</span>
@@ -350,33 +428,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;rsync command: </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">command</span>
 
-<span class="c">#    def _compress_increments(self):</span>
-<span class="c">#        &quot;&quot;&quot;</span>
-<span class="c">#        Compress increments and delete old ones</span>
-<span class="c">#        &quot;&quot;&quot;</span>
-<span class="c">#        if self.dest_type == &#39;DIR&#39;:</span>
-<span class="c">#            #compress if not empty</span>
-<span class="c">#            if os.listdir(self.inc_path) != []:</span>
-<span class="c">#                self.logger.debug(&quot;Zip the directory: %s&quot;, self.inc_path)</span>
-<span class="c">#                utils.compress(self.inc_path)</span>
-<span class="c">#            else:</span>
-<span class="c">#                self.logger.info(&#39;Empty increment&#39;)</span>
-<span class="c">#                pass</span>
-<span class="c">#            #delete the dir (we keep only non-empty tarballs</span>
-<span class="c">#            shutil.rmtree(self.inc_path)</span>
-<span class="c">#</span>
-<span class="c">#            #MrProper: remove old tarballs</span>
-<span class="c">#            self._delete_old_files(self.inc_dir, days=self.duration, keep=self.keep)</span>
-<span class="c">#        elif self.dest_type == &#39;SSH&#39;:</span>
-<span class="c">#            pass</span>
-<span class="c">#            #TODO ! compress dir though ssh</span>
-<span class="c">#            #TODO Remove old dirs though ssh</span>
-
-    <span class="k">def</span> <span class="nf">_rsync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">        Run rsync to do the task.</span>
+<span class="sd">        Run a command and log stderr+stdout in a dedicated log file.</span>
+<span class="sd">        :param command: a list, each element is a part of the command line</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        command = [&#39;/usr/bin/cp&#39;, &#39;-r&#39;, &#39;/home&#39;, &#39;/tmp&#39;]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_rsync_command2</span><span class="p">()</span>
 
         <span class="c">#If a signal is received, stop the process</span>
         <span class="c">#if self.terminate: return</span>
@@ -397,31 +457,38 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the job</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#TODO rewriting and integration</span>
+        <span class="c">#self._check_disk_usage()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_need_backup</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">job_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="o">*</span><span class="mi">20</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span>
             <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Backup </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="c">#Prepare the destination</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_destination2</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;source path </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;destination path </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_destination</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;source path </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">target</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;destination path </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">target</span><span class="p">)</span> 
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;filter path </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span>
             <span class="c">#Run rsync</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rsync</span><span class="p">()</span>
-            <span class="c">#Compress</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_rsync_command</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
             <span class="c">#Job done, update the time in the database</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_lastbackup_time</span><span class="p">()</span>
-        <span class="c">#Remove old snapshots, local only</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_type</span> <span class="o">==</span> <span class="s">&#39;DIR&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">:</span>
-            <span class="n">dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_delete_old_files</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keep</span><span class="p">)</span>
-            <span class="c">#Symlink</span>
-            <span class="n">last</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;last&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">last</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">last</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
-            <span class="k">except</span> <span class="n">FileExistsError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;The symlink </span><span class="si">%s</span><span class="s"> could not be created because a file exists&#39;</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+            <span class="c">#Remove old snapshots</span>
+            <span class="c">#self._delete_old_files(days=self.duration, keep=self.keep)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_delete_old_files</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="c">#Create symlink TODO: SSH</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">:</span>
+                <span class="c">#Symlink</span>
+                <span class="n">last</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;last&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">last</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">last</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_backup_path</span><span class="p">),</span> <span class="n">last</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">FileExistsError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;The symlink </span><span class="si">%s</span><span class="s"> could not be created because a file exists&#39;</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Attribute error for symlink. Job: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> 
 </pre></div></div></div>
 
           </div>
@@ -455,7 +522,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">Vitalus 0.3 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Vitalus 0.3.2 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

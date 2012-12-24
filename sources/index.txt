@@ -7,7 +7,8 @@ Welcome to Vitalus' documentation!
 ===================================
 
 :Author: François Boulogne
-:Source code: `github.com project <https://github.com/sciunto/Vitalus>`_
+:Download: `Stable version <http://sciunto.org/source/>`_
+:Developer's corner: `github.com project <https://github.com/sciunto/Vitalus>`_
 :Generated: |today|
 :License: GPL v3
 :Version: |release|
@@ -28,7 +29,8 @@ Philosophy
 * I want to centralize my backup in a unique script to achieve many tasks.
 * I want to backup my desktop on external disks.
 * I want to backup external disks to other external disks.
-* I want to backup my homes on hosts accessible via ssh to a local disk.
+* I want to backup my /home/user on hosts accessible via ssh to a local disk.
+* I want to backup my destop to hosts accessible via ssh.
 * I want to keep increment if I need it.
 * I want to adjust the frequency of copies for each task. The script starts much more frequently.
 * I want readable log files telling me if everything goes fine.
@@ -40,7 +42,7 @@ This is just another way to express the philosophy :)
 * Manage different tasks
 * rsync from and to local disks
 * rsync from SSH to local disk
-* (from local to SSH not fully supported yet)
+* rsync from local to SSH almost supported
 * Check disk space (local disks)
 * Keep track of time evolution (increments done with hard links), not possible via SSH for the moment. 
 * Old increments deleted (keeping a minimal amount of increments)

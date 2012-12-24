@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Vitalus’ documentation! &mdash; Vitalus 0.3 documentation</title>
+    <title>Welcome to Vitalus’ documentation! &mdash; Vitalus 0.3.2 documentation</title>
     
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.3',
+        VERSION:     '0.3.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Vitalus 0.3 documentation" href="#" />
+    <link rel="top" title="Vitalus 0.3.2 documentation" href="#" />
     <link rel="next" title="Vitalus library" href="vitalus.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="vitalus.html" title="Vitalus library"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Vitalus 0.3 documentation</a> &raquo;</li> 
+        <li><a href="#">Vitalus 0.3.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,13 +58,16 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">François Boulogne</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Source code:</th><td class="field-body"><a class="reference external" href="https://github.com/sciunto/Vitalus">github.com project</a></td>
+<tr class="field-even field"><th class="field-name">Download:</th><td class="field-body"><a class="reference external" href="http://sciunto.org/source/">Stable version</a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Generated:</th><td class="field-body">December 10, 2012</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Developer&#8217;s corner:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><a class="reference external" href="https://github.com/sciunto/Vitalus">github.com project</a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">License:</th><td class="field-body">GPL v3</td>
+<tr class="field-even field"><th class="field-name">Generated:</th><td class="field-body">December 24, 2012</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">0.3</td>
+<tr class="field-odd field"><th class="field-name">License:</th><td class="field-body">GPL v3</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Version:</th><td class="field-body">0.3.2</td>
 </tr>
 </tbody>
 </table>
@@ -83,7 +86,8 @@ Backup solutions are generally too basic or very difficult. This one fits my nee
 <li>I want to centralize my backup in a unique script to achieve many tasks.</li>
 <li>I want to backup my desktop on external disks.</li>
 <li>I want to backup external disks to other external disks.</li>
-<li>I want to backup my homes on hosts accessible via ssh to a local disk.</li>
+<li>I want to backup my /home/user on hosts accessible via ssh to a local disk.</li>
+<li>I want to backup my destop to hosts accessible via ssh.</li>
 <li>I want to keep increment if I need it.</li>
 <li>I want to adjust the frequency of copies for each task. The script starts much more frequently.</li>
 <li>I want readable log files telling me if everything goes fine.</li>
@@ -96,7 +100,7 @@ Backup solutions are generally too basic or very difficult. This one fits my nee
 * Manage different tasks
 * rsync from and to local disks
 * rsync from SSH to local disk
-* (from local to SSH not fully supported yet)
+* rsync from local to SSH almost supported
 * Check disk space (local disks)
 * Keep track of time evolution (increments done with hard links), not possible via SSH for the moment.
 * Old increments deleted (keeping a minimal amount of increments)
@@ -205,7 +209,7 @@ Add in your ~/.ssh/config, something like</p>
         <li class="right" >
           <a href="vitalus.html" title="Vitalus library"
              >next</a> |</li>
-        <li><a href="#">Vitalus 0.3 documentation</a> &raquo;</li> 
+        <li><a href="#">Vitalus 0.3.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
