@@ -48,7 +48,7 @@ class Target:
         self.logger = logging.getLogger('Vitalus.Target') 
         self.logger.debug("Read target %s", target)
         self.target = target
-        self.ttype = _detect_target_type()
+        self.ttype = self._detect_target_type()
 
         if self.is_dir():
             self.path = target
@@ -82,7 +82,7 @@ class Target:
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'
         else:
-            if not os.path.exists(target):
+            if not os.path.exists(self.target):
                 self.logger.warn("The target %s does not exist", self.target)
                 self.logger.info('Aborting...')
                 raise TARGETError("Target %s does not exist" % self.target)
@@ -118,8 +118,8 @@ class Job:
     def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
        
         self.name = name
-        self.source = source
-        self.destination = destination
+        self.source = Target(source)
+        self.destination = Target(destination)
         self.period = period
         self.snapshot = snapshot
         self.duration = duration
@@ -142,23 +142,23 @@ class Job:
         self.job_logger.info('='*20 + str(self.now) + '='*20)
         
         #Source types
-        self.source_type = self._get_target_type(self.source)
-        self.dest_type = self._get_target_type(self.destination)
+        #self.source_type = self._get_target_type(self.source)
+        #self.dest_type = self._get_target_type(self.destination)
 
         #Set previous and current backup paths
         self.previous_backup_path = None
         self.current_backup_path = None
 
-        if self.dest_type != 'SSH':
-            last_date = self._get_last_backup(os.path.join(self.destination, self.name))
-            self.current_backup_path = os.path.join(self.destination , self.name, str(self.current_date))
+        if self.destination.is_dir():
+            last_date = self._get_last_backup(os.path.join(self.destination.path, self.name))
+            self.current_backup_path = os.path.join(self.destination.path , self.name, str(self.current_date))
             if last_date is None:
                 #It means that this is the first backup.
                 self.previous_backup_path = None
             else:
-                self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
+                self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
 
-        else:
+        elif self.destination.is_ssh():
             #TODO detect previous backup though SSH
             self.dest_login, dest_dir_path = destination.split(':')
             #add ./ if does not start with /
@@ -203,13 +203,13 @@ class Job:
         Check the disk usage
         :raises TARGETError: if low disk space
         """
-        if self.dest_type == 'DIR':
+        if self.destination.is_dir():
             #TODO, change the criterion
             pass
             #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source): 
             #    self.logger.critical("Low disk space: %s", self.destination)
             #    raise TARGETError('Low disk space on %s' % self.destination)
-        elif self.dest_type == 'SSH':
+        elif self.destination.is_ssh():
             #TODO
             pass
 
@@ -307,7 +307,7 @@ class Job:
         Prepare the destination to receive a backup:
         Create dirs
         """
-        if self.dest_type != 'SSH':
+        if self.destination.is_dir():
             if self.snapshot:
                 os.makedirs(self.current_backup_path) #This one does not exist!
             else:
@@ -321,7 +321,7 @@ class Job:
                 else:
                     #Move dir
                     os.rename(self.previous_backup_path, self.current_backup_path)
-        else:
+        elif self.destination.is_ssh():
             #Create dirs
             command = ['ssh', '-t', self.dest_login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
@@ -352,7 +352,7 @@ class Job:
         command.append('--delete-excluded')
 
         # z: compress the flux if transfert thought a network
-        if (self.source_type or self.dest_type) == 'SSH':
+        if (self.source.is_ssh() or self.destination.is_ssh()):
             command.append('-z')
         #else: #FIXME for the moment, no snapshots though SSH !
         #    pass
@@ -361,8 +361,8 @@ class Job:
             command.append('--link-dest=' + self.previous_backup_path)
 
         # Add source and destination
-        command.append(self.source)
-        if self.dest_type == 'SSH':
+        command.append(self.source.target)
+        if self.destination.is_ssh():
             full_dest = str(self.dest_login) + ':' + str(self.current_backup_path)
             command.append(full_dest)
         else:
@@ -414,8 +414,8 @@ class Job:
             self.logger.info("Backup %s", self.name)
             #Prepare the destination
             self._prepare_destination()
-            self.logger.debug("source path %s", self.source) 
-            self.logger.debug("destination path %s", self.destination) 
+            self.logger.debug("source path %s", self.source.target) 
+            self.logger.debug("destination path %s", self.destination.target) 
             self.logger.debug("filter path %s", self.filter)
             #Run rsync
             command = self._prepare_rsync_command()
@@ -423,11 +423,11 @@ class Job:
             #Job done, update the time in the database
             self._set_lastbackup_time()
             #Remove old snapshots, local only
-            if self.dest_type == 'DIR' and self.snapshot:
-                dest = os.path.join(self.destination, self.name)
+            if self.destination.is_dir() and self.snapshot:
+                dest = os.path.join(self.destination.path, self.name)
                 self._delete_old_files(dest, days=self.duration, keep=self.keep)
                 #Symlink
-                last = os.path.join(self.destination , self.name, 'last')
+                last = os.path.join(self.destination.path, self.name, 'last')
                 if os.path.islink(last):
                     os.remove(last)
                 os.chdir(os.path.dirname(self.current_backup_path))
