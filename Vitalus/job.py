@@ -156,10 +156,11 @@ class Job:
 
         elif self.destination.is_ssh():
             #TODO detect previous backup though SSH
-            self.dest_login, dest_dir_path = destination.split(':')
+            #FOr that, we should refactor get_last_backup
+
             #add ./ if does not start with /
-            if not dest_dir_path.startswith('/'):
-                dest_dir_path = os.path.join('.', dest_dir_path) #FIXME this tends to write ././foo/bar
+            if not self.destination.path.startswith('/'):
+                dest_dir_path = os.path.join('.', self.destination.path) #FIXME this tends to write ././foo/bar
             if self.snapshot:
                 #For the moment, we do not support snapshots via SSH
                 self.current_backup_path = os.path.join(dest_dir_path, self.name, str(self.current_date))
@@ -291,7 +292,7 @@ class Job:
                     os.rename(self.previous_backup_path, self.current_backup_path)
         elif self.destination.is_ssh():
             #Create dirs
-            command = ['ssh', '-t', self.dest_login, 'mkdir', '-p', self.current_backup_path]
+            command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
@@ -331,7 +332,7 @@ class Job:
         # Add source and destination
         command.append(self.source.target)
         if self.destination.is_ssh():
-            full_dest = str(self.dest_login) + ':' + str(self.current_backup_path)
+            full_dest = str(self.destination.login) + ':' + str(self.current_backup_path)
             command.append(full_dest)
         else:
             command.append(self.current_backup_path)
