@@ -211,37 +211,63 @@ class Job:
             self.logger.debug("%s does not need backup", self.name)
             return False
 
-    def _delete_old_files(self, path, days=10, keep=10): 
+    def _delete_old_files(self, days=10, keep=10): 
         """
-        Delete old archives in a path
+        Delete old archives in the destination
 
-        :param path: path to clean
         :param days: delete files older than this value
         :param keep: keep at least this amount of archives
         """
         #TODO : review logs
 
+        path = os.path.join(self.destination.path, self.name)
         ####if self.terminate: return
-        filenames = [os.path.join(path, el) for el in os.listdir(path) ]
+        
+        if self.destination.is_dir():
+            filenames = [os.path.join(path, el) for el in os.listdir(path) ]
+        elif self.destination.is_ssh():
+            command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
+            self.logger.debug('SSH ls command: ' + str(command))
+            process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            filenames = stdout.decode()
+            filenames = filenames.split('\r\n')
+            filenames = [x for x in filenames if x!='']
+        else:
+            return
+
+        if self.destination.is_ssh():
+            #Not yet implemented!
+            return
+
         #delete first the older one
+        to_delete = []
         filenames.sort() #newer first
         nb_archives = len(filenames)
         for filepath in enumerate(filenames):
             #keep a sufficient number of archives
             if (nb_archives - filepath[0]) <= keep:
                 self.logger.debug('nb archives %s, keep %s, archive %s' % (nb_archives, keep, filepath[0]))
-                return
+                continue
             #Are they too old?
             file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
             if datetime.datetime.now() - file_date > datetime.timedelta(days=days): 
-                self.logger.info("remove %s", filepath[1])
-                try:
-                    shutil.rmtree(filepath[1])
-                except OSError:
-                    self.logger.error("Impossible to delete %s (symlink?)", filepath[1])
+
+                to_delete.append(filepath[1])
+                self.logger.info("Remove backup %s", filepath[1])
             else:
                 self.logger.debug("Keep backup %s", filepath[1])
-                return
+                continue
+
+        for element in to_delete:
+            if self.destination.is_dir():
+                print(element) #FIXME
+                try:
+                    shutil.rmtree(element)
+                except OSError:
+                    self.logger.error("Impossible to delete %s (symlink?)", element)
+            elif self.destination.is_ssh():
+                print(element) #FIXME
 
     def _get_last_backup(self):
         """
@@ -396,10 +422,11 @@ class Job:
             self._run_command(command)
             #Job done, update the time in the database
             self._set_lastbackup_time()
-            #Remove old snapshots, local only
+            #Remove old snapshots
+            #self._delete_old_files(days=self.duration, keep=self.keep)
+            self._delete_old_files(days=0, keep=3)
+            #Create symlink TODO: SSH
             if self.destination.is_dir() and self.snapshot:
-                dest = os.path.join(self.destination.path, self.name)
-                self._delete_old_files(dest, days=self.duration, keep=self.keep)
                 #Symlink
                 last = os.path.join(self.destination.path, self.name, 'last')
                 if os.path.islink(last):
