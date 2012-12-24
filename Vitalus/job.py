@@ -36,6 +36,62 @@ import datetime
 import logging
 from contextlib import closing
 
+
+class Target:
+    """
+    A target is a source or a destination.
+    Both of them can be a local directory
+    or a distant one though SSH
+    """
+    
+    def __init__(self, target):
+        self.logger = logging.getLogger('Vitalus.Target') 
+        self.logger.debug("Read target %s", target)
+        self.target = target
+        self.ttype = _detect_target_type()
+
+        if self.is_dir():
+            self.path = target
+        elif self.is_ssh():
+            self.login, self.path = target.split(':')
+
+
+    def is_dir(self):
+        if self.ttype == 'DIR':
+            return True
+        else:
+            return False
+
+    def is_ssh(self):
+        if self.ttype == 'SSH':
+            return True
+        else:
+            return False
+
+    def _detect_target_type(self):
+        """
+        Return the target type
+        SSH if matches name@domaine.tld:dir
+        DIR if it's a directory
+       
+        :param target: Target (source or destination)
+        :raises TARGETError: weird target type 
+        """
+        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
+            #ssh
+            self.logger.debug("The target %s looks like SSH", self.target)
+            return 'SSH'
+        else:
+            if not os.path.exists(target):
+                self.logger.warn("The target %s does not exist", self.target)
+                self.logger.info('Aborting...')
+                raise TARGETError("Target %s does not exist" % self.target)
+            else:
+                self.logger.debug("The target %s looks like DIR", self.target)
+                return 'DIR'
+
+
+
 class Job:
     """
     Class containing a job
