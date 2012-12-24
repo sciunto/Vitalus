@@ -144,24 +144,30 @@ class Job:
         self.previous_backup_path = None
         self.current_backup_path = None
 
-        if self.destination.is_dir():
-            last_date = self._get_last_backup(os.path.join(self.destination.path, self.name))
-            self.current_backup_path = os.path.join(self.destination.path , self.name, str(self.current_date))
-            if last_date is None:
-                #It means that this is the first backup.
-                self.previous_backup_path = None
-            else:
-                self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+        last_date = self._get_last_backup2()
+        self.current_backup_path = os.path.join(self.destination.path , self.name, str(self.current_date))
+        if last_date is None:
+            #It means that this is the first backup.
+            self.previous_backup_path = None
+        else:
+            self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+        #if self.destination.is_dir():
+        #    #last_date = self._get_last_backup(os.path.join(self.destination.path, self.name))
+        #    self.current_backup_path = os.path.join(self.destination.path , self.name, str(self.current_date))
+        #    if last_date is None:
+        #        #It means that this is the first backup.
+        #        self.previous_backup_path = None
+        #    else:
+        #        self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
 
-        elif self.destination.is_ssh():
-            #TODO detect previous backup though SSH
-            #FOr that, we should refactor get_last_backup
-
-            if self.snapshot:
-                #For the moment, we do not support snapshots via SSH
-                self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
-            else:
-                self.current_backup_path = os.path.join(self.destination.path, self.name)
+        #elif self.destination.is_ssh():
+        #    #TODO detect previous backup though SSH
+        #    #FOr that, we should refactor get_last_backup
+        #    if self.snapshot:
+        #        #For the moment, we do not support snapshots via SSH
+        #        self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+        #    else:
+        #        self.current_backup_path = os.path.join(self.destination.path, self.name)
             
 
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
@@ -271,6 +277,47 @@ class Job:
             return None
         return filenames[-1] 
 
+    def _get_last_backup2(self):
+        """
+        Get the last backup in path
+        Return None if not available
+        """
+        path = os.path.join(self.destination.path, self.name)
+        if self.destination.is_dir():
+            if not os.path.isdir(path):
+                return None
+            filenames = [os.path.join(path, el) for el in os.listdir(path)]
+            filenames.sort()
+            if filenames == []:
+                return None
+            return filenames[-1] 
+        elif self.destination.is_ssh():
+            #First, create at least the target if does not exists
+            command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', path]
+            self.logger.debug('SSH mkdir command: ' + str(command))
+            process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            self.logger.debug('SSH mkdir result: ' + stdout.decode())
+
+
+            command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
+            self.logger.debug('SSH ls command: ' + str(command))
+            process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            filenames = stdout.decode()
+            filenames = filenames.split('\r\n')
+            filenames = [x for x in filenames if x!='']
+            print(filenames)
+            print(type(filenames))
+            #self.logger.debug('SSH ls result: ' + stdout.decode())
+
+            filenames.sort()
+            if filenames == []:
+                return None
+            try:
+                return filenames[-2] 
+            except IndexError:
+                return None
 
     def _prepare_destination(self): 
         """
