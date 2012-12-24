@@ -325,11 +325,13 @@ class Job:
         # z: compress the flux if transfert thought a network
         if (self.source.is_ssh() or self.destination.is_ssh()):
             command.append('-z')
-        #else: #FIXME for the moment, no snapshots though SSH !
-        #    pass
-            # link-dest: write snapshots with hard-links
         if self.snapshot and self.previous_backup_path is not None:
-            command.append('--link-dest=' + self.previous_backup_path)
+            #Even if it works for ttype==Dir
+            #It fails for ttype=SSH
+            #If link-dest is not a relative path
+            path = os.path.basename(self.previous_backup_path)
+            command.append('--link-dest=../' + path)
+
 
         # Add source and destination
         command.append(self.source.target)
