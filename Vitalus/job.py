@@ -27,7 +27,7 @@ class TARGETError(Exception):
 
 import os
 import re
-import psutil
+#import psutil
 import shelve
 import subprocess
 import shutil
@@ -158,34 +158,31 @@ class Job:
             #TODO detect previous backup though SSH
             #FOr that, we should refactor get_last_backup
 
-            #add ./ if does not start with /
-            if not self.destination.path.startswith('/'):
-                dest_dir_path = os.path.join('.', self.destination.path) #FIXME this tends to write ././foo/bar
             if self.snapshot:
                 #For the moment, we do not support snapshots via SSH
-                self.current_backup_path = os.path.join(dest_dir_path, self.name, str(self.current_date))
+                self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
             else:
-                self.current_backup_path = os.path.join(dest_dir_path, self.name)
+                self.current_backup_path = os.path.join(self.destination.path, self.name)
             
 
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
 
 
-    def _check_disk_usage(self):
-        """
-        Check the disk usage
-        :raises TARGETError: if low disk space
-        """
-        if self.destination.is_dir():
-            #TODO, change the criterion
-            pass
-            #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source): 
-            #    self.logger.critical("Low disk space: %s", self.destination)
-            #    raise TARGETError('Low disk space on %s' % self.destination)
-        elif self.destination.is_ssh():
-            #TODO
-            pass
+#    def _check_disk_usage(self):
+#        """
+#        Check the disk usage
+#        :raises TARGETError: if low disk space
+#        """
+#        if self.destination.is_dir():
+#            #TODO, change the criterion
+#            pass
+#            #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source): 
+#            #    self.logger.critical("Low disk space: %s", self.destination)
+#            #    raise TARGETError('Low disk space on %s' % self.destination)
+#        elif self.destination.is_ssh():
+#            #TODO
+#            pass
 
     def _set_lastbackup_time(self):
         """
