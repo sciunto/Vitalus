@@ -98,14 +98,15 @@ class Job:
 
         else:
             self.dest_login, dest_dir_path = destination.split(':')
-            #add ~/ if does not start with /
+            #add ./ if does not start with /
             if not dest_dir_path.startswith('/'):
-                dest_dir_path = os.path.join('~', dest_dir_path)
+                dest_dir_path = os.path.join('.', dest_dir_path)
             if self.snapshot:
                 #For the moment, we do not support snapshots via SSH
                 pass
             else:
                 self.current_backup_path = os.path.join(dest_dir_path, self.name)
+            
 
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
@@ -297,7 +298,11 @@ class Job:
 
         # Add source and destination
         command.append(self.source)
-        command.append(self.current_backup_path)
+        if self.dest_type == 'SSH':
+            full_dest = str(self.dest_login) + ':' + str(self.current_backup_path)
+            command.append(full_dest)
+        else:
+            command.append(self.current_backup_path)
 
         if self.filter:
             # Add filters, the resulting command must look like
