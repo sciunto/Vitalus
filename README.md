@@ -1,5 +1,6 @@
 # Description
-Wrapper for rsync, still under heavy dev. Use and update with caution
+Wrapper for rsync, still under heavy dev. Use and update with caution.
+I still change my mind on the ideal tool :)
 
 # Author 
 F. Boulogne <fboulogne at april dot org>
