@@ -97,7 +97,7 @@ class Job:
                 self.previous_backup_path = os.path.join(self.destination, self.name, str(last_date))
 
         else:
-            login, dest_dir_path = destination.split(':')
+            self.dest_login, dest_dir_path = destination.split(':')
             #add ~/ if does not start with /
             if not dest_dir_path.startswith('/'):
                 dest_dir_path = os.path.join('~', dest_dir_path)
@@ -259,7 +259,7 @@ class Job:
                     os.rename(self.previous_backup_path, self.current_backup_path)
         else:
             #Create dirs
-            command = ['ssh', '-t', login, 'mkdir', '-p', self.current_backup_path]
+            command = ['ssh', '-t', self.dest_login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
