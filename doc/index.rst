@@ -50,18 +50,9 @@ This is just another way to express the philosophy :)
 
 How to install?
 ===============
-Archlinux: https://aur.archlinux.org/packages.php?ID=61901
 
-Otherwise:
-python setup.py install --root='/tmp'
-You can adapt the root directory.
+See :doc:`install`.
 
-Requirements
-------------
-* python 3
-* python-psutil
-* rsync
-* distutils (install)
 
 How to setup?
 =============
