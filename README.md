@@ -24,4 +24,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 http://sciunto.github.com/Vitalus/
 
 #Download
-http://sciunto.org/source/
+http://source.sciunto.org/vitalus/

@@ -27,6 +27,8 @@ To install with pip:
 Manual installation
 -------------------
 
+`Download <http://source.sciunto.org/vitalus>`_
+
 .. code-block:: sh
 
     python setup.py --root=/usr/local/bin
