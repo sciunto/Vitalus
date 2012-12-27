@@ -5,6 +5,7 @@ import unittest
 import tempfile
 
 from job import Target
+from job import TARGETError
 
 
 class TestTarget(unittest.TestCase):
@@ -19,6 +20,13 @@ class TestTarget(unittest.TestCase):
     def test_is_dir_ssh_domain(self):
         target = Target('fr@sciunto.org:.')
         self.assertFalse(target.is_dir())
+
+    #
+    # Complicated domain
+    #
+    def test_is_ssh_ssh_cdomain(self):
+        target = Target('fr67-94@sub-extra.sciunto.org:.')
+        self.assertTrue(target.is_ssh())
 
     #
     # IPv4
@@ -43,6 +51,13 @@ class TestTarget(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
         target = Target(tmp.name)
         self.assertFalse(target.is_ssh())
+
+    #
+    # Wrong domain
+    #
+    def test_incompletedomain(self):
+        self.assertRaises(TARGETError, Target, 'fr67-94@sub-extra.sciunto.org')
+
 
 if __name__ == '__main__':
     unittest.main()
