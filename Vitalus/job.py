@@ -84,7 +84,7 @@ class Target:
             return 'SSH'
         else:
             if not os.path.exists(self.target):
-                self.logger.warn("The target %s does not exist", self.target)
+                self.logger.warning("The target %s does not exist", self.target)
                 self.logger.info('Aborting...')
                 raise TARGETError("Target %s does not exist" % self.target)
             else:
@@ -436,8 +436,8 @@ class Job:
                 try:
                     os.symlink(os.path.basename(self.current_backup_path), last)
                 except FileExistsError:
-                    self.logger.warn('The symlink %s could not be created because a file exists', last)
+                    self.logger.warning('The symlink %s could not be created because a file exists', last)
                 except AttributeError:
-                    self.logger.warn('Attribute error for symlink. Job: %s', self.name) 
+                    self.logger.warning('Attribute error for symlink. Job: %s', self.name) 
 
 

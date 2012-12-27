@@ -93,7 +93,7 @@ class Vitalus:
 
 
     def _signal_handler(self, signal, frame):
-        self.logger.warn('Signal received %s', signal)
+        self.logger.warning('Signal received %s', signal)
         self._set_process_high_priority()
         self.terminate = True
 
