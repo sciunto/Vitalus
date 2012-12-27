@@ -45,13 +45,6 @@ class TestTarget(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
         target = Target(tmp.name)
         self.assertFalse(target.is_ssh())
-#
-#
-#    def test_link_archive_status_NO(self):
-#        url = 'http://www.toto.org'
-#        line = 'A nice line with http://www.toto.org Another info'
-#        result = link_archive_status(url, line)
-#        self.assertFalse(result)
 
 if __name__ == '__main__':
     unittest.main()
