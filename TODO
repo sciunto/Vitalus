@@ -5,6 +5,7 @@
 
 * history false to true and conversly (started)
 
+* minimize the # of SSH connections
 
 Delete old files
 ----------------
