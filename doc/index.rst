@@ -56,7 +56,7 @@ See :doc:`install`.
 
 How to setup?
 =============
-See example.py
+See :doc:`example`.
 
 In my use case, I have a cron job running every hour. IMHO, this is quite atomic. Then, the script decides which task has to be done.
 
