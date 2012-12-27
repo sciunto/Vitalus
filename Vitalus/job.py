@@ -77,7 +77,8 @@ class Target:
         :param target: Target (source or destination)
         :raises TARGETError: weird target type 
         """
-        if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
+        #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
+        if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
             #ssh
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'

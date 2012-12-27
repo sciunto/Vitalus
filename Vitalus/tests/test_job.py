@@ -23,12 +23,10 @@ class TestTarget(unittest.TestCase):
     #
     # IPv4
     #
-    @unittest.skip('known to fail')
     def test_is_ssh_ssh_ipv4(self):
         target = Target('fr@192.168.1.30:.')
         self.assertTrue(target.is_ssh())
 
-    @unittest.skip('known to fail')
     def test_is_dir_ssh_ipv4(self):
         target = Target('fr@192.168.1.30:.')
         self.assertFalse(target.is_dir())
