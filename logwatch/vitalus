@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+##########################################################################
+# $Id$
+##########################################################################
+# $Log$
+########################################################
+# GPLv3+
+# Author: Francois Boulogne <fboulogne at sciunto dot org>
+#########################################################
+
+# Detail level
+$Detail = $ENV{'LOGWATCH_DETAIL_LEVEL'} || 0;
+
+while (defined($ThisLine = <STDIN>)) {
+   chomp($ThisLine);
+   if ( 
+      ($ThisLine =~ /DEBUG/) or
+      ($ThisLine =~ /DEBUG/)
+   ) {
+      # Ignore
+   } else {
+      # Report any unmatched entries...
+      $OtherList{$ThisLine}++;
+   } 
+}
+
+
+if (keys %OtherList) {
+   print "\n**Unmatched Entries**\n";
+   foreach $ThisOne (keys %OtherList) {
+      print "    $ThisOne: $OtherList{$ThisOne} Time(s)\n";
+   }
+}
+
+exit(0);
+
+# vi: shiftwidth=3 tabstop=3 syntax=perl et
+
