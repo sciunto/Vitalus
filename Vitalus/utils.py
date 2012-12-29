@@ -66,7 +66,10 @@ def get_older_files(file_list, days=5, keep=10):
     old = []
     recent = []
     for afile in file_list:
-        date = datetime.datetime.strptime(afile, '%Y-%m-%d_%Hh%Mm%Ss')
+        try:
+            date = datetime.datetime.strptime(afile, '%Y-%m-%d_%Hh%Mm%Ss')
+        except ValueError:
+            continue
         if (now - date) >= datetime.timedelta(days):
             old.append(afile)
         else:
