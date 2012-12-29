@@ -57,12 +57,22 @@ class Target:
 
 
     def is_dir(self):
+        """
+        Check if the target is a directory
+
+        :returns: boolean
+        """
         if self.ttype == 'DIR':
             return True
         else:
             return False
 
     def is_ssh(self):
+        """
+        Check if the target is a 'SSH' host
+
+        :returns: boolean
+        """
         if self.ttype == 'SSH':
             return True
         else:
