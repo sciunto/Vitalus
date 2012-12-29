@@ -245,7 +245,7 @@ class Job:
         else:
             return
 
-        self.logger.error("to delete %s ", filenames)
+        self.logger.debug("to delete %s ", filenames)
 
         to_delete = utils.get_older_files(filenames, days, keep)
 
