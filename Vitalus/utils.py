@@ -78,7 +78,7 @@ def get_older_files(file_list, days=5, keep=10):
     old.sort()
     #While we remove too much,
     #re-feed keep array
-    while len(recent) < keep:
+    while (len(recent) < keep) and (old != []):
         recent.append(old.pop(-1))
 
     return old

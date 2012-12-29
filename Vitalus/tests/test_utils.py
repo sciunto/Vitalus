@@ -72,3 +72,11 @@ class TestOlderFiles(unittest.TestCase):
         result = get_older_files(file_list, days=0, keep=10)
         self.assertEqual(result, expected_list)
 
+    def test_getOlderFiles_zero_file(self):
+        #In this case, the number of file < keep
+        file_list = []
+        expected_list = []
+        now = datetime.datetime.now()
+
+        result = get_older_files(file_list, days=0, keep=10)
+        self.assertEqual(result, expected_list)
