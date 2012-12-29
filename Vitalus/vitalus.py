@@ -161,7 +161,7 @@ class Vitalus:
         Note: filter syntax is the same of rsync. See "FILTER RULES" section
         in the rsync man page.
         """
-        if name in self.job:
+        if name in self.jobs:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
             return
 
