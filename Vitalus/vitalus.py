@@ -161,6 +161,11 @@ class Vitalus:
         Note: filter syntax is the same of rsync. See "FILTER RULES" section
         in the rsync man page.
         """
+        if name in self.job:
+            self.critical("%s already present in the job list. Job's name should be uniq.", name)
+            return
+
+
         if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug("add job: %s", name) 
@@ -185,7 +190,6 @@ if __name__ == '__main__':
     b = Vitalus()
     b.set_log_level('DEBUG')
     b.set_destination('/tmp/sauvegarde')
-    #TODO Check that job names are uniq
     b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, history=True)
     b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, history=True)
     b.add_job('test3', '/home/gnu/tmp/photos', period=0.001, history=False)
