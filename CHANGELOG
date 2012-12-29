@@ -1,5 +1,7 @@
 ==== Version 0.x ====
 * Fix bug ipv4 address
+* Log improvements
+* check job uniqness
 
 ==== Version 0.3.2 ====
 * Code refactoring (job.py)
