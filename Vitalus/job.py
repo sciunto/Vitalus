@@ -85,7 +85,6 @@ class Target:
         else:
             if not os.path.exists(self.target):
                 self.logger.warning("The target %s does not exist", self.target)
-                self.logger.info('Aborting...')
                 raise TARGETError("Target %s does not exist" % self.target)
             else:
                 self.logger.debug("The target %s looks like DIR", self.target)
@@ -114,7 +113,6 @@ class Job:
     Source and destination path can be either real path
     or a ssh login joined to the path by a : caracter.
     """
-    #TODO signal...
 
     def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
        
@@ -132,7 +130,7 @@ class Job:
 
         self.backup_log_dir = log_dir
         
-        self.logger = logging.getLogger('Vitalus.Job') #TODO add the job name in the format
+        self.logger = logging.getLogger('Vitalus.Job') 
         
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
@@ -387,10 +385,6 @@ class Job:
         -------
         command = ['/usr/bin/cp', '-r', '/home', '/tmp']
         """
-
-        #If a signal is received, stop the process
-        #if self.terminate: return
-
         #Run the command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
@@ -407,12 +401,14 @@ class Job:
         """
         Run the job
         """
+        self.logger.debug('Start job: %s', name)
         #TODO rewriting and integration
         #self._check_disk_usage()
+
         if self._check_need_backup():
             self.job_logger.info('='*20 + str(self.now) + '='*20)
+            self.logger.debug('Start Backup: %s', name)
             print(self.name)
-            self.logger.info("Backup %s", self.name)
             #Prepare the destination
             self._prepare_destination()
             self.logger.debug("source path %s", self.source.target) 
@@ -439,5 +435,7 @@ class Job:
                     self.logger.warning('The symlink %s could not be created because a file exists', last)
                 except AttributeError:
                     self.logger.warning('Attribute error for symlink. Job: %s', self.name) 
+
+            self.logger.info("Backup %s done", self.name)
 
 

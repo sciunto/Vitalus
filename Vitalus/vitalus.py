@@ -16,10 +16,9 @@
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
-#import datetime
 import os
 import psutil
-import signal
+#import signal
 import logging, logging.handlers
 import sys
 
@@ -61,10 +60,8 @@ class Vitalus:
         #Priority 
         self._set_process_low_priority()
 
-        #timebase
-        
         self.logger.info('Vitalus %s starts...' % info.VERSION)
-        signal.signal(signal.SIGTERM, self._signal_handler)
+        #signal.signal(signal.SIGTERM, self._signal_handler)
 
     def set_log_level(self, level='INFO'):
         """
@@ -92,10 +89,10 @@ class Vitalus:
             
 
 
-    def _signal_handler(self, signal, frame):
-        self.logger.warning('Signal received %s', signal)
-        self._set_process_high_priority()
-        self.terminate = True
+#    def _signal_handler(self, signal, frame):
+#        self.logger.warning('Signal received %s', signal)
+#        self._set_process_high_priority()
+#        self.terminate = True
 
     def _create_pidfile(self):
         """ Create a pidfile """
@@ -171,8 +168,7 @@ class Vitalus:
                 self.jobs.append(Job(self.backup_log_dir, name, source, 
                     self.destination, period_in_seconds, history, duration, keep, filter))
             except TARGETError:
-                #FIXME: message
-                self.logger.warning('Wrong or unreachable destination')
+                #We abort
                 pass
 
 
