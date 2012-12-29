@@ -230,13 +230,13 @@ class Job:
         #TODO : review logs
 
         path = os.path.join(self.destination.path, self.name)
-        ####if self.terminate: return
         
         if self.destination.is_dir():
-            filenames = [os.path.join(path, el) for el in os.listdir(path) ]
+            #filenames = [os.path.join(path, el) for el in os.listdir(path) ]
+            filenames = os.listdir(path)
         elif self.destination.is_ssh():
             command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
-            self.logger.debug('SSH ls command: ' + str(command))
+            self.logger.debug('SSH rm command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
@@ -245,38 +245,26 @@ class Job:
         else:
             return
 
-        if self.destination.is_ssh():
-            #Not yet implemented!
-            return
+        self.logger.error("to delete %s ", filenames)
 
-        #delete first the older one
-        to_delete = []
-        filenames.sort() #newer first
-        nb_archives = len(filenames)
-        for filepath in enumerate(filenames):
-            #keep a sufficient number of archives
-            if (nb_archives - filepath[0]) <= keep:
-                self.logger.debug('nb archives %s, keep %s, archive %s' % (nb_archives, keep, filepath[0]))
-                continue
-            #Are they too old?
-            file_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath[1]))
-            if datetime.datetime.now() - file_date > datetime.timedelta(days=days): 
-
-                to_delete.append(filepath[1])
-                self.logger.info("Remove backup %s", filepath[1])
-            else:
-                self.logger.debug("Keep backup %s", filepath[1])
-                continue
+        to_delete = utils.get_older_files(filenames, days, keep)
 
         for element in to_delete:
+            self.logger.info("Remove backup %s", element)
             if self.destination.is_dir():
-                print(element) #FIXME
                 try:
-                    shutil.rmtree(element)
+                    shutil.rmtree(os.path.join(path, element))
                 except OSError:
                     self.logger.error("Impossible to delete %s (symlink?)", element)
             elif self.destination.is_ssh():
-                print(element) #FIXME
+                filepath = os.path.join(path, element)
+                command = ['ssh', '-t', self.destination.login, 'rm', filepath]
+                self.logger.debug('SSH rm command: ' + str(command))
+                #CHECKME
+                #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+                #stdout, stderr = process.communicate()
+
+                #TODO uniq command
 
     def _get_last_backup(self):
         """
@@ -411,13 +399,13 @@ class Job:
         """
         Run the job
         """
-        self.logger.debug('Start job: %s', name)
+        self.logger.debug('Start job: %s', self.name)
         #TODO rewriting and integration
         #self._check_disk_usage()
 
         if self._check_need_backup():
             self.job_logger.info('='*20 + str(self.now) + '='*20)
-            self.logger.debug('Start Backup: %s', name)
+            self.logger.debug('Start Backup: %s', self.name)
             print(self.name)
             #Prepare the destination
             self._prepare_destination()
