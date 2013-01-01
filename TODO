@@ -12,8 +12,9 @@ Delete old files
 * Support SSH
 
 
-Style
------
+Unittests
+---------
+* refactor _get_last_backup in job.py
 
 Signals
 -------

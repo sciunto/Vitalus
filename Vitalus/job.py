@@ -153,16 +153,6 @@ class Job:
         self.previous_backup_path = None
         self.current_backup_path = None
 
-        last_date = self._get_last_backup()
-        self.current_backup_path = os.path.join(self.destination.path , self.name, str(self.current_date))
-        if last_date is None:
-            #It means that this is the first backup.
-            self.previous_backup_path = None
-        else:
-            self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
-
-        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
-        self.logger.debug("Current backup path: %s", self.current_backup_path)
 
 
 #    def _check_disk_usage(self):
@@ -236,7 +226,7 @@ class Job:
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
             command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
-            self.logger.debug('SSH rm command: ' + str(command))
+            self.logger.debug('SSH ls command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
@@ -245,32 +235,36 @@ class Job:
         else:
             return
 
-        self.logger.debug("to delete %s ", filenames)
+        self.logger.debug("file_list %s ", filenames)
 
         to_delete = utils.get_older_files(filenames, days, keep)
 
-        for element in to_delete:
-            self.logger.info("Remove backup %s", element)
-            if self.destination.is_dir():
+        self.logger.debug("to delete %s ", to_delete)
+
+        if self.destination.is_dir():
+            for element in to_delete:
+                self.logger.info("Remove backup %s", element)
                 try:
                     shutil.rmtree(os.path.join(path, element))
                 except OSError:
                     self.logger.error("Impossible to delete %s (symlink?)", element)
-            elif self.destination.is_ssh():
-                filepath = os.path.join(path, element)
-                command = ['ssh', '-t', self.destination.login, 'rm', filepath]
-                self.logger.debug('SSH rm command: ' + str(command))
-                #CHECKME
-                #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
-                #stdout, stderr = process.communicate()
+        elif self.destination.is_ssh():
+            filepaths = [ os.path.join(path, element) for element in to_delete ]
+            command = ['ssh', '-t', self.destination.login, 'rm', filepaths]
+            self.logger.debug('SSH rm command: ' + str(command))
+            #CHECKME
+            #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+            #stdout, stderr = process.communicate()
 
-                #TODO uniq command
 
     def _get_last_backup(self):
         """
         Get the last backup in path
         Return None if not available
         """
+        #TODO: it should look only correct name format
+        #The best is to write a subfunction in utils with unittest
+
         path = os.path.join(self.destination.path, self.name)
         if self.destination.is_dir():
             if not os.path.isdir(path):
@@ -297,7 +291,9 @@ class Job:
         if filenames == []:
             return None
         try:
-            return filenames[-1] 
+            name = filenames[-1] 
+            self.logger.debug('_get_last_backup returns: %s', name)
+            return name
         except IndexError:
             return None
 
@@ -323,9 +319,6 @@ class Job:
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir result: ' + stdout.decode())
                 
-        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
-        self.logger.debug("Current backup path: %s", self.current_backup_path)
-
 
     def _prepare_rsync_command(self): 
         """
@@ -402,6 +395,17 @@ class Job:
         self.logger.debug('Start job: %s', self.name)
         #TODO rewriting and integration
         #self._check_disk_usage()
+
+        last_date = self._get_last_backup()
+        self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+        if last_date is None:
+            #It means that this is the first backup.
+            self.previous_backup_path = None
+        else:
+            self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+
+        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
+        self.logger.debug("Current backup path: %s", self.current_backup_path)
 
         if self._check_need_backup():
             self.job_logger.info('='*20 + str(self.now) + '='*20)
