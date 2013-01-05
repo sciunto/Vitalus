@@ -284,7 +284,8 @@ class Job:
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
-            filenames = filenames.split('\r\n')
+            #filenames = filenames.split('\r\n')
+            filenames = filenames.split('\n')
             filenames = [x for x in filenames if x!='']
 
         filenames.sort()
@@ -292,6 +293,7 @@ class Job:
             return None
         try:
             name = filenames[-1] 
+            name.strip('\r')
             self.logger.debug('_get_last_backup returns: %s', name)
             return name
         except IndexError:
