@@ -425,7 +425,7 @@ class Job:
             #self._delete_old_files(days=self.duration, keep=self.keep)
             self._delete_old_files(days=0, keep=3)
             #Create symlink TODO: SSH
-            if self.destination.is_dir() and self.snapshot:
+            if self.destination.is_dir():
                 #Symlink
                 last = os.path.join(self.destination.path, self.name, 'last')
                 if os.path.islink(last):
