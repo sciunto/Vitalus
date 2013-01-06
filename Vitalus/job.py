@@ -243,7 +243,7 @@ class Job:
 
         if self.destination.is_dir():
             for element in to_delete:
-                self.logger.info("Remove backup %s", element)
+                self.logger.debug("Remove backup %s", element)
                 try:
                     shutil.rmtree(os.path.join(path, element))
                 except OSError:
