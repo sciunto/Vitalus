@@ -15,7 +15,6 @@ Both partially done
 
 Unittests
 ---------
-* refactor _get_last_backup in job.py
 
 Signals
 -------
@@ -52,6 +51,7 @@ TOTEST
 
 TOCHECK
 -------
+* refactor _get_last_backup in job.py
 
 
 DONE
