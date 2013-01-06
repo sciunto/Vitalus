@@ -3,10 +3,38 @@
 #Author: Francois Boulogne
 
 from utils import get_older_files
+from utils import get_last_file
 
 import unittest 
 import datetime
 
+class TestRecentFile(unittest.TestCase):
+
+    def test_list_date(self):
+        file_list = []
+        now = datetime.datetime.now()
+        for day in range(0,20):
+            date = now - datetime.timedelta(days=day)
+            filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+            file_list.append(filename)
+       
+        expected = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+        result = get_last_file(file_list)
+        self.assertEqual(result, expected)
+
+    def test_list_date_plus_poison(self):
+        file_list = []
+        now = datetime.datetime.now()
+        for day in range(0,20):
+            date = now - datetime.timedelta(days=day)
+            filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+            file_list.append(filename)
+
+        file_list.append('poison')
+       
+        expected = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+        result = get_last_file(file_list)
+        self.assertEqual(result, expected)
 
 class TestOlderFiles(unittest.TestCase):
 

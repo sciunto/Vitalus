@@ -46,6 +46,27 @@ def get_folder_size(path):
                 logger.error("Impossible to get size of: %s", os.path.join(item[0], file))
     return size
 
+def get_last_file(file_list):
+    """
+    Return the more recent file in a list (in the format "%Y-%m-%d_%Hh%Mm%Ss")
+
+    :param file_list: list of files
+
+    :return: filename
+    """
+    if file_list == []:
+        return None
+
+    last_date = datetime.datetime(1, 1, 1, 0, 0)
+    for afile in file_list:
+        try:
+            date = datetime.datetime.strptime(afile, '%Y-%m-%d_%Hh%Mm%Ss')
+        except ValueError:
+            continue
+        if date > last_date:
+            last_date = date
+            last = afile
+    return last
 
 def get_older_files(file_list, days=5, keep=10):
     """
