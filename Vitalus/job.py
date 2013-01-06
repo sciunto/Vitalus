@@ -286,18 +286,21 @@ class Job:
             filenames = stdout.decode()
             #filenames = filenames.split('\r\n')
             filenames = filenames.split('\n')
-            filenames = [x for x in filenames if x!='']
+            filenames = [x.strip('\r') for x in filenames if x!='']
 
-        filenames.sort()
-        if filenames == []:
-            return None
-        try:
-            name = filenames[-1] 
-            name.strip('\r')
-            self.logger.debug('_get_last_backup returns: %s', name)
-            return name
-        except IndexError:
-            return None
+        last = utils.get_last_file(filenames)
+        self.logger.debug('_get_last_backup returns: %s', name)
+        return last
+        #filenames.sort()
+        #if filenames == []:
+        #    return None
+        #try:
+        #    name = filenames[-1] 
+        #    name.strip('\r')
+        #    self.logger.debug('_get_last_backup returns: %s', name)
+        #    return name
+        #except IndexError:
+        #    return None
 
     def _prepare_destination(self): 
         """
