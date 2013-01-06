@@ -10,6 +10,19 @@ import datetime
 
 class TestRecentFile(unittest.TestCase):
 
+    def test_list_empty(self):
+        file_list = []
+        expected = None
+        result = get_last_file(file_list)
+        self.assertEqual(result, expected)
+
+    def test_list_poison(self):
+        file_list = ['poison']
+        expected = None
+        result = get_last_file(file_list)
+        self.assertEqual(result, expected)
+
+
     def test_list_date(self):
         file_list = []
         now = datetime.datetime.now()

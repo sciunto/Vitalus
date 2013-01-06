@@ -58,6 +58,7 @@ def get_last_file(file_list):
         return None
 
     last_date = datetime.datetime(1, 1, 1, 0, 0)
+    last = None
     for afile in file_list:
         try:
             date = datetime.datetime.strptime(afile, '%Y-%m-%d_%Hh%Mm%Ss')
