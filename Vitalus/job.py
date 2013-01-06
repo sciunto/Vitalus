@@ -269,7 +269,8 @@ class Job:
         if self.destination.is_dir():
             if not os.path.isdir(path):
                 return None
-            filenames = [os.path.join(path, el) for el in os.listdir(path)]
+            #filenames = [os.path.join(path, el) for el in os.listdir(path)]
+            filenames = os.listdir(path)
         elif self.destination.is_ssh():
             #First, create at least the target if does not exists
             command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', path]
@@ -289,6 +290,7 @@ class Job:
             filenames = [x.strip('\r') for x in filenames if x!='']
 
         last = utils.get_last_file(filenames)
+        last = os.path.join(path, last) 
         self.logger.debug('_get_last_backup returns: %s', last)
         return last
         #filenames.sort()
