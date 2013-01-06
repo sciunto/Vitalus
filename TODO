@@ -23,7 +23,9 @@ Signals
 
 Alerts
 ------
-* Improve logging messages
+* Improve logging messages (debug, other are clean now)
+* Improve logwatch script
+* Doc. for logwatch
 * Send an email via logging when a job has not been performed for a while.
 
 Snapshots
@@ -51,7 +53,7 @@ TOTEST
 
 TOCHECK
 -------
-* refactor _get_last_backup in job.py
+* refactor _get_last_backup in job.py (almost done)
 
 
 DONE
