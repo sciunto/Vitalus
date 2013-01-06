@@ -25,8 +25,8 @@ while (defined($ThisLine = <STDIN>)) {
       $Starts++;
    } elsif ($ThisLine =~ /The script exited gracefully/)  {
       $ExitOK++;
-   } elsif ($name = ($ThisLine =~ /Backup (.*) done/))  {
-      $CatalogDone{$name}++;
+   } elsif ($ThisLine =~ /INFO Backup (.*) done/)  {
+      $CatalogDone{$1}++;
    } else {
       # Report any unmatched entries...
       $OtherList{$ThisLine}++;
