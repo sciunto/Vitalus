@@ -11,6 +11,9 @@
 # Detail level
 $Detail = $ENV{'LOGWATCH_DETAIL_LEVEL'} || 0;
 
+$Starts = 0;
+$ExitOK = 0;
+
 while (defined($ThisLine = <STDIN>)) {
    chomp($ThisLine);
    if ( 
@@ -18,12 +21,32 @@ while (defined($ThisLine = <STDIN>)) {
       ($ThisLine =~ /DEBUG/)
    ) {
       # Ignore
+   } elsif ($ThisLine =~ /Vitalus .* starts\.\.\./)  {
+      $Starts++;
+   } elsif ($ThisLine =~ /The script exited gracefully/)  {
+      $ExitOK++;
+   } elsif ($name = ($ThisLine =~ /Backup (.*) done/))  {
+      $CatalogDone{$name}++;
    } else {
       # Report any unmatched entries...
       $OtherList{$ThisLine}++;
    } 
 }
 
+if ($Starts > 0) {
+   print "\nVitalus started: $Starts Time(s)\n";
+}
+
+if ($ExitOK > 0) {
+   print "\nVitalus exited gracefully: $ExitOK Time(s)\n";
+}
+
+if (keys %CatalogDone) {
+   print "\nBackups done:\n";
+   foreach $ThisOne (keys %CatalogDone) {
+      print "    $ThisOne: $CatalogDone{$ThisOne} Time(s)\n";
+   }
+}
 
 if (keys %OtherList) {
    print "\n**Unmatched Entries**\n";
