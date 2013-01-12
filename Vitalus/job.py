@@ -253,9 +253,8 @@ class Job:
             if filepaths != []:
                 command = ['ssh', '-t', self.destination.login, 'rm', filepaths]
                 self.logger.debug('SSH rm command: ' + str(command))
-                #CHECKME
-                #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
-                #stdout, stderr = process.communicate()
+                process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+                stdout, stderr = process.communicate()
 
 
     def _get_last_backup(self):
