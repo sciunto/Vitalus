@@ -230,8 +230,8 @@ class Job:
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
-            filenames = filenames.split('\r\n')
-            filenames = [x for x in filenames if x!='']
+            filenames = filenames.split('\n')
+            filenames = [x.strip('\r') for x in filenames if x!='']
         else:
             return
 
