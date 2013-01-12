@@ -250,21 +250,21 @@ class Job:
                     self.logger.error("Impossible to delete %s (symlink?)", element)
         elif self.destination.is_ssh():
             filepaths = [ os.path.join(path, element) for element in to_delete ]
-            command = ['ssh', '-t', self.destination.login, 'rm', filepaths]
-            self.logger.debug('SSH rm command: ' + str(command))
-            #CHECKME
-            #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
-            #stdout, stderr = process.communicate()
+            if filepaths != []:
+                command = ['ssh', '-t', self.destination.login, 'rm', filepaths]
+                self.logger.debug('SSH rm command: ' + str(command))
+                #CHECKME
+                #process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+                #stdout, stderr = process.communicate()
 
 
     def _get_last_backup(self):
         """
         Get the last backup in path
         Return None if not available
-        """
-        #TODO: it should look only correct name format
-        #The best is to write a subfunction in utils with unittest
 
+        :returns: string
+        """
         path = os.path.join(self.destination.path, self.name)
         if self.destination.is_dir():
             if not os.path.isdir(path):
@@ -285,7 +285,6 @@ class Job:
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
-            #filenames = filenames.split('\r\n')
             filenames = filenames.split('\n')
             filenames = [x.strip('\r') for x in filenames if x!='']
 
@@ -293,16 +292,6 @@ class Job:
         last = os.path.join(path, last) 
         self.logger.debug('_get_last_backup returns: %s', last)
         return last
-        #filenames.sort()
-        #if filenames == []:
-        #    return None
-        #try:
-        #    name = filenames[-1] 
-        #    name.strip('\r')
-        #    self.logger.debug('_get_last_backup returns: %s', name)
-        #    return name
-        #except IndexError:
-        #    return None
 
     def _prepare_destination(self): 
         """
