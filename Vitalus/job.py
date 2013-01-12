@@ -17,13 +17,6 @@
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
 
-class TARGETError(Exception):
-    """
-    Exception for target validity
-    :param message: Message
-    """
-    def __init__(self, message=''):
-        Exception.__init__(self, message)
 
 import os
 import re
@@ -36,6 +29,13 @@ import datetime
 import logging
 from contextlib import closing
 
+class TARGETError(Exception):
+    """
+    Exception for target validity
+    :param message: Message
+    """
+    def __init__(self, message=''):
+        Exception.__init__(self, message)
 
 class Target:
     """
@@ -389,7 +389,7 @@ class Job:
         Run the job
         """
         self.logger.debug('Start job: %s', self.name)
-        #TODO rewriting and integration
+        #TODO rewriting and integration:
         #self._check_disk_usage()
 
         last_date = self._get_last_backup()
@@ -408,23 +408,26 @@ class Job:
             self.job_logger.info('='*20 + str(self.now) + '='*20)
             self.logger.debug('Start Backup: %s', self.name)
             print(self.name)
-            #Prepare the destination
+
+            # Prepare the destination
             self._prepare_destination()
             self.logger.debug("source path %s", self.source.target) 
             self.logger.debug("destination path %s", self.destination.target) 
             self.logger.debug("filter path %s", self.filter)
-            #Run rsync
+
+            # Run rsync
             command = self._prepare_rsync_command()
             self._run_command(command)
-            #Job done, update the time in the database
+
+            # Job done, update the time in the database
             self._set_lastbackup_time()
-            #Remove old snapshots
-            #self._delete_old_files(days=self.duration, keep=self.keep)
+
+            # Remove old snapshots
             self._delete_old_files(days=0, keep=3)
-            #Create symlink TODO: SSH
+
+            # Create symlink 
+            last = os.path.join(self.destination.path, self.name, 'last')
             if self.destination.is_dir():
-                #Symlink
-                last = os.path.join(self.destination.path, self.name, 'last')
                 if os.path.islink(last):
                     os.remove(last)
                 os.chdir(os.path.dirname(self.current_backup_path))
@@ -434,6 +437,9 @@ class Job:
                     self.logger.warning('The symlink %s could not be created because a file exists', last)
                 except AttributeError:
                     self.logger.warning('Attribute error for symlink. Job: %s', self.name) 
+            elif self.destination.is_ssh():
+                pass
+                #TODO Create symlink
 
             self.logger.info("Backup %s done", self.name)
 
