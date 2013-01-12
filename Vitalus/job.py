@@ -260,7 +260,7 @@ class Job:
 
     def _get_last_backup(self):
         """
-        Get the last backup in path
+        Get the last backup path
         Return None if not available
 
         :returns: string
@@ -398,7 +398,8 @@ class Job:
             #It means that this is the first backup.
             self.previous_backup_path = None
         else:
-            self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+            #self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+            self.previous_backup_path = last_date
 
         self.logger.debug("Previous backup path: %s", self.previous_backup_path)
         self.logger.debug("Current backup path: %s", self.current_backup_path)
