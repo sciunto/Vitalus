@@ -1,16 +1,6 @@
-* review disk space usage
+* rewrite disk space usage
 * In job, take datetime as parameter
-
-
-* history false to true and conversly (started)
-
 * minimize the # of SSH connections
-
-Delete old files
-----------------
-Both partially done
-* Review and code testing (I suspect a bug)
-* Support SSH
 
 
 Unittests
@@ -36,9 +26,8 @@ Snapshots
 
 SSH support
 -----------
-* Try to support the backup local->SSH
- - disk space
- - snapshots
+* symlink
+* disk usage
 
 Tools
 -----
@@ -53,7 +42,7 @@ TOTEST
 
 TOCHECK
 -------
-* refactor _get_last_backup in job.py (almost done)
+* switch history false to true and conversly (started)
 
 
 DONE
@@ -63,3 +52,4 @@ DONE
 * symlink are not often created. (AttributeError)
 * Do not start a job log file if nothing in it
 * structure for source/dest type
+* refactor _get_last_backup in job.py 
