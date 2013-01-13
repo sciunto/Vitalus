@@ -251,7 +251,8 @@ class Job:
         elif self.destination.is_ssh():
             filepaths = [ os.path.join(path, element) for element in to_delete ]
             if filepaths != []:
-                command = ['ssh', '-t', self.destination.login, 'rm', filepaths]
+                command = ['ssh', '-t', self.destination.login, 'rm', '-rf']
+                command.extend(filepaths)
                 self.logger.debug('SSH rm command: ' + str(command))
                 process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
                 stdout, stderr = process.communicate()
@@ -422,7 +423,7 @@ class Job:
             self._set_lastbackup_time()
 
             # Remove old snapshots
-            self._delete_old_files(days=0, keep=3)
+            self._delete_old_files(days=10, keep=10) #TODO adjustable in API
 
             # Create symlink 
             last = os.path.join(self.destination.path, self.name, 'last')
