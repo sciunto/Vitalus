@@ -23,6 +23,7 @@ import datetime
 
 logger = logging.getLogger('Vitalus.utils')
 
+
 def compress(path):
     """ Compress the directory """
 
@@ -43,8 +44,10 @@ def get_folder_size(path):
             try:
                 size += os.path.getsize(os.path.join(item[0], file))
             except:
-                logger.error("Impossible to get size of: %s", os.path.join(item[0], file))
+                logger.error("Impossible to get size of: %s",
+                    os.path.join(item[0], file))
     return size
+
 
 def get_last_file(file_list):
     """
@@ -68,6 +71,7 @@ def get_last_file(file_list):
             last_date = date
             last = afile
     return last
+
 
 def get_older_files(file_list, days=5, keep=10):
     """
