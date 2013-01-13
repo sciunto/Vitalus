@@ -16,8 +16,6 @@
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
-
-
 import os
 import re
 #import psutil
@@ -29,6 +27,7 @@ import datetime
 import logging
 from contextlib import closing
 
+
 class TARGETError(Exception):
     """
     Exception for target validity
@@ -37,13 +36,13 @@ class TARGETError(Exception):
     def __init__(self, message=''):
         Exception.__init__(self, message)
 
+
 class Target:
     """
     A target is a source or a destination.
     Both of them can be a local directory
     or a distant one though SSH
     """
-    
     def __init__(self, target):
         self.logger = logging.getLogger('Vitalus.Target') 
         self.logger.debug("Read target %s", target)
@@ -54,7 +53,6 @@ class Target:
             self.path = target
         elif self.is_ssh():
             self.login, self.path = target.split(':')
-
 
     def is_dir(self):
         """
@@ -249,7 +247,7 @@ class Job:
                 except OSError:
                     self.logger.error("Impossible to delete %s (symlink?)", element)
         elif self.destination.is_ssh():
-            filepaths = [ os.path.join(path, element) for element in to_delete ]
+            filepaths = [os.path.join(path, element) for element in to_delete]
             if filepaths != []:
                 command = ['ssh', '-t', self.destination.login, 'rm', '-rf']
                 command.extend(filepaths)
@@ -300,7 +298,7 @@ class Job:
         """
         if self.destination.is_dir():
             if self.snapshot:
-                os.makedirs(self.current_backup_path) #This one does not exist!
+                os.makedirs(self.current_backup_path) # This one does not exist!
             else:
                 if self.previous_backup_path is None:
                     os.makedirs(self.current_backup_path, exist_ok=True) 
@@ -359,7 +357,7 @@ class Job:
             for element in self.filter:
                 command.append('--filter=' + element)
                 self.logger.debug("add filter: %s", element)
-                
+
         self.logger.debug("rsync command: %s", command)
         return command
 
@@ -423,7 +421,7 @@ class Job:
             self._set_lastbackup_time()
 
             # Remove old snapshots
-            self._delete_old_files(days=10, keep=10) #TODO adjustable in API
+            self._delete_old_files(days=10, keep=10) # TODO adjustable in API
 
             # Create symlink 
             last = os.path.join(self.destination.path, self.name, 'last')
