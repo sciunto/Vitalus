@@ -1,9 +1,11 @@
-* logwatch script
 
-==== Version 0.x ====
+==== Version 0.3.3 ====
 * Fix bug ipv4 address
 * Log improvements
 * check job uniqness
+* logwatch script
+* Code refactoring (delete old files) with unittests
+* delete old files on remote hosts
 
 ==== Version 0.3.2 ====
 * Code refactoring (job.py)
