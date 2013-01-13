@@ -44,7 +44,7 @@ class Target:
     or a distant one though SSH
     """
     def __init__(self, target):
-        self.logger = logging.getLogger('Vitalus.Target') 
+        self.logger = logging.getLogger('Vitalus.Target')
         self.logger.debug("Read target %s", target)
         self.target = target
         self.ttype = self._detect_target_type()
@@ -81,9 +81,9 @@ class Target:
         Return the target type
         SSH if matches name@domaine.tld:dir
         DIR if it's a directory
-       
+
         :param target: Target (source or destination)
-        :raises TARGETError: weird target type 
+        :raises TARGETError: weird target type
         """
         #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
         if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
@@ -123,7 +123,7 @@ class Job:
     """
 
     def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
-       
+
         self.name = name
         self.source = Target(source)
         self.destination = Target(destination)
@@ -137,16 +137,16 @@ class Job:
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
         self.backup_log_dir = log_dir
-        
-        self.logger = logging.getLogger('Vitalus.Job') 
-        
+
+        self.logger = logging.getLogger('Vitalus.Job')
+
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
         self.job_logger = logging.getLogger(self.name)
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
         self.job_logger.addHandler(log_rotator)
         self.job_logger.setLevel(logging.INFO)
-        
+
         #Set previous and current backup paths
         self.previous_backup_path = None
         self.current_backup_path = None
@@ -161,7 +161,7 @@ class Job:
 #        if self.destination.is_dir():
 #            #TODO, change the criterion
 #            pass
-#            #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source): 
+#            #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source):
 #            #    self.logger.critical("Low disk space: %s", self.destination)
 #            #    raise TARGETError('Low disk space on %s' % self.destination)
 #        elif self.destination.is_ssh():
@@ -170,7 +170,7 @@ class Job:
 
     def _set_lastbackup_time(self):
         """
-        Set the last backup (labeled name) time 
+        Set the last backup (labeled name) time
         """
         self.logger.debug('Set lastbackup time')
         with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
@@ -187,13 +187,13 @@ class Job:
         self.logger.debug("Check time between backups for %s", self.name)
         with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
             try:
-                last = timebase[self.name] 
+                last = timebase[self.name]
             except KeyError:
                 #Not yet stored
                 #Run the first backup
                 self.logger.debug("%s: first backup", self.name)
                 return True
-       
+
         #Calculate the difference
         self.logger.debug("now= %s", datetime.datetime.now())
         self.logger.debug("last= %s", last)
@@ -208,7 +208,7 @@ class Job:
             self.logger.debug("%s does not need backup", self.name)
             return False
 
-    def _delete_old_files(self, days=10, keep=10): 
+    def _delete_old_files(self, days=10, keep=10):
         """
         Delete old archives in the destination
 
@@ -218,7 +218,7 @@ class Job:
         #TODO : review logs
 
         path = os.path.join(self.destination.path, self.name)
-        
+
         if self.destination.is_dir():
             #filenames = [os.path.join(path, el) for el in os.listdir(path) ]
             filenames = os.listdir(path)
@@ -287,11 +287,11 @@ class Job:
             filenames = [x.strip('\r') for x in filenames if x!='']
 
         last = utils.get_last_file(filenames)
-        last = os.path.join(path, last) 
+        last = os.path.join(path, last)
         self.logger.debug('_get_last_backup returns: %s', last)
         return last
 
-    def _prepare_destination(self): 
+    def _prepare_destination(self):
         """
         Prepare the destination to receive a backup:
         Create dirs
@@ -301,7 +301,7 @@ class Job:
                 os.makedirs(self.current_backup_path) # This one does not exist!
             else:
                 if self.previous_backup_path is None:
-                    os.makedirs(self.current_backup_path, exist_ok=True) 
+                    os.makedirs(self.current_backup_path, exist_ok=True)
                 else:
                     #Move dir to set the new date in the path
                     os.rename(self.previous_backup_path, self.current_backup_path)
@@ -312,9 +312,9 @@ class Job:
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir result: ' + stdout.decode())
-                
 
-    def _prepare_rsync_command(self): 
+
+    def _prepare_rsync_command(self):
         """
         Compose the rsync command
         """
@@ -327,7 +327,7 @@ class Job:
         # stat: file rate stats
         # delete: delete extraneous files from dest dirs
         # delete-excluded: also delete excluded files from dest dirs
-        command.append('-avh') 
+        command.append('-avh')
         command.append('--stats')
         command.append('--delete')
         command.append('--delete-excluded')
@@ -362,7 +362,7 @@ class Job:
         return command
 
     def _run_command(self, command):
-        """ 
+        """
         Run a command and log stderr+stdout in a dedicated log file.
         :param command: a list, each element is a part of the command line
 
@@ -409,8 +409,8 @@ class Job:
 
             # Prepare the destination
             self._prepare_destination()
-            self.logger.debug("source path %s", self.source.target) 
-            self.logger.debug("destination path %s", self.destination.target) 
+            self.logger.debug("source path %s", self.source.target)
+            self.logger.debug("destination path %s", self.destination.target)
             self.logger.debug("filter path %s", self.filter)
 
             # Run rsync
@@ -423,7 +423,7 @@ class Job:
             # Remove old snapshots
             self._delete_old_files(days=10, keep=10) # TODO adjustable in API
 
-            # Create symlink 
+            # Create symlink
             last = os.path.join(self.destination.path, self.name, 'last')
             if self.destination.is_dir():
                 if os.path.islink(last):
@@ -434,7 +434,7 @@ class Job:
                 except FileExistsError:
                     self.logger.warning('The symlink %s could not be created because a file exists', last)
                 except AttributeError:
-                    self.logger.warning('Attribute error for symlink. Job: %s', self.name) 
+                    self.logger.warning('Attribute error for symlink. Job: %s', self.name)
             elif self.destination.is_ssh():
                 pass
                 #TODO Create symlink
