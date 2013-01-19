@@ -34,14 +34,15 @@ class Vitalus:
     :type log_path: string
     """
     def __init__(self, log_path='~/.backup'):
-        #Variables
-
+        # Variables
         self.jobs = []
         self.terminate = False
-
         self.destination = None
 
-        #Logging
+        # Create a pidfile
+        self._create_pidfile()
+
+        # Logging
         self.backup_log_dir = os.path.expanduser(log_path)
         if not os.path.isdir(self.backup_log_dir):
             os.makedirs(self.backup_log_dir)
@@ -195,7 +196,6 @@ class Vitalus:
 
     def run(self):
         """ Run all jobs """
-        self._create_pidfile()
         for job in self.jobs:
             job.run()
         self._release_pidfile()
