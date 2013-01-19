@@ -13,10 +13,11 @@ $Detail = $ENV{'LOGWATCH_DETAIL_LEVEL'} || 0;
 
 $Starts = 0;
 $ExitOK = 0;
+$AlreadyRunning = 0;
 
 while (defined($ThisLine = <STDIN>)) {
    chomp($ThisLine);
-   if ( 
+   if (
       ($ThisLine =~ /DEBUG/) or
       ($ThisLine =~ /DEBUG/)
    ) {
@@ -25,12 +26,14 @@ while (defined($ThisLine = <STDIN>)) {
       $Starts++;
    } elsif ($ThisLine =~ /The script exited gracefully/)  {
       $ExitOK++;
+   } elsif ($ThisLine =~ /INFO An instance is already running, exiting/)  {
+      $AlreadyRunning++;
    } elsif ($ThisLine =~ /INFO Backup (.*) done/)  {
       $CatalogDone{$1}++;
    } else {
       # Report any unmatched entries...
       $OtherList{$ThisLine}++;
-   } 
+   }
 }
 
 if ($Starts > 0) {
@@ -39,6 +42,10 @@ if ($Starts > 0) {
 
 if ($ExitOK > 0) {
    print "\nVitalus exited gracefully: $ExitOK Time(s)\n";
+}
+
+if ($AlreadyRunning > 0) {
+   print "\nVitalus was already running: $AlreadyRunning Time(s)\n";
 }
 
 if (keys %CatalogDone) {
