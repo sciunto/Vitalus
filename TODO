@@ -2,6 +2,7 @@
 * In job, take datetime as parameter
 * minimize the # of SSH connections
 
+*check that period can be float
 
 Unittests
 ---------

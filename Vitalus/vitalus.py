@@ -30,6 +30,7 @@ class Vitalus:
     Class for backups
 
     :params log_path: directory for logs and database
+    :type log_path: string
     """
     def __init__(self, log_path='~/.backup'):
         #Variables
@@ -54,10 +55,10 @@ class Vitalus:
         formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
         log_rotator.setFormatter(formatter)
         self.logger.addHandler(log_rotator)
-        
+
         self.logger.setLevel(logging.INFO)
 
-        #Priority 
+        #Priority
         self._set_process_low_priority()
 
         self.logger.info('Vitalus %s starts...' % info.VERSION)
@@ -68,25 +69,26 @@ class Vitalus:
         Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)
 
         :param level: Loger level
+        :type level: string
         """
         if level == 'INFO':
             self.logger.setLevel(logging.INFO)
             self.logger.info('Set logger level: %s', level)
         elif level == 'CRITICAL':
-            self.logger.setLevel(logging.CRITICAL) 
+            self.logger.setLevel(logging.CRITICAL)
             self.logger.info('Set logger level: %s', level)
         elif level == 'DEBUG':
-            self.logger.setLevel(logging.DEBUG)   
+            self.logger.setLevel(logging.DEBUG)
             self.logger.info('Set logger level: %s', level)
         elif level == 'ERROR':
-            self.logger.setLevel(logging.ERROR)   
+            self.logger.setLevel(logging.ERROR)
             self.logger.info('Set logger level: %s', level)
         elif level == 'FATAL':
             self.logger.setLevel(logging.FATAL)
             self.logger.info('Set logger level: %s', level)
         else:
             self.logger.ERROR('Unknown level')
-            
+
 
 
 #    def _signal_handler(self, signal, frame):
@@ -138,28 +140,39 @@ class Vitalus:
         #nice
         p.nice = 15
 
-    def set_destination(self, destination): 
+    def set_destination(self, destination):
         """ Set the destination of the backup
-        
-        :param destination: path
-        """        
+
+        :param destination: destination path
+        :type destination: string
+        """
         self.logger.debug("Set destination: %s", destination)
         self.destination = destination
 
     #TODO: filter -> *filter ?
     def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
-        """ Add a new job 
-        :param name: backup label
-        :param source: backup from...
-        :param destination: backup to...
-        :param period: min time (hours) between backups
-        :param history: Activate snapshots (Boolean)
-        :param duration: How many days snapshotss are kept
-        :param keep: How many snapshots are (at least) kept
-        :param filter: filter, must be a tuple
+        """ Add a new job
 
-        Note: filter syntax is the same of rsync. See "FILTER RULES" section
-        in the rsync man page.
+        :param name: backup label
+        :type name: string
+        :param source: backup from...
+        :type source: string
+        :param destination: backup to...
+        :type destination: string
+        :param period: min time (hours) between backups
+        :type period: float
+        :param history: Activate snapshots
+        :type history: bool
+        :param duration: How many days snapshotss are kept
+        :type duration: int
+        :param keep: How many snapshots are (at least) kept
+        :type keep: int
+        :param filter: filters
+        :type filter: tuple
+
+        .. note::
+            filter syntax is the same of rsync. See "FILTER RULES" section
+            in the rsync man page.
         """
         if name in self.jobs:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
@@ -168,9 +181,9 @@ class Vitalus:
 
         if self.destination:
             period_in_seconds = period * 3600
-            self.logger.debug("add job: %s", name) 
-            try: 
-                self.jobs.append(Job(self.backup_log_dir, name, source, 
+            self.logger.debug("add job: %s", name)
+            try:
+                self.jobs.append(Job(self.backup_log_dir, name, source,
                     self.destination, period_in_seconds, history, duration, keep, filter))
             except TARGETError:
                 #We abort
@@ -196,4 +209,4 @@ if __name__ == '__main__':
     b.add_job('test4', '/home/gnu/tmp/www', period=0, history=True)
 
     b.run()
-    
+

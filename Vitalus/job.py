@@ -31,7 +31,9 @@ from contextlib import closing
 class TARGETError(Exception):
     """
     Exception for target validity
+
     :param message: Message
+    :type message: string
     """
     def __init__(self, message=''):
         Exception.__init__(self, message)
@@ -42,6 +44,9 @@ class Target:
     A target is a source or a destination.
     Both of them can be a local directory
     or a distant one though SSH
+
+    :param target: a target
+    :type target: string
     """
     def __init__(self, target):
         self.logger = logging.getLogger('Vitalus.Target')
@@ -58,7 +63,7 @@ class Target:
         """
         Check if the target is a directory
 
-        :returns: boolean
+        :returns: bool -- True if it is a directory
         """
         if self.ttype == 'DIR':
             return True
@@ -69,7 +74,7 @@ class Target:
         """
         Check if the target is a 'SSH' host
 
-        :returns: boolean
+        :returns: bool -- True if it is a SSH host
         """
         if self.ttype == 'SSH':
             return True
@@ -82,7 +87,6 @@ class Target:
         SSH if matches name@domaine.tld:dir
         DIR if it's a directory
 
-        :param target: Target (source or destination)
         :raises TARGETError: weird target type
         """
         #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
@@ -104,22 +108,30 @@ class Job:
     """
     Class containing a job
 
-    :param min_disk_space: minimal disk space
     :param log_dir: Log directory path
+    :type log_dir: string
     :param name: Job name
+    :type name: string
     :param source: Source path
+    :type source: string
     :param destination: Destination path
+    :type destination: string
     :param period: Min duration between two backups (in seconds)
-    :param snapshot: Activate snapshots (Boolean)
+    :type period: float
+    :param snapshot: Activate snapshots
+    :type snapshot: bool
     :param duration: How many days snapshots are kept
+    :type duration: int
     :param keep: How many snapshots are (at least) kept
+    :type keep: int
     :param filter: Rsync filters
+    :type filter: list
 
 
-    Note:
-    -----
-    Source and destination path can be either real path
-    or a ssh login joined to the path by a : caracter.
+    .. note::
+
+        Source and destination path can be either real path
+        or a ssh login joined to the path by a : character.
     """
 
     def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
@@ -213,7 +225,9 @@ class Job:
         Delete old archives in the destination
 
         :param days: delete files older than this value
+        :type days: int
         :param keep: keep at least this amount of archives
+        :type keep: int
         """
         #TODO : review logs
 
@@ -364,11 +378,14 @@ class Job:
     def _run_command(self, command):
         """
         Run a command and log stderr+stdout in a dedicated log file.
-        :param command: a list, each element is a part of the command line
 
-        Example
-        -------
-        command = ['/usr/bin/cp', '-r', '/home', '/tmp']
+        :param command: Command: each element is a part of the command line
+        :type command: list
+
+        .. note::
+
+            Example of the command format
+            command = ['/usr/bin/cp', '-r', '/home', '/tmp']
         """
         #Run the command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

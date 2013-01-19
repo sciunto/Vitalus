@@ -14,14 +14,16 @@ Welcome to Vitalus' documentation!
 :Version: |release|
 
 
-Vitalus is a rsync wrapper. Rsync is a good atomic tool, but it needs to be wrapped to have a real backup solution. 
+Vitalus is a rsync wrapper. Rsync is a good atomic tool, but it needs to be wrapped to have a real backup solution.
 Backup solutions are generally too basic or very difficult. This one fits my needs.
 
 Contents:
 
 .. toctree::
     :maxdepth: 2
-    
+
+    install
+    example
     vitalus
 
 Philosophy
@@ -44,7 +46,7 @@ This is just another way to express the philosophy :)
 * rsync from SSH to local disk
 * rsync from local to SSH almost supported
 * Check disk space (local disks)
-* Keep track of time evolution (increments done with hard links), not possible via SSH for the moment. 
+* Keep track of time evolution (increments done with hard links), not possible via SSH for the moment.
 * Old increments deleted (keeping a minimal amount of increments)
 * Rotated logs (general + one per task)
 
