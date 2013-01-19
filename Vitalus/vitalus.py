@@ -25,6 +25,7 @@ import sys
 from Vitalus.job import Job, TARGETError
 import Vitalus.info as info
 
+
 class Vitalus:
     """
     Class for backups
@@ -51,7 +52,13 @@ class Vitalus:
         #hdlr = logging.FileHandler(os.path.join(self.backup_log_dir, 'backup.log'))
 
         # Add the log message handler to the logger
-        log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
+        log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH,
+                                                                when='midnight',
+                                                                interval=1,
+                                                                backupCount=30,
+                                                                encoding=None,
+                                                                delay=False,
+                                                                utc=False)
         formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
         log_rotator.setFormatter(formatter)
         self.logger.addHandler(log_rotator)
@@ -89,8 +96,6 @@ class Vitalus:
         else:
             self.logger.ERROR('Unknown level')
 
-
-
 #    def _signal_handler(self, signal, frame):
 #        self.logger.warning('Signal received %s', signal)
 #        self._set_process_high_priority()
@@ -115,7 +120,6 @@ class Vitalus:
 
         with open(self.pidfilename, "w") as pidfile:
             pidfile.write("%s" % os.getpid())
-
 
     def _release_pidfile(self):
         """ Release the pidfile """
@@ -178,17 +182,16 @@ class Vitalus:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
             return
 
-
         if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug("add job: %s", name)
             try:
                 self.jobs.append(Job(self.backup_log_dir, name, source,
-                    self.destination, period_in_seconds, history, duration, keep, filter))
+                                     self.destination, period_in_seconds,
+                                     history, duration, keep, filter))
             except TARGETError:
                 #We abort
                 pass
-
 
     def run(self):
         """ Run all jobs """
@@ -209,4 +212,3 @@ if __name__ == '__main__':
     b.add_job('test4', '/home/gnu/tmp/www', period=0, history=True)
 
     b.run()
-
