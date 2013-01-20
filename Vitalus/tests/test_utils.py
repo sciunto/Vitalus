@@ -5,7 +5,7 @@
 from utils import get_older_files
 from utils import get_last_file
 
-import unittest 
+import unittest
 import datetime
 
 class TestRecentFile(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestRecentFile(unittest.TestCase):
             date = now - datetime.timedelta(days=day)
             filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
             file_list.append(filename)
-       
+
         expected = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
         result = get_last_file(file_list)
         self.assertEqual(result, expected)
@@ -42,7 +42,7 @@ class TestRecentFile(unittest.TestCase):
             date = now - datetime.timedelta(days=day)
             filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
             file_list.append(filename)
-      
+
         file_list.reverse()
         expected = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
         result = get_last_file(file_list)
@@ -57,7 +57,7 @@ class TestRecentFile(unittest.TestCase):
             file_list.append(filename)
 
         file_list.append('poison')
-       
+
         expected = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
         result = get_last_file(file_list)
         self.assertEqual(result, expected)
@@ -120,7 +120,7 @@ class TestOlderFiles(unittest.TestCase):
             filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
             file_list.append(filename)
             expected_list.append(filename)
-        
+
         expected_list = expected_list[10:]
         expected_list.sort()
         result = get_older_files(file_list, days=0, keep=10)
