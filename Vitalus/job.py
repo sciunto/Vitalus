@@ -26,7 +26,7 @@ import Vitalus.utils as utils
 import datetime
 import logging
 from contextlib import closing
-
+import socket
 
 class TARGETError(Exception):
     """
@@ -58,6 +58,7 @@ class Target:
             self.path = target
         elif self.is_ssh():
             self.login, self.path = target.split(':')
+            self.domain = self.login.split('@')[1]
 
     def is_dir(self):
         """
@@ -80,6 +81,25 @@ class Target:
             return True
         else:
             return False
+
+    def check_availability(self):
+        """
+        Check if the target is available
+        For SSH host, it means it's reachable
+
+        :returns: bool -- True is available
+        """
+        if self.ttype == 'SSH':
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                sock.connect((self.domain, 22))
+            except socket.error:
+                raise TARGETError("Target %s unreachable" % self.target)
+            else:
+                return True
+        elif self.ttype == 'DIR':
+            pass #TODO
+
 
     def _detect_target_type(self):
         """
@@ -233,17 +253,18 @@ class Job:
 
         path = os.path.join(self.destination.path, self.name)
 
+        self.destination.check_availability()
         if self.destination.is_dir():
             #filenames = [os.path.join(path, el) for el in os.listdir(path) ]
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
-            command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
-            self.logger.debug('SSH ls command: ' + str(command))
-            process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            filenames = stdout.decode()
-            filenames = filenames.split('\n')
-            filenames = [x.strip('\r') for x in filenames if x!='']
+                command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
+                self.logger.debug('SSH ls command: ' + str(command))
+                process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                filenames = stdout.decode()
+                filenames = filenames.split('\n')
+                filenames = [x.strip('\r') for x in filenames if x!='']
         else:
             return
 
@@ -253,6 +274,7 @@ class Job:
 
         self.logger.debug("to delete %s ", to_delete)
 
+        self.destination.check_availability()
         if self.destination.is_dir():
             for element in to_delete:
                 self.logger.debug("Remove backup %s", element)
@@ -278,6 +300,7 @@ class Job:
         :returns: string
         """
         path = os.path.join(self.destination.path, self.name)
+        self.destination.check_availability()
         if self.destination.is_dir():
             if not os.path.isdir(path):
                 return None
@@ -310,6 +333,7 @@ class Job:
         Prepare the destination to receive a backup:
         Create dirs
         """
+        self.destination.check_availability()
         if self.destination.is_dir():
             if self.snapshot:
                 os.makedirs(self.current_backup_path) # This one does not exist!
@@ -407,55 +431,56 @@ class Job:
         #TODO rewriting and integration:
         #self._check_disk_usage()
 
-        last_date = self._get_last_backup()
-        self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
-        if last_date is None:
-            #It means that this is the first backup.
-            self.previous_backup_path = None
-        else:
-            #self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
-            self.previous_backup_path = last_date
+        try:
+            last_date = self._get_last_backup()
+            self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+            if last_date is None:
+                #It means that this is the first backup.
+                self.previous_backup_path = None
+            else:
+                #self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
+                self.previous_backup_path = last_date
 
-        self.logger.debug("Previous backup path: %s", self.previous_backup_path)
-        self.logger.debug("Current backup path: %s", self.current_backup_path)
+            self.logger.debug("Previous backup path: %s", self.previous_backup_path)
+            self.logger.debug("Current backup path: %s", self.current_backup_path)
 
-        if self._check_need_backup():
-            self.job_logger.info('='*20 + str(self.now) + '='*20)
-            self.logger.debug('Start Backup: %s', self.name)
-            print(self.name)
+            if self._check_need_backup():
+                self.job_logger.info('='*20 + str(self.now) + '='*20)
+                self.logger.debug('Start Backup: %s', self.name)
+                print(self.name)
 
-            # Prepare the destination
-            self._prepare_destination()
-            self.logger.debug("source path %s", self.source.target)
-            self.logger.debug("destination path %s", self.destination.target)
-            self.logger.debug("filter path %s", self.filter)
+                # Prepare the destination
+                self._prepare_destination()
+                self.logger.debug("source path %s", self.source.target)
+                self.logger.debug("destination path %s", self.destination.target)
+                self.logger.debug("filter path %s", self.filter)
 
-            # Run rsync
-            command = self._prepare_rsync_command()
-            self._run_command(command)
+                # Run rsync
+                command = self._prepare_rsync_command()
+                self._run_command(command)
 
-            # Job done, update the time in the database
-            self._set_lastbackup_time()
+                # Job done, update the time in the database
+                self._set_lastbackup_time()
 
-            # Remove old snapshots
-            self._delete_old_files(days=10, keep=10) # TODO adjustable in API
+                # Remove old snapshots
+                self._delete_old_files(days=10, keep=10) # TODO adjustable in API
 
-            # Create symlink
-            last = os.path.join(self.destination.path, self.name, 'last')
-            if self.destination.is_dir():
-                if os.path.islink(last):
-                    os.remove(last)
-                os.chdir(os.path.dirname(self.current_backup_path))
-                try:
-                    os.symlink(os.path.basename(self.current_backup_path), last)
-                except FileExistsError:
-                    self.logger.warning('The symlink %s could not be created because a file exists', last)
-                except AttributeError:
-                    self.logger.warning('Attribute error for symlink. Job: %s', self.name)
-            elif self.destination.is_ssh():
-                pass
-                #TODO Create symlink
+                # Create symlink
+                last = os.path.join(self.destination.path, self.name, 'last')
+                if self.destination.is_dir():
+                    if os.path.islink(last):
+                        os.remove(last)
+                    os.chdir(os.path.dirname(self.current_backup_path))
+                    try:
+                        os.symlink(os.path.basename(self.current_backup_path), last)
+                    except FileExistsError:
+                        self.logger.warning('The symlink %s could not be created because a file exists', last)
+                    except AttributeError:
+                        self.logger.warning('Attribute error for symlink. Job: %s', self.name)
+                elif self.destination.is_ssh():
+                    pass
+                    #TODO Create symlink
 
-            self.logger.info("Backup %s done", self.name)
-
-
+                self.logger.info("Backup %s done", self.name)
+            except TARGETError:
+                self.logger.warning('The target is unavailable') # FIXME message
