@@ -482,5 +482,5 @@ class Job:
                     #TODO Create symlink
 
                 self.logger.info("Backup %s done", self.name)
-        except TARGETError:
-            self.logger.warning('The target is unavailable') # FIXME message
+        except TARGETError as e:
+            self.logger.warning(e)

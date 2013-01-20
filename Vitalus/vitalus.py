@@ -190,9 +190,9 @@ class Vitalus:
                 self.jobs.append(Job(self.backup_log_dir, name, source,
                                      self.destination, period_in_seconds,
                                      history, duration, keep, filter))
-            except TARGETError:
+            except TARGETError as e:
                 # We abort this job
-                self.logger.error('The target is not well-formed') #FIXME: pass a message
+                self.logger.error(e) 
 
     def run(self):
         """ Run all jobs """
