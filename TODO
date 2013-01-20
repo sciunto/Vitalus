@@ -2,7 +2,7 @@
 * In job, take datetime as parameter
 * minimize the # of SSH connections
 
-*check that period can be float
+* check that period can be float
 
 Unittests
 ---------
@@ -29,6 +29,7 @@ SSH support
 -----------
 * symlink
 * disk usage
+* custom port
 
 Tools
 -----
