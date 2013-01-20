@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest 
+import unittest
 import tempfile
 
 from job import Target
