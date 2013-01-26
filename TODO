@@ -1,7 +1,7 @@
+MISC
+----
 * rewrite disk space usage
-* In job, take datetime as parameter
 * minimize the # of SSH connections
-
 * check that period can be float
 
 Unittests
@@ -17,13 +17,11 @@ Alerts
 * Improve logging messages (debug, other are clean now)
 * Improve logwatch script
 * Doc. for logwatch
-* Send an email via logging when a job has not been performed for a while.
 
 Snapshots
 ---------
-* When the script does not exit gracefully, remove bad snapshots
 * Implement different snapshots retentions (lin, log...)
-* Do not keep a number of archives, but a ratio size of snapshots/size last snapshot
+* Add a callback in add_job to specify the method
 
 SSH support
 -----------
@@ -33,7 +31,7 @@ SSH support
 
 Tools
 -----
-Some tools can be developped 
+Some tools can be developped
 * to track the evolution of a specific file though snapshots...
 * restore a snapshot
 
@@ -54,4 +52,14 @@ DONE
 * symlink are not often created. (AttributeError)
 * Do not start a job log file if nothing in it
 * structure for source/dest type
-* refactor _get_last_backup in job.py 
+* refactor _get_last_backup in job.py
+
+DELAYED
+-------
+* Send an email via logging when a job has not been performed for a while.
+
+CANCELED
+--------
+* When the script does not exit gracefully, remove bad snapshots
+* In job, take datetime as parameter
+* Do not keep a number of archives, but a ratio size of snapshots/size last snapshot
