@@ -39,8 +39,6 @@ class Vitalus:
         self.terminate = False
         self.destination = None
 
-        # Create a pidfile
-        self._create_pidfile()
 
         # Logging
         self.backup_log_dir = os.path.expanduser(log_path)
@@ -50,8 +48,6 @@ class Vitalus:
 
         self.logger = logging.getLogger('Vitalus')
         LOG_PATH = os.path.join(self.backup_log_dir, 'backup.log')
-        #hdlr = logging.FileHandler(os.path.join(self.backup_log_dir, 'backup.log'))
-
         # Add the log message handler to the logger
         log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH,
                                                                 when='midnight',
@@ -63,8 +59,10 @@ class Vitalus:
         formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
         log_rotator.setFormatter(formatter)
         self.logger.addHandler(log_rotator)
-
         self.logger.setLevel(logging.INFO)
+
+        # Create a pidfile
+        self._create_pidfile()
 
         #Priority
         self._set_process_low_priority()
