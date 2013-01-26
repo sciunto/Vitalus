@@ -255,7 +255,6 @@ class Job:
 
         self.destination.check_availability()
         if self.destination.is_dir():
-            #filenames = [os.path.join(path, el) for el in os.listdir(path) ]
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
                 command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
@@ -268,11 +267,9 @@ class Job:
         else:
             return
 
-        self.logger.debug("file_list %s ", filenames)
-
         to_delete = utils.get_older_files(filenames, days, keep)
-
-        self.logger.debug("to delete %s ", to_delete)
+        self.logger.debug("Backups available %s ", filenames)
+        self.logger.debug("Backups to delete %s ", to_delete)
 
         self.destination.check_availability()
         if self.destination.is_dir():
