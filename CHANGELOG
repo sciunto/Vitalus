@@ -1,3 +1,4 @@
+==== Version 0.3.4 ====
 * if pidfile exists, exit asap
 * check connectivity to SSH hosts
 
