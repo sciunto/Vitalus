@@ -41,7 +41,7 @@ This is an example. To know more about the API, read the :doc:`vitalus` document
     my_backup.add_job('thunderbird', '/home/myself/.thunderbird', period=5, history=False)
 
 
-    # Sync my home space on a server though SSH
+    # Sync my home space on a server to my disk
     # Keys, without password must be configured
     my_backup.add_job('server', 'myself@server.tld:.')
 
