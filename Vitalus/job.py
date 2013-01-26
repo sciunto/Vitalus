@@ -46,10 +46,9 @@ class Target:
     or a distant one though SSH
 
     :param target: a target
-    :param port: port (for SSH)
     :type target: string
     """
-    def __init__(self, target, port=22):
+    def __init__(self, target):
         self.logger = logging.getLogger('Vitalus.Target')
         self.logger.debug("Read target %s", target)
         self.target = target
@@ -60,7 +59,6 @@ class Target:
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
-            self.port = port
 
     def is_dir(self):
         """
@@ -171,6 +169,7 @@ class Job:
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
         self.backup_log_dir = log_dir
+
         self.logger = logging.getLogger('Vitalus.Job')
 
         #Logs specific to the rsync job
@@ -258,10 +257,7 @@ class Job:
         if self.destination.is_dir():
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
-                command = ['ssh',
-                           '-p', self.destination.port,
-                           '-t', self.destination.login,
-                           'ls', '-1', path]
+                command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
                 self.logger.debug('SSH ls command: ' + str(command))
                 process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
                 stdout, stderr = process.communicate()
@@ -286,10 +282,7 @@ class Job:
         elif self.destination.is_ssh():
             filepaths = [os.path.join(path, element) for element in to_delete]
             if filepaths != []:
-                command = ['ssh',
-                           '-p', self.destination.port,
-                           '-t', self.destination.login,
-                           'rm', '-rf']
+                command = ['ssh', '-t', self.destination.login, 'rm', '-rf']
                 command.extend(filepaths)
                 self.logger.debug('SSH rm command: ' + str(command))
                 process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
@@ -312,20 +305,14 @@ class Job:
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
             #First, create at least the target if does not exists
-            command = ['ssh',
-                       '-p', self.destination.port,
-                       '-t', self.destination.login,
-                       'mkdir', '-p', path]
+            command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir result: ' + stdout.decode())
 
 
-            command = ['ssh',
-                       '-p', self.destination.port,
-                       '-t', self.destination.login,
-                       'ls', '-1', path]
+            command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
             self.logger.debug('SSH ls command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
@@ -355,10 +342,7 @@ class Job:
                     os.rename(self.previous_backup_path, self.current_backup_path)
         elif self.destination.is_ssh():
             #Create dirs
-            command = ['ssh',
-                       '-p', self.destination.port,
-                       '-t', self.destination.login,
-                       'mkdir', '-p', self.current_backup_path]
+            command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
@@ -386,11 +370,10 @@ class Job:
         # z: compress the flux if transfert thought a network
         if (self.source.is_ssh() or self.destination.is_ssh()):
             command.append('-z')
-            # TODO add port support
         if self.snapshot and self.previous_backup_path is not None:
-            # Even if it works for ttype==Dir
-            # It fails for ttype=SSH
-            # If link-dest is not a relative path
+            #Even if it works for ttype==Dir
+            #It fails for ttype=SSH
+            #If link-dest is not a relative path
             path = os.path.basename(self.previous_backup_path)
             command.append('--link-dest=../' + path)
 
@@ -425,11 +408,11 @@ class Job:
             Example of the command format
             command = ['/usr/bin/cp', '-r', '/home', '/tmp']
         """
-        # Run the command
+        #Run the command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
-        # Dump outputs in log files
+        #Dump outputs in log files
         log = stdout.decode()
         self.job_logger.info(log)
 
