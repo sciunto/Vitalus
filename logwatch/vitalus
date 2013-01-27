@@ -14,6 +14,7 @@ $Detail = $ENV{'LOGWATCH_DETAIL_LEVEL'} || 0;
 $Starts = 0;
 $ExitOK = 0;
 $AlreadyRunning = 0;
+$RemoveOldPID = 0;
 
 while (defined($ThisLine = <STDIN>)) {
    chomp($ThisLine);
@@ -26,10 +27,14 @@ while (defined($ThisLine = <STDIN>)) {
       $Starts++;
    } elsif ($ThisLine =~ /The script exited gracefully/)  {
       $ExitOK++;
+   } elsif ($ThisLine =~ /INFO Removing old PID file/)  {
+      $RemoveOldPID++;
    } elsif ($ThisLine =~ /INFO An instance is already running, exiting/)  {
       $AlreadyRunning++;
    } elsif ($ThisLine =~ /INFO Backup (.*) done/)  {
       $CatalogDone{$1}++;
+   } elsif ($ThisLine =~ /WARNING Target (.*) unreachable/)  {
+      $CatalogUnreachable{$1}++;
    } else {
       # Report any unmatched entries...
       $OtherList{$ThisLine}++;
@@ -48,10 +53,22 @@ if ($AlreadyRunning > 0) {
    print "\nVitalus was already running: $AlreadyRunning Time(s)\n";
 }
 
+if ($RemoveOldPID > 0) {
+   print "\nPID file removed: $RemoveOldPID Time(s)\n";
+}
+
+
 if (keys %CatalogDone) {
    print "\nBackups done:\n";
    foreach $ThisOne (keys %CatalogDone) {
       print "    $ThisOne: $CatalogDone{$ThisOne} Time(s)\n";
+   }
+}
+
+if (keys %CatalogUnreachable) {
+   print "\nRessource unreachable:\n";
+   foreach $ThisOne (keys %CatalogUnreachable) {
+      print "    $ThisOne: $CatalogUnreachable{$ThisOne} Time(s)\n";
    }
 }
 
@@ -65,4 +82,3 @@ if (keys %OtherList) {
 exit(0);
 
 # vi: shiftwidth=3 tabstop=3 syntax=perl et
-
