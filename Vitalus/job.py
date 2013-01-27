@@ -28,6 +28,7 @@ import logging
 from contextlib import closing
 import socket
 
+
 class TARGETError(Exception):
     """
     Exception for target validity
@@ -120,7 +121,6 @@ class Target:
                 return 'DIR'
 
 
-
 class Job:
     """
     Class containing a job
@@ -180,8 +180,6 @@ class Job:
         self.previous_backup_path = None
         self.current_backup_path = None
 
-
-
 #    def _check_disk_usage(self):
 #        """
 #        Check the disk usage
@@ -204,7 +202,6 @@ class Job:
         self.logger.debug('Set lastbackup time')
         with closing(shelve.open(os.path.join(self.backup_log_dir, 'time.db'))) as timebase:
             timebase[self.name] = datetime.datetime.now()
-
 
     def _check_need_backup(self):
         """
@@ -285,7 +282,6 @@ class Job:
                 process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
                 stdout, stderr = process.communicate()
 
-
     def _get_last_backup(self):
         """
         Get the last backup path
@@ -308,7 +304,6 @@ class Job:
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir result: ' + stdout.decode())
 
-
             command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
             self.logger.debug('SSH ls command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
@@ -330,7 +325,7 @@ class Job:
         self.destination.check_availability()
         if self.destination.is_dir():
             if self.snapshot:
-                os.makedirs(self.current_backup_path) # This one does not exist!
+                os.makedirs(self.current_backup_path)  # This one does not exist!
             else:
                 if self.previous_backup_path is None:
                     os.makedirs(self.current_backup_path, exist_ok=True)
@@ -344,7 +339,6 @@ class Job:
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
             stdout, stderr = process.communicate()
             self.logger.debug('SSH mkdir result: ' + stdout.decode())
-
 
     def _prepare_rsync_command(self):
         """
@@ -373,7 +367,6 @@ class Job:
             #If link-dest is not a relative path
             path = os.path.basename(self.previous_backup_path)
             command.append('--link-dest=../' + path)
-
 
         # Add source and destination
         command.append(self.source.target)
