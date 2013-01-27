@@ -450,7 +450,7 @@ class Job:
                 self._set_lastbackup_time()
 
                 # Remove old snapshots
-                self._delete_old_files(days=10, keep=10) # TODO adjustable in API
+                self._delete_old_files(days=self.duration, keep=self.keep)
 
                 # Create symlink
                 last = os.path.join(self.destination.path, self.name, 'last')
