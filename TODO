@@ -16,7 +16,9 @@ Alerts
 ------
 * Improve logging messages (debug, other are clean now)
 * Improve logwatch script
-* Doc. for logwatch
+* Doc. for logwatch (started)
+  - Add example for the result
+  - Check procedure
 
 Snapshots
 ---------
