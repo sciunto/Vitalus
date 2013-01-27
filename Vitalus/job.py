@@ -87,7 +87,7 @@ class Target:
         Check if the target is available
         For SSH host, it means it's reachable
 
-        :returns: bool -- True is available
+        :raises: TARGETError -- if not available
         """
         if self.ttype == 'SSH':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,15 +95,9 @@ class Target:
                 sock.connect((self.domain, 22))
             except socket.error:
                 raise TARGETError("Target %s unreachable" % self.target)
-            else:
-                return True
         elif self.ttype == 'DIR':
             if not os.path.exist(self.path):
                 raise TARGETError("Target %s unreachable" % self.target)
-            else:
-                return True
-
-
 
     def _detect_target_type(self):
         """
