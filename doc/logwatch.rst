@@ -5,7 +5,7 @@ Goal
 ----
 
 If you have very sensitive data, desktops, servers, I would advice to monitor
-your machines. Logwatch is a simple set of script which reads your logs and
+your machines. `Logwatch <http://www.logwatch.org>`_ is a simple set of script which reads your logs and
 send you tidy and readable emails. The goal of this page is to setup logwatch
 for Vitalus.
 
