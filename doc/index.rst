@@ -25,6 +25,7 @@ Contents:
     install
     example
     vitalus
+    logwatch
 
 Philosophy
 ==========
