@@ -14,7 +14,7 @@ Setup
 
 * In services/vitalus.log
 
-.. code-block:: conf
+.. code-block:: none
 
     # this is in the format of <name> = <value>.  Whitespace at the beginning
     # and end of the lines is removed.  Whitespace before and after the = sign
@@ -32,7 +32,7 @@ Setup
 
 * In logfiles/vitalus.conf (don't forget to adapt the paths)
 
-.. code-block:: conf
+.. code-block:: none
 
     # What actual file?  Defaults to LogPath if not absolute path....
     #Solaris is /var/cron/log -mgt
