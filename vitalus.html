@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Vitalus library &mdash; Vitalus 0.3.2 documentation</title>
+    <title>Vitalus library &mdash; Vitalus 0.3.5 documentation</title>
     
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.3.2',
+        VERSION:     '0.3.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,9 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="Vitalus 0.3.2 documentation" href="index.html" />
-    <link rel="prev" title="Welcome to Vitalus’ documentation!" href="index.html" /> 
+    <link rel="top" title="Vitalus 0.3.5 documentation" href="index.html" />
+    <link rel="next" title="Logwatch" href="logwatch.html" />
+    <link rel="prev" title="Example" href="example.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,9 +40,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Vitalus’ documentation!"
+          <a href="logwatch.html" title="Logwatch"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="example.html" title="Example"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Vitalus 0.3.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Vitalus 0.3.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,51 +70,64 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.add_job">
-<tt class="descname">add_job</tt><big>(</big><em>name</em>, <em>source</em>, <em>period=24</em>, <em>history=False</em>, <em>duration=50</em>, <em>keep=10</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.add_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.add_job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new job 
-:param name: backup label
-:param source: backup from...
-:param destination: backup to...
-:param period: min time (hours) between backups
-:param history: Activate snapshots (Boolean)
-:param duration: How many days snapshotss are kept
-:param keep: How many snapshots are (at least) kept
-:param filter: filter, must be a tuple</p>
-<p>Note: filter syntax is the same of rsync. See &#8220;FILTER RULES&#8221; section
+<tt class="descname">add_job</tt><big>(</big><em>self</em>, <em>name</em>, <em>source</em>, <em>period=24</em>, <em>history=False</em>, <em>duration=50</em>, <em>keep=10</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.add_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.add_job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new job</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; backup label</li>
+<li><strong>source</strong> (<em>string</em>) &#8211; backup from...</li>
+<li><strong>destination</strong> (<em>string</em>) &#8211; backup to...</li>
+<li><strong>period</strong> (<em>float</em>) &#8211; min time (hours) between backups</li>
+<li><strong>history</strong> (<em>bool</em>) &#8211; Activate snapshots</li>
+<li><strong>duration</strong> (<em>int</em>) &#8211; How many days snapshotss are kept</li>
+<li><strong>keep</strong> (<em>int</em>) &#8211; How many snapshots are (at least) kept</li>
+<li><strong>filter</strong> (<em>tuple</em>) &#8211; filters</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">filter syntax is the same of rsync. See &#8220;FILTER RULES&#8221; section
 in the rsync man page.</p>
+</div>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run all jobs</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.set_destination">
-<tt class="descname">set_destination</tt><big>(</big><em>destination</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_destination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_destination" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_destination</tt><big>(</big><em>self</em>, <em>destination</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_destination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_destination" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the destination of the backup</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>destination</strong> &#8211; path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>destination</strong> (<em>string</em>) &#8211; destination path</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="function">
 <dt id="vitalus.Vitalus.set_log_level">
-<tt class="descname">set_log_level</tt><big>(</big><em>level='INFO'</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_log_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_log_level" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_log_level</tt><big>(</big><em>self</em>, <em>level='INFO'</em><big>)</big><a class="reference internal" href="modules/vitalus.html#Vitalus.set_log_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitalus.Vitalus.set_log_level" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the logger level (INFO, CRITICAL, DEBUG, ERROR, FATAL)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>level</strong> &#8211; Loger level</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>level</strong> (<em>string</em>) &#8211; Loger level</td>
 </tr>
 </tbody>
 </table>
@@ -128,26 +145,28 @@ in the rsync man page.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>min_disk_space</strong> &#8211; minimal disk space</li>
-<li><strong>log_dir</strong> &#8211; Log directory path</li>
-<li><strong>name</strong> &#8211; Job name</li>
-<li><strong>source</strong> &#8211; Source path</li>
-<li><strong>destination</strong> &#8211; Destination path</li>
-<li><strong>period</strong> &#8211; Min duration between two backups (in seconds)</li>
-<li><strong>snapshot</strong> &#8211; Activate snapshots (Boolean)</li>
-<li><strong>duration</strong> &#8211; How many days snapshots are kept</li>
-<li><strong>keep</strong> &#8211; How many snapshots are (at least) kept</li>
-<li><strong>filter</strong> &#8211; Rsync filters</li>
+<li><strong>log_dir</strong> (<em>string</em>) &#8211; Log directory path</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; Job name</li>
+<li><strong>source</strong> (<em>string</em>) &#8211; Source path</li>
+<li><strong>destination</strong> (<em>string</em>) &#8211; Destination path</li>
+<li><strong>period</strong> (<em>float</em>) &#8211; Min duration between two backups (in seconds)</li>
+<li><strong>snapshot</strong> (<em>bool</em>) &#8211; Activate snapshots</li>
+<li><strong>duration</strong> (<em>int</em>) &#8211; How many days snapshots are kept</li>
+<li><strong>keep</strong> (<em>int</em>) &#8211; How many snapshots are (at least) kept</li>
+<li><strong>filter</strong> (<em>list</em>) &#8211; Rsync filters</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Source and destination path can be either real path
-or a ssh login joined to the path by a : caracter.</p>
-<dl class="method">
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Source and destination path can be either real path
+or a ssh login joined to the path by a : character.</p>
+</div>
+<dl class="function">
 <dt id="job.Job.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="modules/job.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/job.html#Job.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Job.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the job</p>
 </dd></dl>
 
@@ -157,8 +176,15 @@ or a ssh login joined to the path by a : caracter.</p>
 <dt id="job.TARGETError">
 <em class="property">exception </em><tt class="descclassname">job.</tt><tt class="descname">TARGETError</tt><big>(</big><em>message=''</em><big>)</big><a class="reference internal" href="modules/job.html#TARGETError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.TARGETError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
-<p>Exception for target validity
-:param message: Message</p>
+<p>Exception for target validity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<em>string</em>) &#8211; Message</td>
+</tr>
+</tbody>
+</table>
 <dl class="attribute">
 <dt id="job.TARGETError.args">
 <tt class="descname">args</tt><a class="headerlink" href="#job.TARGETError.args" title="Permalink to this definition">¶</a></dt>
@@ -180,15 +206,56 @@ set self.__traceback__ to tb and return self.</p>
 <p>A target is a source or a destination.
 Both of them can be a local directory
 or a distant one though SSH</p>
-<dl class="method">
-<dt id="job.Target.is_dir">
-<tt class="descname">is_dir</tt><big>(</big><big>)</big><a class="reference internal" href="modules/job.html#Target.is_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Target.is_dir" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target</strong> (<em>string</em>) &#8211; a target</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="job.Target.check_availability">
+<tt class="descname">check_availability</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#job.Target.check_availability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the target is available
+For SSH host, it means it&#8217;s reachable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; True is available</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
-<dl class="method">
+<dl class="function">
+<dt id="job.Target.is_dir">
+<tt class="descname">is_dir</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/job.html#Target.is_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Target.is_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the target is a directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; True if it is a directory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="job.Target.is_ssh">
-<tt class="descname">is_ssh</tt><big>(</big><big>)</big><a class="reference internal" href="modules/job.html#Target.is_ssh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Target.is_ssh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">is_ssh</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="modules/job.html#Target.is_ssh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#job.Target.is_ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the target is a &#8216;SSH&#8217; host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bool &#8211; True if it is a SSH host</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -201,8 +268,11 @@ or a distant one though SSH</p>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to Vitalus&#8217; documentation!</a></p>
+  <p class="topless"><a href="example.html"
+                        title="previous chapter">Example</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="logwatch.html"
+                        title="next chapter">Logwatch</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="sources/vitalus.txt"
@@ -235,9 +305,12 @@ or a distant one though SSH</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Vitalus’ documentation!"
+          <a href="logwatch.html" title="Logwatch"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="example.html" title="Example"
              >previous</a> |</li>
-        <li><a href="index.html">Vitalus 0.3.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Vitalus 0.3.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
