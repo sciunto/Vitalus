@@ -98,7 +98,11 @@ class Target:
             else:
                 return True
         elif self.ttype == 'DIR':
-            pass #TODO
+            if not os.path.exist(self.path):
+                raise TARGETError("Target %s unreachable" % self.target)
+            else:
+                return True
+
 
 
     def _detect_target_type(self):
@@ -115,9 +119,8 @@ class Target:
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'
         else:
-            if not os.path.exists(self.target):
-                self.logger.warning("The target %s does not exist", self.target)
-                raise TARGETError("Target %s does not exist" % self.target)
+            if not os.path.exists(self.path):
+                raise TARGETError("Target %s unreachable" % self.target)
             else:
                 self.logger.debug("The target %s looks like DIR", self.target)
                 return 'DIR'
