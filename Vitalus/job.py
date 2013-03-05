@@ -313,7 +313,8 @@ class Job:
             filenames = [x.strip('\r') for x in filenames if x!='']
 
         last = utils.get_last_file(filenames)
-        last = os.path.join(path, last)
+        if last is not None:
+            last = os.path.join(path, last)
         self.logger.debug('_get_last_backup returns: %s', last)
         return last
 
