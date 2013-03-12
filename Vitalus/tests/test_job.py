@@ -4,8 +4,8 @@
 import unittest
 import tempfile
 
-from job import Target
-from job import TARGETError
+from Vitalus.job import Target
+from Vitalus.job import TARGETError
 
 
 class TestTarget(unittest.TestCase):

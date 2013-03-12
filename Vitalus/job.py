@@ -60,6 +60,8 @@ class Target:
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
+        if not os.path.exists(self.path):
+            raise TARGETError("Target %s unreachable" % self.target)
 
     def is_dir(self):
         """
@@ -105,8 +107,6 @@ class Target:
         Return the target type
         SSH if matches name@domaine.tld:dir
         DIR if it's a directory
-
-        :raises TARGETError: weird target type
         """
         #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
         if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
@@ -114,11 +114,8 @@ class Target:
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'
         else:
-            if not os.path.exists(self.path):
-                raise TARGETError("Target %s unreachable" % self.target)
-            else:
-                self.logger.debug("The target %s looks like DIR", self.target)
-                return 'DIR'
+            self.logger.debug("The target %s looks like DIR", self.target)
+            return 'DIR'
 
 
 class Job:

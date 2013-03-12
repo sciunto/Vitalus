@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #Author: Francois Boulogne
 
-from utils import get_older_files
-from utils import get_last_file
+from Vitalus.utils import get_older_files
+from Vitalus.utils import get_last_file
 
 import unittest
 import datetime

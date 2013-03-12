@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup, find_packages
 from Vitalus import info
 
 setup(
@@ -10,6 +11,7 @@ setup(
     author       = "Francois Boulogne",
     author_email = info.EMAIL,
     description  = info.SHORT_DESCRIPTION,
-    packages = ['Vitalus'],
-    scripts     = [],
+    packages     = find_packages(),
+    scripts      = [],
+    test_suite   = "nose.collector",
 )
