@@ -13,5 +13,5 @@ setup(
     description  = info.SHORT_DESCRIPTION,
     packages     = find_packages(),
     scripts      = [],
-    test_suite   = "nose.collector",
+    #test_suite   = "nose.collector",
 )
