@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/sciunto/Vitalus.png)](http://travis-ci.org/sciunto/Vitalus)
+
 # Description
 Wrapper for rsync, still under heavy dev. Use and update with caution.
 I still change my mind on the ideal tool :)
