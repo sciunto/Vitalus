@@ -1,3 +1,4 @@
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=fboulogne&url=https://github.com/sciunto/Vitalus&title=Vitalus&language=&tags=github&category=software)
 [![Build Status](https://secure.travis-ci.org/sciunto/Vitalus.png)](http://travis-ci.org/sciunto/Vitalus)
 
 # Description
