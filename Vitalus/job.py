@@ -138,6 +138,8 @@ class Job:
     :type duration: int
     :param keep: How many snapshots are (at least) kept
     :type keep: int
+    :param force: overide the timebase check, no min. duration.
+    :type filter: bool
     :param filter: Rsync filters
     :type filter: list
 
@@ -148,7 +150,7 @@ class Job:
         or a ssh login joined to the path by a : character.
     """
 
-    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, filter):
+    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, force, filter):
 
         self.name = name
         self.source = Target(source)
@@ -159,6 +161,7 @@ class Job:
         self.keep = keep
         self.filter = filter
 
+        self.force = force_backup
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
@@ -429,7 +432,7 @@ class Job:
             self.logger.debug("Previous backup path: %s", self.previous_backup_path)
             self.logger.debug("Current backup path: %s", self.current_backup_path)
 
-            if self._check_need_backup():
+            if self._check_need_backup() and not self.force:
                 self.job_logger.info('='*20 + str(self.now) + '='*20)
                 self.logger.debug('Start Backup: %s', self.name)
                 print(self.name)

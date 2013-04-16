@@ -32,13 +32,16 @@ class Vitalus:
 
     :params log_path: directory for logs and database
     :type log_path: string
+    :param force: overide the timebase check, no min. duration.
+    :type filter: bool
+
     """
-    def __init__(self, log_path='~/.backup'):
+    def __init__(self, log_path='~/.backup', force=False):
         # Variables
         self.jobs = []
         self.terminate = False
         self.destination = None
-
+        self.force = force
 
         # Logging
         self.backup_log_dir = os.path.expanduser(log_path)
@@ -187,7 +190,7 @@ class Vitalus:
             try:
                 self.jobs.append(Job(self.backup_log_dir, name, source,
                                      self.destination, period_in_seconds,
-                                     history, duration, keep, filter))
+                                     history, duration, keep, self.force, filter))
             except TARGETError as e:
                 # We abort this job
                 self.logger.error(e) 
