@@ -99,7 +99,7 @@ class Target:
             except socket.error:
                 raise TARGETError("Target %s unreachable" % self.target)
         elif self.ttype == 'DIR':
-            if not os.path.exist(self.path):
+            if not os.path.exists(self.path):
                 raise TARGETError("Target %s unreachable" % self.target)
 
     def _detect_target_type(self):
@@ -161,7 +161,7 @@ class Job:
         self.keep = keep
         self.filter = filter
 
-        self.force = force_backup
+        self.force = force
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
@@ -432,7 +432,7 @@ class Job:
             self.logger.debug("Previous backup path: %s", self.previous_backup_path)
             self.logger.debug("Current backup path: %s", self.current_backup_path)
 
-            if self._check_need_backup() and not self.force:
+            if self._check_need_backup() or self.force:
                 self.job_logger.info('='*20 + str(self.now) + '='*20)
                 self.logger.debug('Start Backup: %s', self.name)
                 print(self.name)
