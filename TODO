@@ -30,6 +30,7 @@ Snapshots
 
 SSH support
 -----------
+* connection down -> timeout
 * symlink
 * disk usage
 * custom port (humm, can be specified in host file)
