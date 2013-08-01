@@ -42,6 +42,7 @@ Philosophy
 Functionalities
 ===============
 This is just another way to express the philosophy :)
+
 * Manage different tasks
 * rsync from and to local disks
 * rsync from SSH to local disk
