@@ -1,6 +1,7 @@
 * in job.py, use _run_command evrywhere
 * catch keybordInterrupt, especially for SSH connection. See signals
 * traceback in log
+* set logrotate period
 
 MISC
 ----
