@@ -354,10 +354,12 @@ class Job:
         # stat: file rate stats
         # delete: delete extraneous files from dest dirs
         # delete-excluded: also delete excluded files from dest dirs
+        # L: turn symlinks to dir/file
         command.append('-avh')
         command.append('--stats')
         command.append('--delete')
         command.append('--delete-excluded')
+        command.append('-L')
 
         # z: compress the flux if transfert thought a network
         if (self.source.is_ssh() or self.destination.is_ssh()):
