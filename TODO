@@ -9,13 +9,21 @@ MISC
 * minimize the # of SSH connections
 * check that period can be float
 
+Simple copy
+-----------
+
+It would be interesting for some usage to have just a copy with timestamp in the path.
+It means the history flag can not be switch on/off but it is useful when you don't want changing filepaths especially for chained backups.
+It would me to history or snapshot bool to a three positions flag: None, on, off.
+
+
 Unittests
 ---------
 
 Signals
 -------
 * Add signal support (SIGTERM, keybordinterupt...)
-
+* we also need to record backtraces. Logging seems to support such feature with an exception() method.
 
 Alerts
 ------
@@ -52,6 +60,9 @@ TOCHECK
 -------
 * switch history false to true and conversly (started)
 
+DELAYED
+-------
+* Send an email via logging when a job has not been performed for a while.
 
 DONE
 ----
@@ -61,10 +72,6 @@ DONE
 * Do not start a job log file if nothing in it
 * structure for source/dest type
 * refactor _get_last_backup in job.py
-
-DELAYED
--------
-* Send an email via logging when a job has not been performed for a while.
 
 CANCELED
 --------
