@@ -62,6 +62,8 @@ class Target:
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
+        if self.path is None:
+            raise TARGETError("The path is not correct in %s" % self.target)
 
     def is_local(self):
         """
