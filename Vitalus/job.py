@@ -50,6 +50,8 @@ class Target:
     :type target: string
     """
     def __init__(self, target):
+        # Here, we do not check that path exists.
+        # It is checked in check_availability()
         self.logger = logging.getLogger('Vitalus.Target')
         self.logger.debug("Read target %s", target)
         self.target = target
@@ -57,12 +59,9 @@ class Target:
 
         if self.is_dir():
             self.path = target
-            if not os.path.exists(self.path):
-                raise TARGETError("Target %s unreachable" % self.target)
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
-            #TODO: chek if path exists
 
     def is_dir(self):
         """
