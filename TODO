@@ -27,6 +27,7 @@ Signals
 
 Alerts
 ------
+* The log rotation duration should be 1/ adjustable or 2/ automatically set according to the keep policy. 1/ is much easier to implement.
 * Improve logging messages (debug, other are clean now)
 * Improve logwatch script
 * Doc. for logwatch (started)
