@@ -179,7 +179,7 @@ class Job:
         self.job_logger.setLevel(logging.INFO)
 
         #Set previous and current backup paths
-        self.previous_backup_path = None  # will be detected later
+        self.previous_backup_path = None  # will be detected later
         self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
 
 #    def _check_disk_usage(self):
