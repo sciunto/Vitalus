@@ -57,11 +57,12 @@ class Target:
 
         if self.is_dir():
             self.path = target
+            if not os.path.exists(self.path):
+                raise TARGETError("Target %s unreachable" % self.target)
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
-        if not os.path.exists(self.path):
-            raise TARGETError("Target %s unreachable" % self.target)
+            #TODO: chek if path exists
 
     def is_dir(self):
         """
