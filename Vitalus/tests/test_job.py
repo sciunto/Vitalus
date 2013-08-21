@@ -19,7 +19,7 @@ class TestTarget(unittest.TestCase):
 
     def test_is_dir_ssh_domain(self):
         target = Target('fr@sciunto.org:.')
-        self.assertFalse(target.is_dir())
+        self.assertFalse(target.is_local())
 
     #
     # Complicated domain
@@ -37,7 +37,7 @@ class TestTarget(unittest.TestCase):
 
     def test_is_dir_ssh_ipv4(self):
         target = Target('fr@192.168.1.30:.')
-        self.assertFalse(target.is_dir())
+        self.assertFalse(target.is_local())
 
     #
     # Directory
@@ -45,7 +45,7 @@ class TestTarget(unittest.TestCase):
     def test_is_dir_dir_abs(self):
         tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
         target = Target(tmp.name)
-        self.assertTrue(target.is_dir())
+        self.assertTrue(target.is_local())
 
     def test_is_ssh_dir_abs(self):
         tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
@@ -61,4 +61,3 @@ class TestTarget(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
