@@ -101,10 +101,10 @@ class Target:
             try:
                 sock.connect((self.domain, 22))
             except socket.error:
-                raise TARGETError("Target %s unreachable" % self.target)
+                raise TARGETError("SSH target %s unreachable" % self.target)
         elif self.ttype == 'LOCAL':
             if not os.path.exists(self.path):
-                raise TARGETError("Target %s unreachable" % self.target)
+                raise TARGETError("Local target %s unreachable" % self.target)
 
     def _detect_target_type(self):
         """

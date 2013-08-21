@@ -56,7 +56,8 @@ class TestTarget(unittest.TestCase):
     # Wrong domain
     #
     def test_incompletedomain(self):
-        self.assertRaises(TARGETError, Target, 'fr67-94@sub-extra.sciunto.org')
+        target = Target('fr67-94@sub-extra.sciunto.org')
+        self.assertRaises(TARGETError, lambda: target.check_availability())
 
 
 if __name__ == '__main__':
