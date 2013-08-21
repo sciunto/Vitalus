@@ -93,6 +93,8 @@ class Target:
         :raises: TARGETError -- if not available
         """
         if self.ttype == 'SSH':
+            # TODO; here we check the connection.
+            # We may check also the filepath
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 sock.connect((self.domain, 22))
