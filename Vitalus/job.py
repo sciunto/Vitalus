@@ -177,8 +177,8 @@ class Job:
         self.job_logger.setLevel(logging.INFO)
 
         #Set previous and current backup paths
-        self.previous_backup_path = None
-        self.current_backup_path = None
+        self.previous_backup_path = None  # will be detected later
+        self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
 
 #    def _check_disk_usage(self):
 #        """
@@ -423,7 +423,6 @@ class Job:
 
         try:
             last_date = self._get_last_backup()
-            self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
             if last_date is None:
                 #It means that this is the first backup.
                 self.previous_backup_path = None
