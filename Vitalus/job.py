@@ -57,19 +57,19 @@ class Target:
         self.target = target
         self.ttype = self._detect_target_type()
 
-        if self.is_dir():
+        if self.is_local():
             self.path = target
         elif self.is_ssh():
             self.login, self.path = target.split(':')
             self.domain = self.login.split('@')[1]
 
-    def is_dir(self):
+    def is_local(self):
         """
         Check if the target is a directory
 
         :returns: bool -- True if it is a directory
         """
-        if self.ttype == 'DIR':
+        if self.ttype == 'LOCAL':
             return True
         else:
             return False
@@ -100,7 +100,7 @@ class Target:
                 sock.connect((self.domain, 22))
             except socket.error:
                 raise TARGETError("Target %s unreachable" % self.target)
-        elif self.ttype == 'DIR':
+        elif self.ttype == 'LOCAL':
             if not os.path.exists(self.path):
                 raise TARGETError("Target %s unreachable" % self.target)
 
@@ -108,7 +108,7 @@ class Target:
         """
         Return the target type
         SSH if matches name@domaine.tld:dir
-        DIR if it's a directory
+        LOCAL if it's a directory
         """
         #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
         if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
@@ -116,8 +116,8 @@ class Target:
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'
         else:
-            self.logger.debug("The target %s looks like DIR", self.target)
-            return 'DIR'
+            self.logger.debug("The target %s looks like LOCAL", self.target)
+            return 'LOCAL'
 
 
 class Job:
@@ -187,7 +187,7 @@ class Job:
 #        Check the disk usage
 #        :raises TARGETError: if low disk space
 #        """
-#        if self.destination.is_dir():
+#        if self.destination.is_local():
 #            #TODO, change the criterion
 #            pass
 #            #if psutil.disk_usage(self.destination)[2] < utils.get_folder_size(self.source):
@@ -250,7 +250,7 @@ class Job:
         path = os.path.join(self.destination.path, self.name)
 
         self.destination.check_availability()
-        if self.destination.is_dir():
+        if self.destination.is_local():
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
                 command = ['ssh', '-t', self.destination.login, 'ls', '-1', path]
@@ -268,7 +268,7 @@ class Job:
         self.logger.debug("Backups to delete %s ", to_delete)
 
         self.destination.check_availability()
-        if self.destination.is_dir():
+        if self.destination.is_local():
             for element in to_delete:
                 self.logger.debug("Remove backup %s", element)
                 try:
@@ -293,7 +293,7 @@ class Job:
         """
         path = os.path.join(self.destination.path, self.name)
         self.destination.check_availability()
-        if self.destination.is_dir():
+        if self.destination.is_local():
             if not os.path.isdir(path):
                 return None
             #filenames = [os.path.join(path, el) for el in os.listdir(path)]
@@ -326,7 +326,7 @@ class Job:
         Create dirs
         """
         self.destination.check_availability()
-        if self.destination.is_dir():
+        if self.destination.is_local():
             if self.snapshot:
                 os.makedirs(self.current_backup_path)  # This one does not exist!
             else:
@@ -458,7 +458,7 @@ class Job:
 
                 # Create symlink
                 last = os.path.join(self.destination.path, self.name, 'last')
-                if self.destination.is_dir():
+                if self.destination.is_local():
                     if os.path.islink(last):
                         os.remove(last)
                     os.chdir(os.path.dirname(self.current_backup_path))
