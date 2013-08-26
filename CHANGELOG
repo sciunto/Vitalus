@@ -1,3 +1,6 @@
+
+* FIX: issue making impossible to push a backup
+
 ==== Version 0.3.6 ====
 * force option to overide timebase
 * bugfix
