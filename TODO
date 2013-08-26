@@ -1,7 +1,6 @@
 * in job.py, use _run_command evrywhere
 * catch keybordInterrupt, especially for SSH connection. See signals
 * traceback in log
-* set logrotate period
 
 MISC
 ----
@@ -73,6 +72,7 @@ DONE
 * Do not start a job log file if nothing in it
 * structure for source/dest type
 * refactor _get_last_backup in job.py
+* set logrotate period
 
 CANCELED
 --------

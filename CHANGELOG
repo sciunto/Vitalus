@@ -1,5 +1,6 @@
 
 * FIX: issue making impossible to push a backup
+* ENH: set log rotation duration in options
 
 ==== Version 0.3.6 ====
 * force option to overide timebase

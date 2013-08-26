@@ -32,11 +32,13 @@ class Vitalus:
 
     :params log_path: directory for logs and database
     :type log_path: string
+    :params log_rotation: How many days logs are kept
+    :type log_path: int
     :param force: overide the timebase check, no min. duration.
     :type filter: bool
 
     """
-    def __init__(self, log_path='~/.backup', force=False):
+    def __init__(self, log_path='~/.backup', log_rotation=30, force=False):
         # Variables
         self.jobs = []
         self.terminate = False
@@ -55,7 +57,7 @@ class Vitalus:
         log_rotator = logging.handlers.TimedRotatingFileHandler(LOG_PATH,
                                                                 when='midnight',
                                                                 interval=1,
-                                                                backupCount=30,
+                                                                backupCount=log_rotation,
                                                                 encoding=None,
                                                                 delay=False,
                                                                 utc=False)
