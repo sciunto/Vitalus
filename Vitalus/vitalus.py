@@ -195,14 +195,19 @@ class Vitalus:
                                      history, duration, keep, self.force, filter))
             except TARGETError as e:
                 # We abort this job
-                self.logger.error(e) 
+                self.logger.error(e)
+            except:
+                self.logger.exception('Exception raised in add_job()')
 
     def run(self):
         """ Run all jobs """
-        for job in self.jobs:
-            job.run()
-        self._release_pidfile()
-        self.logger.info('The script exited gracefully')
+        try:
+            for job in self.jobs:
+                job.run()
+            self._release_pidfile()
+            self.logger.info('The script exited gracefully')
+        except:
+            self.logger.exception('Exception raised in run()')
 
 if __name__ == '__main__':
     #An example...

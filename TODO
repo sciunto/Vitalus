@@ -1,6 +1,5 @@
 * in job.py, use _run_command evrywhere
 * catch keybordInterrupt, especially for SSH connection. See signals
-* traceback in log
 
 MISC
 ----
