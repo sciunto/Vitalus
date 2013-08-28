@@ -479,7 +479,7 @@ class Job:
                 self._delete_old_files(days=self.duration, keep=self.keep)
 
                 # Create symlink
-                if self.snapshots is True or self.snapshots is False:
+                if self.snapshot is True or self.snapshot is False:
                     last = os.path.join(self.destination.path, self.name, 'last')
                     if self.destination.is_local():
                         if os.path.islink(last):
