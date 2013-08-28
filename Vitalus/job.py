@@ -479,20 +479,21 @@ class Job:
                 self._delete_old_files(days=self.duration, keep=self.keep)
 
                 # Create symlink
-                last = os.path.join(self.destination.path, self.name, 'last')
-                if self.destination.is_local():
-                    if os.path.islink(last):
-                        os.remove(last)
-                    os.chdir(os.path.dirname(self.current_backup_path))
-                    try:
-                        os.symlink(os.path.basename(self.current_backup_path), last)
-                    except FileExistsError:
-                        self.logger.warning('The symlink %s could not be created because a file exists', last)
-                    except AttributeError:
-                        self.logger.warning('Attribute error for symlink. Job: %s', self.name)
-                elif self.destination.is_ssh():
-                    self.logger.warning('symlink for SSH not yet implemented')
-                    #TODO Create symlink
+                if self.snapshots is True or self.snapshots is False:
+                    last = os.path.join(self.destination.path, self.name, 'last')
+                    if self.destination.is_local():
+                        if os.path.islink(last):
+                            os.remove(last)
+                        os.chdir(os.path.dirname(self.current_backup_path))
+                        try:
+                            os.symlink(os.path.basename(self.current_backup_path), last)
+                        except FileExistsError:
+                            self.logger.warning('The symlink %s could not be created because a file exists', last)
+                        except AttributeError:
+                            self.logger.warning('Attribute error for symlink. Job: %s', self.name)
+                    elif self.destination.is_ssh():
+                        self.logger.warning('symlink for SSH not yet implemented')
+                        #TODO Create symlink
 
                 # UID/GID
                 if self.dest_uid and self.dest_gid:
