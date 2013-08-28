@@ -1,6 +1,6 @@
 include COPYING
 include CHANGELOG
 include *md
-include doc/Makefile
-include doc/conf.py
-recursive-include doc *rst
+include docs/Makefile
+include docs/conf.py
+recursive-include docs *rst
