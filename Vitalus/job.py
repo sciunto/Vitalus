@@ -173,7 +173,7 @@ class Job:
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
-        self.uid, self.gid = guid
+        self.dest_uid, self.dest_gid = guid
 
         self.backup_log_dir = log_dir
 
