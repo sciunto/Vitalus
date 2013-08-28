@@ -18,10 +18,29 @@
 
 import tarfile
 import os.path
+import os
 import logging
 import datetime
 
 logger = logging.getLogger('Vitalus.utils')
+
+
+def r_chown(path, uid, gid):
+        """
+        Equivalent to chown -R uid:gid path
+
+        :param path: path
+        :param uid: user ID
+        :param gid: group ID
+        """
+        os.chown(path, uid, gid)
+        for item in os.listdir(path):
+            itempath = os.path.join(path, item)
+            if os.path.isfile(itempath):
+                os.chown(itempath, uid, gid)
+            elif os.path.isdir(itempath):
+                os.chown(itempath, uid, gid)
+                r_chown(itempath, uid, gid)
 
 
 def compress(path):
@@ -45,7 +64,7 @@ def get_folder_size(path):
                 size += os.path.getsize(os.path.join(item[0], file))
             except:
                 logger.error("Impossible to get size of: %s",
-                    os.path.join(item[0], file))
+                             os.path.join(item[0], file))
     return size
 
 
