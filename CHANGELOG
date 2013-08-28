@@ -1,4 +1,5 @@
 
+==== Version 0.3.7 ====
 * FIX: issue making impossible to push a backup
 * ENH: set log rotation duration in options
 * ENH: backtraces will be dumped in logs
