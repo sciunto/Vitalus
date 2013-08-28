@@ -144,6 +144,8 @@ class Job:
     :type keep: int
     :param force: overide the timebase check, no min. duration.
     :type filter: bool
+    :param guid: (uid, gid) for destination
+    :type guid: tuple
     :param filter: Rsync filters
     :type filter: list
 
@@ -152,9 +154,11 @@ class Job:
 
         Source and destination path can be either real path
         or a ssh login joined to the path by a : character.
+
+        if uid or gid are None, files owner are not changed
     """
 
-    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, force, filter):
+    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, force, guid, filter):
 
         self.name = name
         self.source = Target(source)
@@ -168,6 +172,8 @@ class Job:
         self.force = force
         self.now = datetime.datetime.now()
         self.current_date = self.now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+
+        self.uid, self.gid = guid
 
         self.backup_log_dir = log_dir
 
@@ -431,9 +437,9 @@ class Job:
             self.job_logger.info('Errors:')
             self.job_logger.info(stderr.decode())
 
-    def run(self):
+    def run(self, uid=None, gid=None):
         """
-        Run the job
+        Run the job.
         """
         self.logger.debug('Start job: %s', self.name)
         #TODO rewriting and integration:
@@ -485,14 +491,20 @@ class Job:
                     except AttributeError:
                         self.logger.warning('Attribute error for symlink. Job: %s', self.name)
                 elif self.destination.is_ssh():
-                    pass
+                    self.logger.warning('symlink for SSH not yet implemented')
                     #TODO Create symlink
+
+                # UID/GID
+                if self.dest_uid and self.dest_gid:
+                    self._chown_destination(self.dest_uid, self.dest_gid)
+                elif self.dest_uid or self.dest_gid:
+                    self.logger.error('uid or gid missing')
 
                 self.logger.info("Backup %s done", self.name)
         except TARGETError as e:
             self.logger.warning(e)
 
-    def chown_destination(self, uid, gid):
+    def _chown_destination(self, uid, gid):
         """
         Change owner of files in destination
 
@@ -500,7 +512,7 @@ class Job:
         :param gid: group ID
         """
         if self.destination.is_local():
-            self.logger.warning('chown %s %s for %s' % (uid, gid, self.current_backup_path))
-            utils.r_chown(self.current_backup_path ,uid, gid)
+            self.logger.debug('chown %s %s for %s' % (uid, gid, self.current_backup_path))
+            utils.r_chown(self.current_backup_path, uid, gid)
         elif self.destination.is_ssh():
             self.logger.warning('chown for SSH not yet implemented')

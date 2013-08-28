@@ -148,14 +148,19 @@ class Vitalus:
         #nice
         p.nice = 15
 
-    def set_destination(self, destination):
+    def set_destination(self, destination, guid=(None, None)):
         """ Set the destination of the backup
+        if uid or gid are None, files owner are not changed
 
         :param destination: destination path
         :type destination: string
+        :param guid: (uid, gid) for destination
+        :type guid: tuple
+
         """
         self.logger.debug("Set destination: %s", destination)
         self.destination = destination
+        self.guid = guid
 
     #TODO: filter -> *filter ?
     def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
@@ -196,7 +201,8 @@ class Vitalus:
             try:
                 self.jobs.append(Job(self.backup_log_dir, name, source,
                                      self.destination, period_in_seconds,
-                                     history, duration, keep, self.force, filter))
+                                     history, duration, keep, self.force,
+                                     self.guid, filter))
             except TARGETError as e:
                 # We abort this job
                 self.logger.error(e)
