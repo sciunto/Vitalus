@@ -491,3 +491,16 @@ class Job:
                 self.logger.info("Backup %s done", self.name)
         except TARGETError as e:
             self.logger.warning(e)
+
+    def chown_destination(self, uid, gid):
+        """
+        Change owner of files in destination
+
+        :param uid: user ID
+        :param gid: group ID
+        """
+        if self.destination.is_local():
+            self.logger.warning('chown %s %s for %s' % (uid, gid, self.current_backup_path))
+            utils.r_chown(self.current_backup_path ,uid, gid)
+        elif self.destination.is_ssh():
+            self.logger.warning('chown for SSH not yet implemented')
