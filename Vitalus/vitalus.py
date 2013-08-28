@@ -186,7 +186,7 @@ class Vitalus:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
             return
 
-        if self.destination:
+        if self.destination: #Raise something if it's None
             period_in_seconds = period * 3600
             self.logger.debug("add job: %s", name)
             try:
