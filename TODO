@@ -8,13 +8,6 @@ MISC
 * minimize the # of SSH connections
 * check that period can be float
 
-Simple copy
------------
-
-It would be interesting for some usage to have just a copy with timestamp in the path.
-It means the history flag can not be switch on/off but it is useful when you don't want changing filepaths especially for chained backups.
-It would me to history or snapshot bool to a three positions flag: None, on, off.
-
 
 Unittests
 ---------

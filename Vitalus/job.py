@@ -136,8 +136,8 @@ class Job:
     :type destination: string
     :param period: Min duration between two backups (in seconds)
     :type period: float
-    :param snapshot: Activate snapshots
-    :type snapshot: bool
+    :param snapshot: Activate (True) or desactivate (False) snapshots or simple (None) copy
+    :type snapshot: bool or None
     :param duration: How many days snapshots are kept
     :type duration: int
     :param keep: How many snapshots are (at least) kept
@@ -182,7 +182,7 @@ class Job:
 
         #Set previous and current backup paths
         self.previous_backup_path = None  # will be detected later
-        self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+        self.current_backup_path = None
 
 #    def _check_disk_usage(self):
 #        """
@@ -328,15 +328,29 @@ class Job:
         Create dirs
         """
         self.destination.check_availability()
+
+        # Define current backup path
+        if self.snapshot is True:
+            self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+        elif self.snapshot is False:
+            self.current_backup_path = os.path.join(self.destination.path, self.name, str(self.current_date))
+        elif self.snapshot is None:
+            self.current_backup_path = os.path.join(self.destination.path, self.name)
+        else:
+            raise ValueError('Wrong snapshot value (True, False or None)')
+
+        # Make dirs
         if self.destination.is_local():
-            if self.snapshot:
+            if self.snapshot is True:
                 os.makedirs(self.current_backup_path)  # This one does not exist!
-            else:
+            elif self.snapshot is False:
                 if self.previous_backup_path is None:
                     os.makedirs(self.current_backup_path, exist_ok=True)
                 else:
                     #Move dir to set the new date in the path
                     os.rename(self.previous_backup_path, self.current_backup_path)
+            elif self.snapshot is None:
+                os.makedirs(self.current_backup_path, exist_ok=True)
         elif self.destination.is_ssh():
             #Create dirs
             command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', self.current_backup_path]

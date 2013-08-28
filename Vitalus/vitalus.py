@@ -169,8 +169,8 @@ class Vitalus:
         :type destination: string
         :param period: min time (hours) between backups
         :type period: float
-        :param history: Activate snapshots
-        :type history: bool
+        :param history: Activate (True) or desactivate (False) snapshots or simple (None) copy
+        :type history: bool or None
         :param duration: How many days snapshotss are kept
         :type duration: int
         :param keep: How many snapshots are (at least) kept
@@ -181,6 +181,10 @@ class Vitalus:
         .. note::
             filter syntax is the same of rsync. See "FILTER RULES" section
             in the rsync man page.
+
+            history: if True or False, the date is written in the path.
+            It leaves you the possibility to switch on/off the history.
+            None does not put a date in the path. Thus, it remains invariant.
         """
         if name in self.jobs:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
