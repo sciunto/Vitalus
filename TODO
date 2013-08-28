@@ -1,5 +1,6 @@
 * in job.py, use _run_command evrywhere
 * catch keybordInterrupt, especially for SSH connection. See signals
+* move the symlink as soon as the dir is created
 
 MISC
 ----
