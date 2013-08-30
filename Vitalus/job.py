@@ -498,7 +498,7 @@ class Job:
                 # UID/GID
                 if self.dest_uid and self.dest_gid:
                     self._chown_destination(self.dest_uid, self.dest_gid)
-                elif self.dest_uid or self.dest_gid:
+                elif (self.dest_uid and not self.dest_gid) or (not self.dest_uid and self.dest_gid):
                     self.logger.error('uid or gid missing')
 
                 self.logger.info("Backup %s done", self.name)
