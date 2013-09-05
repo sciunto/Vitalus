@@ -4,6 +4,7 @@ How to release
 * Update CHANGELOG
 * Update version in docs/source/conf.py
 * Update the file info.py
+* Add label: git tag -a vx.y -m 'my version x.y'
 * Create a tarball and upload it on github
     git archive master | bzip2 > vitalus-x.y.tar.bz2
 * Send the package on pypi
