@@ -282,7 +282,7 @@ class Job:
                 try:
                     shutil.rmtree(os.path.join(path, element))
                 except OSError:
-                    self.logger.error("Impossible to delete %s (symlink?)", element)
+                    self.logger.error("Impossible to delete %s (symlink?)", os.path.join(path, element))
         elif self.destination.is_ssh():
             filepaths = [os.path.join(path, element) for element in to_delete]
             if filepaths != []:
