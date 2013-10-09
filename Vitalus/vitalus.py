@@ -183,6 +183,8 @@ class Vitalus:
         :param filter: filters
         :type filter: tuple
 
+        :raises: ValueError -- if destination if not set
+
         .. note::
             filter syntax is the same of rsync. See "FILTER RULES" section
             in the rsync man page.
@@ -195,7 +197,7 @@ class Vitalus:
             self.critical("%s already present in the job list. Job's name should be uniq.", name)
             return
 
-        if self.destination: #Raise something if it's None
+        if self.destination:
             period_in_seconds = period * 3600
             self.logger.debug("add job: %s", name)
             try:
@@ -208,6 +210,8 @@ class Vitalus:
                 self.logger.error(e)
             except:
                 self.logger.exception('Exception raised in add_job()')
+        else:
+            raise ValueError('Destination not set')
 
     def run(self):
         """ Run all jobs """
