@@ -43,13 +43,13 @@ class TestTarget(unittest.TestCase):
     # Directory
     #
     def test_is_dir_dir_abs(self):
-        tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
-        target = Target(tmp.name)
+        tmp_dir_name = tempfile.gettempdir()
+        target = Target(tmp_dir_name)
         self.assertTrue(target.is_local())
 
     def test_is_ssh_dir_abs(self):
-        tmp = tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=None)
-        target = Target(tmp.name)
+        tmp_dir_name = tempfile.gettempdir()
+        target = Target(tmp_dir_name)
         self.assertFalse(target.is_ssh())
 
     #
