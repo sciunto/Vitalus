@@ -25,6 +25,23 @@ import datetime
 logger = logging.getLogger('Vitalus.utils')
 
 
+def r_chmod(path, mode):
+        """
+        Equivalent to chmod -R mod path
+
+        :param path: path
+        :param mode: mode
+        """
+        os.chmod(path, mode)
+        for item in os.listdir(path):
+            itempath = os.path.join(path, item)
+            if os.path.isfile(itempath):
+                os.chmod(itempath, mode)
+            elif os.path.isdir(itempath):
+                os.chmod(itempath, mode)
+                r_chmod(itempath, mode)
+
+
 def r_chown(path, uid, gid):
         """
         Equivalent to chown -R uid:gid path
