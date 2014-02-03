@@ -29,21 +29,21 @@ This is an example. To know more about the API, read the :doc:`vitalus` document
 
     # I add a job for 'my_documents'
     # I want to keep increments (default: False)
-    my_backup.add_job('my_documents', '/home/myself/documents', history=True)
+    my_backup.add_rsyncjob('my_documents', '/home/myself/documents', history=True)
 
     # Copy data excepting *.html files.
     # This is a rsync filter rule (man rsync to learn more)
     # filter is a tuple. Don't forget the coma.
-    my_backup.add_job('my_data', '/home/myself/data', history=True, filter=('- *.html',))
+    my_backup.add_rsyncjob('my_data', '/home/myself/data', history=True, filter=('- *.html',))
 
     # Another job
     # minimal duration between two backups: 5 hours (default: 24h)
-    my_backup.add_job('thunderbird', '/home/myself/.thunderbird', period=5, history=False)
+    my_backup.add_rsyncjob('thunderbird', '/home/myself/.thunderbird', period=5, history=False)
 
 
     # Sync my home space on a server to my disk
     # Keys, without password must be configured
-    my_backup.add_job('server', 'myself@server.tld:.')
+    my_backup.add_rsyncjob('server', 'myself@server.tld:.')
 
 
     # Let's go!

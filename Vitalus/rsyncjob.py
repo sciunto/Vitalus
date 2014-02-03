@@ -122,9 +122,9 @@ class Target:
             return 'LOCAL'
 
 
-class Job:
+class RsyncJob:
     """
-    Class containing a job
+    Class containing a rsync job
 
     :param log_dir: Log directory path
     :type log_dir: string
@@ -177,7 +177,7 @@ class Job:
 
         self.backup_log_dir = log_dir
 
-        self.logger = logging.getLogger('Vitalus.Job')
+        self.logger = logging.getLogger('Vitalus.RsyncJob')
 
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
@@ -447,7 +447,7 @@ class Job:
         """
         Run the job.
         """
-        self.logger.debug('Start job: %s', self.name)
+        self.logger.debug('Start rsync job: %s', self.name)
         #TODO rewriting and integration:
         #self._check_disk_usage()
 

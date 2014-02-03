@@ -22,7 +22,7 @@ import psutil
 import logging, logging.handlers
 import sys
 
-from Vitalus.job import Job, TARGETError
+from Vitalus.rsyncjob import RsyncJob, TARGETError
 import Vitalus.info as info
 
 
@@ -162,9 +162,16 @@ class Vitalus:
         self.destination = destination
         self.guid = guid
 
-    #TODO: filter -> *filter ?
     def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
-        """ Add a new job
+        """
+        Deprecated
+        """
+        self.logger.critical('The method add_job is DEPRECATED. Use add_rsyncjob instead.')
+        add_rsyncjob(self, name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
+
+    #TODO: filter -> *filter ?
+    def add_rsyncjob(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
+        """ Add a rsync job
 
         :param name: backup label
         :type name: string
@@ -194,14 +201,14 @@ class Vitalus:
             None does not put a date in the path. Thus, it remains invariant.
         """
         if name in self.jobs:
-            self.critical("%s already present in the job list. Job's name should be uniq.", name)
+            self.logger.critical("%s already present in the job list. Job's name should be uniq.", name)
             return
 
         if self.destination:
             period_in_seconds = period * 3600
-            self.logger.debug("add job: %s", name)
+            self.logger.debug("add rsync job: %s", name)
             try:
-                self.jobs.append(Job(self.backup_log_dir, name, source,
+                self.jobs.append(RsyncJob(self.backup_log_dir, name, source,
                                      self.destination, period_in_seconds,
                                      history, duration, keep, self.force,
                                      self.guid, filter))
@@ -212,6 +219,12 @@ class Vitalus:
                 self.logger.exception('Exception raised in add_job()')
         else:
             raise ValueError('Destination not set')
+
+    def add_customjob(self, ):
+        """
+        Add a custom job
+        """
+        pass
 
     def run(self):
         """ Run all jobs """
@@ -228,9 +241,9 @@ if __name__ == '__main__':
     b = Vitalus()
     b.set_log_level('DEBUG')
     b.set_destination('/tmp/sauvegarde')
-    b.add_job('test', '/home/gnu/tmp/firefox', period=0.0, history=True)
-    b.add_job('test2', '/home/gnu/tmp/debian', period=0.0, history=True)
-    b.add_job('test3', '/home/gnu/tmp/photos', period=0.001, history=False)
-    b.add_job('test4', '/home/gnu/tmp/www', period=0, history=True)
+    b.add_rsyncjob('test', '/home/gnu/tmp/firefox', period=0.0, history=True)
+    b.add_rsyncjob('test2', '/home/gnu/tmp/debian', period=0.0, history=True)
+    b.add_rsyncjob('test3', '/home/gnu/tmp/photos', period=0.001, history=False)
+    b.add_rsyncjob('test4', '/home/gnu/tmp/www', period=0, history=True)
 
     b.run()
