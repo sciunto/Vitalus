@@ -167,7 +167,7 @@ class Vitalus:
         Deprecated
         """
         self.logger.critical('The method add_job is DEPRECATED. Use add_rsyncjob instead.')
-        add_rsyncjob(self, name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
+        self.add_rsyncjob(self, name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
 
     #TODO: filter -> *filter ?
     def add_rsyncjob(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
@@ -209,9 +209,9 @@ class Vitalus:
             self.logger.debug("add rsync job: %s", name)
             try:
                 self.jobs.append(RsyncJob(self.backup_log_dir, name, source,
-                                     self.destination, period_in_seconds,
-                                     history, duration, keep, self.force,
-                                     self.guid, filter))
+                                          self.destination, period_in_seconds,
+                                          history, duration, keep, self.force,
+                                          self.guid, filter))
             except TARGETError as e:
                 # We abort this job
                 self.logger.error(e)
@@ -220,11 +220,32 @@ class Vitalus:
         else:
             raise ValueError('Destination not set')
 
-    def add_customjob(self, ):
+    def add_customjob(self, name, period, job, *args):
         """
-        Add a custom job
+        Add a custom job.
+
+        :param name: backup label
+        :type name: string
+        :param period: min time (hours) between backups
+        :type period: float
+        :param job: object representing a job
+        :param args: arguments to initialize the job
         """
-        pass
+        if name in self.jobs:
+            self.logger.critical("%s already present in the job list. Job's name should be uniq.", name)
+            return
+
+        if self.destination:
+            self.logger.debug("add custom job: %s", name)
+            try:
+                self.jobs.append(job(*args))
+            except TARGETError as e:
+                # We abort this job
+                self.logger.error(e)
+            except:
+                self.logger.exception('Exception raised in add_job()')
+        else:
+            raise ValueError('Destination not set')
 
     def run(self):
         """ Run all jobs """
