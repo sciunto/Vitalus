@@ -17,7 +17,10 @@
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
 import os
-import psutil
+try:
+    import psutil
+except ImportError:
+    psutil = None
 #import signal
 import logging, logging.handlers
 import sys
@@ -133,20 +136,22 @@ class Vitalus:
     def _set_process_high_priority(self):
         """ Change nice/ionice"""
         self.logger.debug('Set high priority')
-        #ionice
-        p = psutil.Process(os.getpid())
-        p.set_ionice(psutil.IOPRIO_CLASS_NONE, value=0)
-        #nice
-        p.nice = 10
+        if psutil and psutil.IOPRIO_CLASS_NONE:
+            #ionice
+            p = psutil.Process(os.getpid())
+            p.set_ionice(psutil.IOPRIO_CLASS_NONE, value=0)
+            #nice
+            p.nice = 10
 
     def _set_process_low_priority(self):
         """ Change nice/ionice"""
         self.logger.debug('Set low priority')
-        #ionice
-        p = psutil.Process(os.getpid())
-        p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
-        #nice
-        p.nice = 15
+        if psutil and psutil.IOPRIO_CLASS_NONE:
+            #ionice
+            p = psutil.Process(os.getpid())
+            p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
+            #nice
+            p.nice = 15
 
     def set_destination(self, destination, guid=(None, None)):
         """ Set the destination of the backup
