@@ -283,7 +283,7 @@ class RsyncJob:
                     shutil.rmtree(os.path.join(path, element))
                 except OSError:
                     self.logger.debug("Could not delete %s, try to chmod 644", os.path.join(path, element))
-                    utils.r_chmod(os.path.join(path, element), 0664)
+                    utils.r_chmod(os.path.join(path, element), '0664')
                     try:
                         # try again
                         shutil.rmtree(os.path.join(path, element))
