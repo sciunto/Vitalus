@@ -13,4 +13,10 @@ Vitalus library
     :inherited-members:
     :show-inheritance:
 
+.. automodule:: rsyncjob
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
+
 
