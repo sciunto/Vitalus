@@ -4,8 +4,8 @@
 import unittest
 import tempfile
 
-from Vitalus.rsyncjob import Target
-from Vitalus.rsyncjob import TARGETError
+from Vitalus.job import Target
+from Vitalus.job import TARGETError
 
 
 class TestTarget(unittest.TestCase):

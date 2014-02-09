@@ -25,7 +25,8 @@ except ImportError:
 import logging, logging.handlers
 import sys
 
-from Vitalus.rsyncjob import RsyncJob, TARGETError
+from Vitalus.rsyncjob import RsyncJob
+from Vitalus.job import TARGETError
 import Vitalus.info as info
 
 
@@ -243,7 +244,7 @@ class Vitalus:
         if self.destination:
             self.logger.debug("add custom job: %s", name)
             try:
-                self.jobs.append(job(self.backup_log_dir, self.destination, *args))
+                self.jobs.append(job(self.backup_log_dir, self.destination, name, *args))
             except TARGETError as e:
                 # We abort this job
                 self.logger.error(e)
