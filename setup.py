@@ -3,6 +3,7 @@
 #from distutils.core import setup
 from setuptools import setup, find_packages
 from Vitalus import __version__
+from Vitalus import info
 
 setup(
     name         = 'Vitalus',
