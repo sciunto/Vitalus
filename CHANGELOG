@@ -1,4 +1,4 @@
-==== Version 0.x.x ====
+==== Version 0.4.0 ====
 * FEATURE: add chmod
 * add_job deprecated, use add_rsyncjob instead
 * FEATURE: custom job

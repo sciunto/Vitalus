@@ -1,6 +1,3 @@
-write add_cutomjob()
-
-
 
 * in job.py, use _run_command evrywhere
 * catch keybordInterrupt, especially for SSH connection. See signals
