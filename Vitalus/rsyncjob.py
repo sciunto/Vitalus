@@ -128,12 +128,12 @@ class RsyncJob:
 
     :param log_dir: Log directory path
     :type log_dir: string
+    :param destination: Destination path
+    :type destination: string
     :param name: Job name
     :type name: string
     :param source: Source path
     :type source: string
-    :param destination: Destination path
-    :type destination: string
     :param period: Min duration between two backups (in seconds)
     :type period: float
     :param snapshot: Activate (True) or desactivate (False) snapshots or simple (None) copy
@@ -158,7 +158,7 @@ class RsyncJob:
         if uid or gid are None, files owner are not changed
     """
 
-    def __init__(self, log_dir, name, source, destination, period, snapshot, duration, keep, force, guid, filter):
+    def __init__(self, log_dir, destination, name, source, period, snapshot, duration, keep, force, guid, filter):
 
         self.name = name
         self.source = Target(source)

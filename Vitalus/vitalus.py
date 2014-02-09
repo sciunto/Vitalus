@@ -213,8 +213,8 @@ class Vitalus:
             period_in_seconds = period * 3600
             self.logger.debug("add rsync job: %s", name)
             try:
-                self.jobs.append(RsyncJob(self.backup_log_dir, name, source,
-                                          self.destination, period_in_seconds,
+                self.jobs.append(RsyncJob(self.backup_log_dir, self.destination, name, source,
+                                          period_in_seconds,
                                           history, duration, keep, self.force,
                                           self.guid, filter))
             except TARGETError as e:
@@ -225,7 +225,7 @@ class Vitalus:
         else:
             raise ValueError('Destination not set')
 
-    def add_customjob(self, name, period, job, *args):
+    def add_customjob(self, name, job, *args):
         """
         Add a custom job.
 
@@ -243,7 +243,7 @@ class Vitalus:
         if self.destination:
             self.logger.debug("add custom job: %s", name)
             try:
-                self.jobs.append(job(*args))
+                self.jobs.append(job(self.backup_log_dir, self.destination, *args))
             except TARGETError as e:
                 # We abort this job
                 self.logger.error(e)
