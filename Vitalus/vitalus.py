@@ -25,6 +25,7 @@ except ImportError:
 import logging, logging.handlers
 import sys
 
+from Vitalus import __version__
 from Vitalus.rsyncjob import RsyncJob
 from Vitalus.job import TARGETError
 import Vitalus.info as info
@@ -76,7 +77,7 @@ class Vitalus:
         #Priority
         self._set_process_low_priority()
 
-        self.logger.info('Vitalus %s starts...' % info.VERSION)
+        self.logger.info('Vitalus %s starts...' % __version__)
         #signal.signal(signal.SIGTERM, self._signal_handler)
 
     def set_log_level(self, level='INFO'):
