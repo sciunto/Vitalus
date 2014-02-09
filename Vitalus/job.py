@@ -18,11 +18,7 @@
 
 import os
 import re
-#import psutil
 import shelve
-import subprocess
-import shutil
-import Vitalus.utils as utils
 import datetime
 import logging
 from contextlib import closing
@@ -160,7 +156,13 @@ class Job():
         #Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
         self.job_logger = logging.getLogger(self.name)
-        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
+        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log,
+                                                                when='midnight',
+                                                                interval=1,
+                                                                backupCount=30,
+                                                                encoding=None,
+                                                                delay=False,
+                                                                utc=False)
         self.job_logger.addHandler(log_rotator)
         self.job_logger.setLevel(logging.INFO)
 
@@ -188,12 +190,12 @@ class Job():
             try:
                 last = timebase[self.name]
             except KeyError:
-                #Not yet stored
-                #Run the first backup
+                # Not yet stored
+                # Run the first backup
                 self.logger.debug("%s: first backup", self.name)
                 return True
 
-        #Calculate the difference
+        # Calculate the difference
         self.logger.debug("now= %s", datetime.datetime.now())
         self.logger.debug("last= %s", last)
         diff = datetime.datetime.now() - last

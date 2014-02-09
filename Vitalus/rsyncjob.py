@@ -17,15 +17,11 @@
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
 import os
-import re
 #import psutil
-import shelve
 import subprocess
 import shutil
 import datetime
 import logging
-from contextlib import closing
-import socket
 
 import Vitalus.utils as utils
 from Vitalus.job import Target
@@ -90,14 +86,20 @@ class RsyncJob(Job):
 
         self.logger = logging.getLogger('Vitalus.RsyncJob')
 
-        #Logs specific to the rsync job
+        # Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
         self.job_logger = logging.getLogger(self.name)
-        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log, when='midnight', interval=1, backupCount=30, encoding=None, delay=False, utc=False)
+        log_rotator = logging.handlers.TimedRotatingFileHandler(job_log,
+                                                                when='midnight',
+                                                                interval=1,
+                                                                backupCount=30,
+                                                                encoding=None,
+                                                                delay=False,
+                                                                utc=False)
         self.job_logger.addHandler(log_rotator)
         self.job_logger.setLevel(logging.INFO)
 
-        #Set previous and current backup paths
+        # Set previous and current backup paths
         self.previous_backup_path = None  # will be detected later
         self.current_backup_path = None
 
@@ -115,7 +117,6 @@ class RsyncJob(Job):
 #        elif self.destination.is_ssh():
 #            #TODO
 #            pass
-
 
     def _delete_old_files(self, days=10, keep=10):
         """
@@ -140,7 +141,7 @@ class RsyncJob(Job):
                 stdout, stderr = process.communicate()
                 filenames = stdout.decode()
                 filenames = filenames.split('\n')
-                filenames = [x.strip('\r') for x in filenames if x!='']
+                filenames = [x.strip('\r') for x in filenames if x != '']
         else:
             return
 
@@ -199,7 +200,7 @@ class RsyncJob(Job):
             stdout, stderr = process.communicate()
             filenames = stdout.decode()
             filenames = filenames.split('\n')
-            filenames = [x.strip('\r') for x in filenames if x!='']
+            filenames = [x.strip('\r') for x in filenames if x != '']
 
         last = utils.get_last_file(filenames)
         if last is not None:
