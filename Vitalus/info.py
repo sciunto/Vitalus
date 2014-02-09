@@ -8,7 +8,6 @@ NAME = "Vitalus"
 URL = "https://github.com/sciunto/Vitalus"
 LICENSE = "GPLv3+"
 EMAIL = "fboulogne@sciunto.org"
-VERSION = "0.4.0"
 
 SHORT_DESCRIPTION = "Rsync wrapper for backups"
 

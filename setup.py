@@ -2,11 +2,11 @@
 
 #from distutils.core import setup
 from setuptools import setup, find_packages
-from Vitalus import info
+from Vitalus import __version__
 
 setup(
     name         = 'Vitalus',
-    version      = info.VERSION,
+    version      = __version__,
     url          = info.URL,
     author       = "Francois Boulogne",
     author_email = info.EMAIL,
