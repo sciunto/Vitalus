@@ -172,7 +172,7 @@ class Vitalus:
         Deprecated
         """
         self.logger.critical('The method add_job is DEPRECATED. Use add_rsyncjob instead.')
-        self.add_rsyncjob(self, name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
+        self.add_rsyncjob(name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
 
     #TODO: filter -> *filter ?
     def add_rsyncjob(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
