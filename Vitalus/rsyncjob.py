@@ -236,7 +236,9 @@ class RsyncJob(Job):
                     #Move dir to set the new date in the path
                     os.rename(self.previous_backup_path, self.current_backup_path)
             elif self.snapshot is None:
-                os.makedirs(self.current_backup_path, exist_ok=True)
+                # raise exception on existing file?!?
+                if not os.path.exists(self.current_backup_path):
+                    os.makedirs(self.current_backup_path, exist_ok=True)
         elif self.destination.is_ssh():
             #Create dirs
             command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', self.current_backup_path]
