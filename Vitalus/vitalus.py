@@ -28,7 +28,6 @@ import sys
 from Vitalus import __version__
 from Vitalus.rsyncjob import RsyncJob
 from Vitalus.job import TARGETError
-import Vitalus.info as info
 
 
 class Vitalus:
