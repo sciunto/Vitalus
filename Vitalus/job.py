@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
@@ -69,7 +69,7 @@ class Target:
         """
         #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
         if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
-            #ssh
+            # SSH
             self.logger.debug("The target %s looks like SSH", self.target)
             return 'SSH'
         else:
@@ -153,7 +153,7 @@ class Job():
 
         self.logger = logging.getLogger('Vitalus.Job')
 
-        #Logs specific to the rsync job
+        # Logs specific to the rsync job
         job_log = os.path.join(self.backup_log_dir, self.name + '.log')
         self.job_logger = logging.getLogger(self.name)
         log_rotator = logging.handlers.TimedRotatingFileHandler(job_log,
@@ -166,7 +166,7 @@ class Job():
         self.job_logger.addHandler(log_rotator)
         self.job_logger.setLevel(logging.INFO)
 
-        #Set previous and current backup paths
+        # Set previous and current backup paths
         self.previous_backup_path = None  # will be detected later
         self.current_backup_path = None
 
