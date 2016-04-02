@@ -32,14 +32,15 @@ from Vitalus.job import TARGETError
 
 class Vitalus:
     """
-    Class for backups
+    This is the main class to declare and run backup tasks.
 
     :params log_path: directory for logs and database
     :type log_path: string
     :params log_rotation: How many days logs are kept
     :type log_path: int
-    :param force: overide the timebase check, no min. duration.
-    :type filter: bool
+    :param force: if True, do not perform timebase check.
+    All jobs will be run.
+    :type force: bool
 
     """
     def __init__(self, log_path='~/.backup', log_rotation=30, force=False):
