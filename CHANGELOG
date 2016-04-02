@@ -1,4 +1,5 @@
 
+* Built-in function for history management
 * remove deprecated function add_job()
 * Enhance DOC
 * enhance PEP8
