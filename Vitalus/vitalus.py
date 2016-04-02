@@ -171,13 +171,15 @@ class Vitalus:
 
     def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
         """
-        Deprecated
+        This function is deprecated.
         """
         self.logger.critical('The method add_job is DEPRECATED. Use add_rsyncjob instead.')
-        self.add_rsyncjob(name, source, period=period, history=history, duration=duration, keep=keep, filter=filter)
+        self.add_rsyncjob(name, source, period=period, history=history,
+                          duration=duration, keep=keep, filter=filter)
 
     #TODO: filter -> *filter ?
-    def add_rsyncjob(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
+    def add_rsyncjob(self, name, source, period=24, history=False,
+                     duration=50, keep=10, filter=None):
         """ Add a rsync job
 
         :param name: backup label
@@ -188,7 +190,8 @@ class Vitalus:
         :type destination: string
         :param period: min time (hours) between backups
         :type period: float
-        :param history: Activate (True) or desactivate (False) snapshots or simple (None) copy
+        :param history: Activate (True) or desactivate (False) snapshots
+        or perform a simple copy (None).
         :type history: bool or None
         :param duration: How many days snapshotss are kept
         :type duration: int
@@ -200,12 +203,13 @@ class Vitalus:
         :raises: ValueError -- if destination if not set
 
         .. note::
-            filter syntax is the same of rsync. See "FILTER RULES" section
+            Filter syntax is the same of rsync. See "FILTER RULES" section
             in the rsync man page.
 
-            history: if True or False, the date is written in the path.
+            history: if set to True or False, the date is written in the path.
+            This is a feature.
             It leaves you the possibility to switch on/off the history.
-            None does not put a date in the path. Thus, it remains invariant.
+            If you don't want the date in the path, set the value to None.
         """
         if name in self.jobs:
             self.logger.critical("%s already present in the job list. Job's name should be uniq.", name)
@@ -237,6 +241,12 @@ class Vitalus:
         :type period: float
         :param job: object representing a job
         :param args: arguments to initialize the job
+
+        .. note::
+            This is particularly useful to do not use the `run()`
+            function implemented in `RsyncJob`. For instance, a
+            git-annex repository can be synchronized by writting
+            a proper class to use git-annex features.
         """
         if name in self.jobs:
             self.logger.critical("%s already present in the job list. Job's name should be uniq.", name)
