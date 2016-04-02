@@ -3,6 +3,7 @@
 
 import unittest
 import datetime
+from random import shuffle
 
 from Vitalus.history import older
 from Vitalus.history import older_keepmin
@@ -26,7 +27,10 @@ class TestOlder(unittest.TestCase):
             if day >= 10:
                 expected_list.append(filename)
         expected_list.sort()
+        #shuffle(file_list)
         result = older(file_list, days=10)
+        print(expected_list)
+        print(result)
         self.assertEqual(result, expected_list)
 
     def test_getOlderFiles_allnew(self):
@@ -36,6 +40,7 @@ class TestOlder(unittest.TestCase):
             date = now - datetime.timedelta(days=day)
             filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
             file_list.append(filename)
+        shuffle(file_list)
         result = older(file_list, days=10)
         # Nothing must be deleted
         self.assertEqual(result, [])
@@ -61,6 +66,7 @@ class TestOlderKeep(unittest.TestCase):
             if day >= 10:
                 expected_list.append(filename)
         expected_list.sort()
+        shuffle(file_list)
         result = older_keepmin(file_list, days=10, keep=0)
         self.assertEqual(result, expected_list)
 
@@ -75,6 +81,7 @@ class TestOlderKeep(unittest.TestCase):
             if day >= 10:
                 expected_list.append(filename)
         expected_list.sort()
+        shuffle(file_list)
         result = older_keepmin(file_list, days=10, keep=0)
         self.assertEqual(result, expected_list)
 
@@ -86,6 +93,7 @@ class TestOlderKeep(unittest.TestCase):
             date = now - datetime.timedelta(days=day)
             filename = date.strftime("%Y-%m-%d_%Hh%Mm%Ss")
             file_list.append(filename)
+        shuffle(file_list)
         result = older_keepmin(file_list, days=10, keep=0)
         self.assertEqual(result, expected_list)
 
@@ -101,6 +109,7 @@ class TestOlderKeep(unittest.TestCase):
 
         expected_list = expected_list[10:]
         expected_list.sort()
+        shuffle(file_list)
         result = older_keepmin(file_list, days=0, keep=10)
         self.assertEqual(result, expected_list)
 
@@ -110,5 +119,6 @@ class TestOlderKeep(unittest.TestCase):
         expected_list = []
         now = datetime.datetime.now()
 
+        shuffle(file_list)
         result = older_keepmin(file_list, days=0, keep=10)
         self.assertEqual(result, expected_list)
