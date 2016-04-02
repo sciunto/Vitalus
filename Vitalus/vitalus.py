@@ -113,17 +113,17 @@ class Vitalus:
     def _create_pidfile(self):
         """ Create a pidfile """
         if os.access(self.pidfilename, os.F_OK):
-            #Oh oh, there is a lock file
+            # Oh oh, there is a lock file
             pidfile = open(self.pidfilename, "r")
             pidfile.seek(0)
             old_pd = pidfile.readline()
-            #PID is running?
+            # PID is running?
             if os.path.exists("/proc/%s" % old_pd):
-                #Yes
+                # Yes
                 self.logger.info('An instance is already running, exiting')
                 sys.exit(0)
             else:
-                #No
+                # No
                 self.logger.info('Removing old PID file')
                 os.remove(self.pidfilename)
 
@@ -139,20 +139,20 @@ class Vitalus:
         """ Change nice/ionice"""
         self.logger.debug('Set high priority')
         if psutil and psutil.IOPRIO_CLASS_NONE:
-            #ionice
+            # ionice
             p = psutil.Process(os.getpid())
             p.set_ionice(psutil.IOPRIO_CLASS_NONE, value=0)
-            #nice
+            # nice
             p.nice = 10
 
     def _set_process_low_priority(self):
         """ Change nice/ionice"""
         self.logger.debug('Set low priority')
         if psutil and psutil.IOPRIO_CLASS_NONE:
-            #ionice
+            # ionice
             p = psutil.Process(os.getpid())
             p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
-            #nice
+            # nice
             p.nice = 15
 
     def set_destination(self, destination, guid=(None, None)):
@@ -169,18 +169,10 @@ class Vitalus:
         self.destination = destination
         self.guid = guid
 
-    def add_job(self, name, source, period=24, history=False, duration=50, keep=10, filter=None):
-        """
-        This function is deprecated.
-        """
-        self.logger.critical('The method add_job is DEPRECATED. Use add_rsyncjob instead.')
-        self.add_rsyncjob(name, source, period=period, history=history,
-                          duration=duration, keep=keep, filter=filter)
-
     #TODO: filter -> *filter ?
     def add_rsyncjob(self, name, source, period=24, history=False,
                      duration=50, keep=10, filter=None):
-        """ Add a rsync job
+        """ Add a rsync job.
 
         :param name: backup label
         :type name: string
