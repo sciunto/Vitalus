@@ -26,6 +26,7 @@ Contents:
     example
     vitalus
     logwatch
+    api
 
 Philosophy
 ==========
