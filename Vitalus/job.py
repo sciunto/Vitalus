@@ -39,8 +39,7 @@ class TARGETError(Exception):
 class Target:
     """
     A target is a source or a destination.
-    Both of them can be a local directory
-    or a distant one though SSH
+    It can be a local directory or a remote one (SSH)
 
     :param target: a target
     :type target: string
