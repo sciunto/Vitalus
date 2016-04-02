@@ -4,14 +4,14 @@
 import unittest
 import datetime
 
-from Vitalus.history import get_older_files
+from Vitalus.history import older
 
 
-#class TestOlderFiles(unittest.TestCase):
-#
-#    def test_wrong_keep_value(self):
-#        with self.assertRaises(ValueError):
-#            get_older_files([], days=3, keep=-1)
+class TestOlderFiles(unittest.TestCase):
+
+    def test_wrong_keep_value(self):
+        with self.assertRaises(ValueError):
+            older([], days=-3)
 #
 #    def test_wrong_day_value(self):
 #        with self.assertRaises(ValueError):

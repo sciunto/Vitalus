@@ -23,6 +23,17 @@ import datetime
 logger = logging.getLogger('Vitalus.history')
 
 
+def older(file_list, days=5):
+    """
+    Return older files than "days"
+
+    :param days: files older than this value are old
+    """
+    if days < 0:
+        raise ValueError
+
+    now = datetime.datetime.now()
+
 # turn this to a new function
 #def get_older_files(file_list, days=5, keep=10):
 #    """
