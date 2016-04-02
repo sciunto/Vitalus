@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
@@ -65,7 +65,8 @@ class RsyncJob(Job):
         if uid or gid are None, files owner are not changed
     """
 
-    def __init__(self, log_dir, destination, name, source, period, snapshot, duration, keep, force, guid, filter):
+    def __init__(self, log_dir, destination, name, source, period, snapshot,
+                 duration, keep, force, guid, filter):
 
         self.name = name
         self.source = Target(source)
@@ -156,13 +157,15 @@ class RsyncJob(Job):
                 try:
                     shutil.rmtree(os.path.join(path, element))
                 except OSError:
-                    self.logger.debug("Could not delete %s, try to chmod 644", os.path.join(path, element))
+                    self.logger.debug("Could not delete %s, try to chmod 644",
+                                      os.path.join(path, element))
                     utils.r_chmod(os.path.join(path, element), 0o664)
                     try:
                         # try again
                         shutil.rmtree(os.path.join(path, element))
                     except OSError:
-                        self.logger.error("Impossible to delete %s (symlink?)", os.path.join(path, element))
+                        self.logger.error("Impossible to delete %s (symlink?)",
+                                          os.path.join(path, element))
         elif self.destination.is_ssh():
             filepaths = [os.path.join(path, element) for element in to_delete]
             if filepaths != []:
@@ -187,7 +190,7 @@ class RsyncJob(Job):
             #filenames = [os.path.join(path, el) for el in os.listdir(path)]
             filenames = os.listdir(path)
         elif self.destination.is_ssh():
-            #First, create at least the target if does not exists
+            # First, create at least the target if does not exists
             command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
@@ -233,14 +236,14 @@ class RsyncJob(Job):
                 if self.previous_backup_path is None:
                     os.makedirs(self.current_backup_path, exist_ok=True)
                 else:
-                    #Move dir to set the new date in the path
+                    # Move dir to set the new date in the path
                     os.rename(self.previous_backup_path, self.current_backup_path)
             elif self.snapshot is None:
                 # raise exception on existing file?!?
                 if not os.path.exists(self.current_backup_path):
                     os.makedirs(self.current_backup_path, exist_ok=True)
         elif self.destination.is_ssh():
-            #Create dirs
+            # Create dirs
             command = ['ssh', '-t', self.destination.login, 'mkdir', '-p', self.current_backup_path]
             self.logger.debug('SSH mkdir command: ' + str(command))
             process = subprocess.Popen(command, bufsize=4096, stdout=subprocess.PIPE)
@@ -271,9 +274,9 @@ class RsyncJob(Job):
         if (self.source.is_ssh() or self.destination.is_ssh()):
             command.append('-z')
         if self.snapshot and self.previous_backup_path is not None:
-            #Even if it works for ttype==Dir
-            #It fails for ttype=SSH
-            #If link-dest is not a relative path
+            # Even if it works for ttype==Dir
+            # It fails for ttype=SSH
+            # If link-dest is not a relative path
             path = os.path.basename(self.previous_backup_path)
             command.append('--link-dest=../' + path)
 
@@ -307,11 +310,11 @@ class RsyncJob(Job):
             Example of the command format
             command = ['/usr/bin/cp', '-r', '/home', '/tmp']
         """
-        #Run the command
+        # Run the command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
-        #Dump outputs in log files
+        # Dump outputs in log files
         log = stdout.decode()
         self.job_logger.info(log)
 
@@ -330,7 +333,7 @@ class RsyncJob(Job):
         try:
             last_date = self._get_last_backup()
             if last_date is None:
-                #It means that this is the first backup.
+                # It means that this is the first backup.
                 self.previous_backup_path = None
             else:
                 #self.previous_backup_path = os.path.join(self.destination.path, self.name, str(last_date))
