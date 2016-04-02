@@ -51,3 +51,39 @@ def older(file_list, days=5):
 
     old.sort()
     return old
+
+def older_keepmin(file_list, days=5, keep=10):
+    """
+    Return older files in a list but keep a minium amount of files
+
+    :param file_list: list of files named in the format "%Y-%m-%d_%Hh%Mm%Ss"
+    :param days: files older than this value are old
+    :param keep: keep at least this number of files
+
+    :returns: a sorted list of old files
+    """
+
+    if (days < 0) or (keep < 0):
+        raise ValueError
+
+    now = datetime.datetime.now()
+
+    old = []
+    recent = []
+    for afile in file_list:
+        try:
+            date = datetime.datetime.strptime(afile, '%Y-%m-%d_%Hh%Mm%Ss')
+        except ValueError:
+            continue
+        if (now - date) >= datetime.timedelta(days):
+            old.append(afile)
+        else:
+            recent.append(afile)
+
+    old.sort()
+    # While we remove too much,
+    # re-feed keep array
+    while (len(recent) < keep) and (old != []):
+        recent.append(old.pop(-1))
+
+    return old
