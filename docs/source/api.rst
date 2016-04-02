@@ -3,11 +3,18 @@
 API
 ===
 
-:mod:`Vitalus.vitalus` ---
-----------------------------
+:mod:`Vitalus.vitalus` --- Main class
+-------------------------------------
 
 .. automodule:: vitalus
     :members:
+
+:mod:`Vitalus.history` --- functions to determine files to delete
+-----------------------------------------------------------------
+
+.. automodule:: history
+    :members:
+
 
 :mod:`Vitalus.rsyncjob` ---
 ----------------------------
