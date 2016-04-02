@@ -47,6 +47,7 @@ class Target:
     def __init__(self, target):
         # Here, we do not check that path exists.
         # It is checked in check_availability()
+        # by the user of this class
         self.logger = logging.getLogger('Vitalus.Target')
         self.logger.debug("Read target %s", target)
         self.target = target
@@ -59,6 +60,21 @@ class Target:
             self.domain = self.login.split('@')[1]
         if self.path is None:
             raise TARGETError("The path is not correct in %s" % self.target)
+
+    def _detect_target_type(self):
+        """
+        This function detects the target type.
+        SSH if matches name@domaine.tld:dir
+        LOCAL if it's a directory
+        """
+        #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
+        if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
+            #ssh
+            self.logger.debug("The target %s looks like SSH", self.target)
+            return 'SSH'
+        else:
+            self.logger.debug("The target %s looks like LOCAL", self.target)
+            return 'LOCAL'
 
     def is_local(self):
         """
@@ -89,7 +105,7 @@ class Target:
 
         :raises: TARGETError -- if not available
         """
-        if self.ttype == 'SSH':
+        if self.is_ssh():
             # TODO; here we check the connection.
             # We may check also the filepath
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -97,24 +113,9 @@ class Target:
                 sock.connect((self.domain, 22))
             except socket.error:
                 raise TARGETError("SSH target %s unreachable" % self.target)
-        elif self.ttype == 'LOCAL':
+        elif self.is_local():
             if not os.path.exists(self.path):
                 raise TARGETError("Local target %s unreachable" % self.target)
-
-    def _detect_target_type(self):
-        """
-        Return the target type
-        SSH if matches name@domaine.tld:dir
-        LOCAL if it's a directory
-        """
-        #if re.match('[a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+\:.*', self.target):
-        if re.match('[a-zA-Z0-9+_\-\.]+@[a-zA-Z0-9+_\-\.]+\:.*', self.target):
-            #ssh
-            self.logger.debug("The target %s looks like SSH", self.target)
-            return 'SSH'
-        else:
-            self.logger.debug("The target %s looks like LOCAL", self.target)
-            return 'LOCAL'
 
 
 class Job():
