@@ -1,4 +1,5 @@
 
+==== Version 0.4.2 ====
 * Built-in function for history management
 * remove deprecated function add_job()
 * Enhance DOC
